@@ -74,6 +74,7 @@
         <i data-lucide="arrow-left" size="20"></i> 返回古镇地图
     </button>
 
+    <!-- 底部悬浮的全局播放控制条 -->
     <div id="audioController" class="fixed bottom-40 right-8 z-50 glass-panel rounded-2xl p-4 hidden items-center gap-4 shadow-2xl border-l-4 border-l-blue-500 transition-all duration-500">
         <div class="flex flex-col">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">语音讲解中</span>
@@ -176,6 +177,7 @@
         </div>
     </div>
 
+    <!-- 底部详情卡片 -->
     <div id="detailCard" class="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl z-40 transition-all duration-700 translate-y-[150%] opacity-0">
         <div class="glass-panel rounded-[2.5rem] p-8 relative shadow-2xl border-2 border-white">
             
@@ -208,23 +210,24 @@
                 <div class="flex-1 flex flex-col">
                     <p id="detailDesc" class="text-sm text-slate-500 leading-relaxed italic overflow-y-auto max-h-32 desc-scrollbar pr-2">加载描述中...</p>
                     
-                    <!-- 新增的语音播报版块 -->
-                    <div id="audioSection" class="hidden mt-3 p-3 bg-slate-50/80 backdrop-blur-md border border-slate-200/60 rounded-2xl flex items-center justify-between shadow-sm">
+                    <!-- 🚨 修改后的语音播报版块（使用原生 style 强制规避类名冲突）🚨 -->
+                    <div id="audioSection" style="display: none;" class="mt-3 p-3 bg-slate-50/80 backdrop-blur-md border border-slate-200/60 rounded-2xl items-center justify-between shadow-sm">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                                 <i data-lucide="headphones" size="16"></i>
                             </div>
                             <div>
-                                <div class="text-xs font-bold text-slate-700">景点语音导览</div>
-                                <div class="text-[10px] text-slate-400">倾听古镇历史，感受岁月芳华</div>
+                                <div class="text-xs font-bold text-slate-800">景点语音导览</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">倾听古镇历史，感受岁月芳华</div>
                             </div>
                         </div>
-                        <button id="audioPlayBtn" onclick="toggleAudioState()" class="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1 active:scale-95">
+                        <button id="audioPlayBtn" onclick="toggleAudioState()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5 active:scale-95">
                             <i data-lucide="play" size="14"></i> 播放
                         </button>
                     </div>
+                    <!-- 语音播报版块结束 -->
 
-                    <div class="mt-auto pt-6 flex gap-3">
+                    <div class="mt-auto pt-5 flex gap-3">
                         <button onclick="currentDetailPOI && planRoute(currentDetailPOI)" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
                             <i data-lucide="navigation-2" size="18"></i> 规划路线
                         </button>
@@ -277,7 +280,7 @@
             { id: 'byt', name: '八元堂', pos: [7.2, 0, -4.5], color: '#8b5cf6', type: '古建', baseWaitTime: 10, schedules: ['11:30', '14:30', '15:30', '18:00'], desc: '八元堂，又名宁乡会馆，清咸丰十一年(公元1861年)宁邑八捐建，砖木结构，建筑面积1200平方米，为宁乡沩水通湘江水运管理人员驻靖港公务会所。在当时是一个管理宁乡船舶和谷米销售的据点，也是为来靖港的宁乡老乡下榻休息和联络乡情等的服务机构。八元堂，前有商铺，内有戏台。会馆内雕梁画栋、古色古香，大厅宽阔，可容纳百余人聚会。厅中两根四方形花岗石柱，柱基略阔于柱身，四周有浮雕图饰。木楼古戏台常有民间艺人唱着湘味实足的地花鼓，有《秦雪梅》、《洪兰桂打酒》、《刘海砍樵》、《张先生讨学钱》等著名的花鼓戏曲目演出，非常适合聚集休息、听戏品茶，让人感觉古镇原汁原味的韵律。', img: './bayuantang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.mp4', audio: './bayuantang.mp3' },
             { id: 'hkjc', name: '花开靖港剧场', pos: [-9.2, 0, -4.9], color: '#ec4899', type: '演艺', baseWaitTime: 0, schedules: ['11:00', '14:30', '16:00'], desc: '沉浸式大型演艺秀，再现千年繁华。靖港古镇的《花开靖港》剧场是一个大型沉浸式实景演艺项目，以1938年长沙文夕大火为背景，通过创新的观演模式和丰富的文化元素，再现老长沙的繁华与湖湘儿女的家国情怀。', img: './huakaijinggangjuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.mp4', audio: './huakaijinggang.mp3' },
             { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3' },
-            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮 影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电 影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3' },
+            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电 影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3' },
             { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆是一个充满怀旧气息的特色文化场馆，旨在让游客在光影交错中重温经典，感受历史的温度与时代的芳华。馆内每日定时放映纪录片、文艺片、战争片及红色教育影片，营造出如同儿时露天影院般的情感共鸣氛围。作为古镇“时光穿越之旅”的重要一站，这里不仅是观影的场所，更是体验老长沙慢生活、在古镇中享受沉浸式文化记忆的绝佳去处。', img: './laodianyingyuan.jpg', audio: './laodianyingbowuguan.mp3' },
             { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场，位于靖港古镇保粮正街13号，总面积2400平方米，是望城地区收藏、陈列民俗物品、研究民风民俗、弘扬民间优秀传统文化的重要传播地点，如今已经升级改造成为靖港古镇全域浸水漫游演艺《花开靖港》日间演艺《黄金年代“捌零”奇妙夜》的沉浸式演艺剧场，通过复原靖港八十年代的复古街景、商铺行当、歌舞表演厅等场景，包含复古Disco派对、时光市集、怀旧影集等精彩互动，还原轻松幽默的情境演艺、自由浪漫的时代风貌，展现时代之光，重温金色年华，为观众呈现一场精彩纷呈的视听双重盛宴。', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './huangjinqimiaoye.mp3' },
             { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所，一栋土砖老式房，室内布局还原了陶承早年的生活场景，并配有图片、书籍等实物展出。陶承原名刘桃英，1893年生于靖港。上世纪20年代她的先生欧阳梅当时在湖南省担任总工会秘书长，1927年长沙“马日事变”后转移至武汉，陶承携带子女，随梅先生一起投身于革命，先后在武汉、上海、重庆、延安负责机要，后勤工作。建国后，在政务院、内务院、最高人民法院西南院工作，之后以自己的一生经历写了本书《我的一家》，发行600多万册，成为进行革命传统、革命理想的优秀教材，后被北京电影制片厂拍成电影《革命家庭》，她的一生都奉献给了革命事业，被誉为“革命母亲”。1986年，7月11日，病逝于长沙。', img: './taochengguju.jpg', audio: './taochengshijichenlieshi.mp3' },
@@ -319,10 +322,10 @@
             if (!btn) return;
             if (isAudioPlaying) {
                 btn.innerHTML = `<i data-lucide="square" size="14" fill="currentColor"></i> 停止`;
-                btn.className = "px-3 py-1.5 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-1 active:scale-95";
+                btn.className = "px-4 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-1.5 active:scale-95";
             } else {
                 btn.innerHTML = `<i data-lucide="play" size="14" fill="currentColor"></i> 播放`;
-                btn.className = "px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1 active:scale-95";
+                btn.className = "px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5 active:scale-95";
             }
             lucide.createIcons();
         }
@@ -736,15 +739,15 @@
             }
             switchDetailMedia('img');
 
-            // 控制语音播报版块的显示状态
+            // 🚨 绝对稳定的语音播报版块显隐逻辑 🚨
             const audioSection = document.getElementById('audioSection');
-            if (poi.audio) {
-                audioSection.classList.remove('hidden');
-                // 为了避免被拦截或突兀，这里可以选择不自动播放，等待用户点击版块内的播放按钮
-                // 如果需要自动播放依然可以调用： playPoiAudio(poi);
-                updateAudioBtnUI();
-            } else {
-                audioSection.classList.add('hidden');
+            if (audioSection) {
+                if (poi.audio) {
+                    audioSection.style.display = 'flex'; // 使用原生 style 彻底绕开 tailwind
+                    updateAudioBtnUI();
+                } else {
+                    audioSection.style.display = 'none';
+                }
             }
 
             const card = document.getElementById('detailCard');
