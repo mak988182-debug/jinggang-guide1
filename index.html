@@ -255,7 +255,6 @@
         const gltfLoader = new THREE.GLTFLoader();
 
         const POI_RAW_DATA = [
-            // 👇 修改了这四个点位，添加了 noModel: true，并移除了 modelUrl
             { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站，项目总投资3000多万元，主要包含建筑面积6000多平方米的游客服务中心以及建筑面积600多平方米的配套用房。由湖南大学教授魏春雨设计，整体设计采用清水混凝土结构，保持建筑结构的原生态面貌，屋面为连续折板造型，几何线条和光影艺术交织，体现建筑宏伟、壮观的空间感，新游客服务中心面积更大、接待能力更强，是游客接待中心，也是网红长沙文化艺术新地标。', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', noModel: true },
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/dongpaifang.glb'},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/xipaifang.glb'},
@@ -684,7 +683,6 @@
             
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
             
-            // 👇 新增的判断逻辑：如果有配置 noModel 就不加载任何模型
             if (poi.noModel) {
                 // 不渲染任何3D建筑模型
             } else if (poi.modelUrl) {
