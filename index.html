@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <!-- 👇 新增：引入 GLTF 模型加载器 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639"></script>
@@ -253,11 +252,9 @@
             return [lng, lat];
         }
 
-        // 👇 新增：初始化 GLTFLoader
         const gltfLoader = new THREE.GLTFLoader();
 
         const POI_RAW_DATA = [
-            // 👇 在这里加上了 modelUrl，你可以配置为你自己的模型地址，其他景点也可以照葫芦画瓢加上
             { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站，项目总投资3000多万元，主要包含建筑面积6000多平方米的游客服务中心以及建筑面积600多平方米的配套用房。由湖南大学教授魏春雨设计，整体设计采用清水混凝土结构，保持建筑结构的原生态面貌，屋面为连续折板造型，几何线条和光影艺术交织，体现建筑宏伟、壮观的空间感，新游客服务中心面积更大、接待能力更强，是游客接待中心，也是网红长沙文化艺术新地标。', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', modelUrl: './youkezhongxin.glb' },
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/dongpaifang.glb'},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/xipaifang.glb'},
@@ -268,7 +265,7 @@
             { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3' },
             { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮 影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电 影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3' },
             { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆是一个充满怀旧气息的特色文化场馆，旨在让游客在光影交错中重温经典，感受历史的温度与时代的芳华。馆内每日定时放映纪录片、文艺片、战争片及红色教育影片，营造出如同儿时露天影院般的情感共鸣氛围。作为古镇“时光穿越之旅”的重要一站，这里不仅是观影的场所，更是体验老长沙慢生活、在古镇中享受沉浸式文化记忆的绝佳去处。', img: './laodianyingyuan.jpg', audio: './laodianyingyuan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/laodianyingbowuguan.glb' },
-            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场，位于靖港古镇保粮正街13号，总面积2400平方米，是望城地区收藏、陈列民俗物品、研究民风民俗、弘扬民间优秀传统文化的重要传播地点，如今已经升级改造成为靖港古镇全域浸水漫游演艺《花开靖港》日间演艺《黄金年代“捌零”奇妙夜》的沉浸式演艺剧场，通过复原靖港八十年代的复古街景、商铺行当、歌舞表演厅等场景，包含复古Disco派对、时光市集、怀旧影集等精彩互动，还原轻松幽默的情境演艺、自由浪漫的时代风貌，展现时代之光，重温金色年华，为观众呈现一场精彩纷呈的视听双重盛宴。', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './liangdianminsu.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/liangdianminsubowuguan.glb' },
+            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场，位于靖港古镇保粮正街13号，总面积2400平方米，是望城地区收藏、陈列民俗物品、研究民风民俗、弘扬民间优秀传统文化的重要传播地点，如今已经升级改造成为靖港古镇全域浸水漫游演艺《花开靖港》日间演艺《黄金年代“捌零”奇妙夜》的沉浸式演艺剧场，通过复原靖港八十年代的复古街景、商铺行当、歌舞表演厅等场景，包含复古Disco派堆、时光市集、怀旧影集等精彩互动，还原轻松幽默的情境演艺、自由浪漫的时代风貌，展现时代之光，重温金色年华，为观众呈现一场精彩纷呈的视听双重盛宴。', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './liangdianminsu.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/liangdianminsubowuguan.glb' },
             { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所，一栋土砖老式房，室内布局还原了陶承早年的生活场景，并配有图片、书籍等实物展出。陶承原名刘桃英，1893年生于靖港。上世纪20年代她的先生欧阳梅当时在湖南省担任总工会秘书长，1927年长沙“马日事变”后转移至武汉，陶承携带子女，随梅先生一起投身于革命，先后在武汉、上海、重庆、延安负责机要，后勤工作。建国后，在政务院、内务院、最高人民法院西南院工作，之后以自己的一生经历写了本书《我的一家》，发行600多万册，成为进行革命传统、革命理想的优秀教材，后被北京电影制片厂拍成电影《革命家庭》，她的一生都奉献给了革命事业，被誉为“革命母亲”。1986年，7月11日，病逝于长沙。', img: './taochengguju.jpg', audio: './taochengshiji.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/taochengguju.glb' },
             { id: 'chmd', name: '楚河码头', pos: [-4.4, 0, -6.4], color: '#0ea5e9', type: '水运', baseWaitTime: 18, schedules: ['13:20', '16:20'], desc: '核心登船点。', img: './chuhematou.JPG', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/chuhematou.glb' },
             { id: 'zymd', name: '正义码头', pos: [14.8, 0, 3.6], color: '#0ea5e9', type: '水运', baseWaitTime: 12, schedules: ['12:30', '16:00'], desc: '漕运历史码头。', img: './zhengyimatou.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/zhengyimatou.mp4' },
@@ -676,7 +673,6 @@
             }
         }
 
-        // 👇 修改：在此处替换进入详情模式时的模型加载逻辑
         function enterDetailMode(poi) {
             if (viewMode === '3D') { controls.update();
             lastExplorerState.pos.copy(camera.position); lastExplorerState.target.copy(controls.target); }
@@ -687,16 +683,36 @@
             
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
             
-            // 👇 新增的判断逻辑：如果有配置 modelUrl 就加载 GLB，没有就用简易小亭子
+            // 👇 全新升级的黑科技：自动检测模型大小并缩放对齐
             if (poi.modelUrl) {
                 gltfLoader.load(poi.modelUrl, function(gltf) {
                     const model = gltf.scene;
                     
-                    // ⚠️ 这里非常重要：如果你的模型导入后特别大或特别小，请修改这里数字(比如 0.1 或者 10)
-                    model.scale.set(1, 1, 1); 
+                    // ==========================================
+                    // 🌟 自动缩放与居中黑科技代码
+                    // ==========================================
+                    // 1. 计算出这个模型真实的体积盒子
+                    const box = new THREE.Box3().setFromObject(model);
+                    const size = box.getSize(new THREE.Vector3());
                     
-                    // 将模型放置在当前景点的坐标点上
-                    model.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
+                    // 2. 找出模型（长、宽、高）里最大的一条边
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    
+                    // 3. 设定你期望它在地图上显示的“标准大小”（目前设为 6）
+                    // 提示：如果你觉得自动缩放出来还是偏大/偏小，只改这个 targetSize 即可！
+                    const targetSize = 6; 
+                    
+                    // 4. 计算出缩放倍率并应用 (加个判断防止极端情况除以0)
+                    const scale = (maxDim > 0) ? (targetSize / maxDim) : 1;
+                    model.scale.set(scale, scale, scale);
+                    
+                    // 5. 自动修复底部（防止模型悬空或陷入地下）
+                    const newBox = new THREE.Box3().setFromObject(model);
+                    const bottomOffset = newBox.min.y;
+                    
+                    // 6. 将模型放到景点对应的坐标点，并把底部贴齐地面
+                    model.position.set(poi.pos[0], poi.pos[1] - bottomOffset, poi.pos[2]); 
+                    // ==========================================
                     
                     detailGroup.add(model);
                 }, undefined, function(error) {
