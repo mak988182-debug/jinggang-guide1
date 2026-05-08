@@ -702,29 +702,39 @@
 
                     // 1. 计算出这个模型真实的体积盒子
                     const box = new THREE.Box3().setFromObject(model);
-                    const size = box.getSize(new THREE.Vector3());
+                    const center = new THREE.Vector3();
+                    box.getCenter(center);
+                    const size = new THREE.Vector3();
+                    box.getSize(size);
                     
-                    // 2. 找出模型（长、宽、高）里最大的一条边
+                    // 安全检查：如果模型体积为0，避免后续计算报错
+                    if (size.x === 0 && size.y === 0 && size.z === 0) {
+                        console.error("加载的模型体积为0，请检查模型文件是否正常！");
+                        return;
+                    }
+
+                    // 2. 这里的核心：创建一个外层组(Wrapper)，用来纠正模型原本奇怪的中心点！
+                    const wrapper = new THREE.Group();
+                    
+                    // 把模型装进组里，并反向偏移，让它的真正中心回到 (0,0,0)，底部回到 y=0
+                    model.position.set(-center.x, -box.min.y, -center.z);
+                    wrapper.add(model);
+                    
+                    // 3. 找出外层组（长、宽、高）里最大的一条边
                     const maxDim = Math.max(size.x, size.y, size.z);
                     
-                    // 3. 设定精确对齐原默认小房子（花开靖港剧场示例模型）的大小
-                    // 原圆锥屋顶直径为5.6，这里设定目标最大边长为 5.0 可达到视觉大小完全一致
+                    // 4. 设定精确对齐原默认小房子（花开靖港剧场示例模型）的大小
                     const targetSize = 5.0; 
                     
-                    // 4. 计算出缩放倍率并应用 (加个判断防止极端情况除以0)
-                    const scale = (maxDim > 0) ? (targetSize / maxDim) : 1;
-                    model.scale.set(scale, scale, scale);
-                    model.updateMatrixWorld(true); // 缩放后再次更新世界矩阵
+                    // 5. 计算出缩放倍率并应用到外层组上
+                    const scale = targetSize / maxDim;
+                    wrapper.scale.set(scale, scale, scale);
                     
-                    // 5. 自动修复底部（防止模型悬空或陷入地下）
-                    const newBox = new THREE.Box3().setFromObject(model);
-                    const bottomOffset = newBox.min.y;
-                    
-                    // 6. 将模型放到景点对应的坐标点，并把底部严丝合缝地贴齐地面
-                    model.position.set(poi.pos[0], poi.pos[1] - bottomOffset, poi.pos[2]); 
+                    // 6. 将外层组放到地图对应的 POI 坐标上
+                    wrapper.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
                     // ==========================================
                     
-                    detailGroup.add(model);
+                    detailGroup.add(wrapper);
                 }, undefined, function(error) {
                     console.error('模型加载失败：', error);
                 });
@@ -735,10 +745,10 @@
                 detailGroup.add(building);
             }
 
-            // 👇 核心修复：修改摄像机机位，让模型居中偏上，避开底部详情卡片！
+            // 👇 核心修复：修改摄像机机位，让模型居中偏上，完美避开底部详情卡片！
             // 摄像机镜头偏移设置
-            const camOffset = new THREE.Vector3(0, 10, 12); 
-            const targetOffset = new THREE.Vector3(0, 0, 3); // 将注视点往镜头方向（+Z）拉近3个单位，模型就会在画面中上浮
+            const camOffset = new THREE.Vector3(0, 6, 12); // 相机位置：从模型正前方略高处俯视
+            const targetOffset = new THREE.Vector3(0, 0, 0); // 相机焦点：直直地死盯住模型底部！
 
             animateCamera(
                 new THREE.Vector3(poi.pos[0] + camOffset.x, poi.pos[1] + camOffset.y, poi.pos[2] + camOffset.z),
@@ -824,7 +834,7 @@
                 });
                 POI_RAW_DATA.forEach(poi => { if (poi.ring) { const s = 1 + Math.sin(elapsed * 3) * 0.2; poi.ring.scale.set(s, s, s); poi.ring.material.opacity = 0.5 - (s-1)*2; } });
             } else if (appState === 'DETAIL' && detailGroup.children[0]) { 
-                // 让加载的模型或者简易建筑慢慢旋转
+                // 完美支持：让加载的模型或者简易建筑原地完美旋转
                 detailGroup.children[0].rotation.y += 0.005;
             }
             renderer.render(scene, camera);
