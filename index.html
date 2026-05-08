@@ -147,7 +147,7 @@
     <div id="qrModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="glass-panel rounded-3xl p-8 max-w-sm w-full text-center">
             <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center justify-center gap-2">
-                <i data-lucide="smartphone" size="20"></i> 手機掃描進入導覽
+                <i data-lucide="smartphone" size="20"></i> 手機掃描进入導覽
             </h3>
             <div class="bg-white rounded-2xl p-4 inline-block mb-4">
                 <img id="qrImage" src="" alt="導覽二維碼" class="w-56 h-56">
@@ -255,30 +255,32 @@
         const gltfLoader = new THREE.GLTFLoader();
 
         const POI_RAW_DATA = [
-            // 🚨 你要求去除模型版的四个点位，已打上 noModel: true
+            // 🚨 游客服务中心、八大碗、红色剧场、刘畴西陈列室 已设置 noModel: true，彻底屏蔽3D模型版块
             { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站...', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', noModel: true },
-            { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅，靠近古镇东入口...', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
-            { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉...', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
+            { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅...', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
+            { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢...', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
             { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹...', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
             
-            // ⬇️ 其余点位全部正常保留并可以配置模型
-            { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg'},
-            { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg'},
-            { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建，古色古香的芦江阁耸立在望城靖港古镇芦江岸边...', img: './lujiangge.jpg', audio: './lujiangge.mp3' },
-            { id: 'byt', name: '八元堂', pos: [7.2, 0, -4.5], color: '#8b5cf6', type: '古建', baseWaitTime: 10, schedules: ['11:30', '14:30', '15:30', '18:00'], desc: '八元堂，又名宁乡会馆，清咸丰十一年(公元1861年)宁邑八捐建，砖木结构，建筑面积1200平方米...', img: './bayuantang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.mp4', audio: './bayuantang.mp3' },
-            { id: 'hkjc', name: '花开靖港剧场', pos: [-9.2, 0, -4.9], color: '#ec4899', type: '演艺', baseWaitTime: 0, schedules: ['11:00', '14:30', '16:00'], desc: '沉浸式大型演艺秀，再现千年繁华。靖港古镇的《花开靖港》剧场是一个大型沉浸式实景演艺项目...', img: './huakaijinggangjuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.mp4', audio: './huakaijinggang.mp3' },
-            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产...', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3' },
-            { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆是一个充满怀旧气息的特色文化场馆，旨在让游客在光影交错中重温经典...', img: './laodianyingyuan.jpg', audio: './laodianyingyuan.mp3' },
-            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场，位于靖港古镇保粮正街13号，总面积2400平方米...', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './liangdianminsu.mp3' },
-            { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所，一栋土砖老式房，室内布局还原了陶承早年的生活场景，并配有图片、书籍等实物展出...', img: './taochengguju.jpg', audio: './taochengshiji.mp3' },
-            { id: 'chmd', name: '楚河码头', pos: [-4.4, 0, -6.4], color: '#0ea5e9', type: '水运', baseWaitTime: 18, schedules: ['13:20', '16:20'], desc: '核心登船点。', img: './chuhematou.JPG' },
+            // 🚨 花开靖港剧场 已正确添加本地路径，默认放大 5 倍
+            { id: 'hkjc', name: '花开靖港剧场', pos: [-9.2, 0, -4.9], color: '#ec4899', type: '演艺', baseWaitTime: 0, schedules: ['11:00', '14:30', '16:00'], desc: '沉浸式大型演艺秀，再现千年繁华...', img: './huakaijinggangjuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.mp4', audio: './huakaijinggang.mp3', modelUrl: './huakaijinggang.glb', modelScale: 5 },
+
+            // 其他常规点位
+            { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: './dongpaifang.glb', modelScale: 5 },
+            { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: './xipaifang.glb', modelScale: 5 },
+            { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建...', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: './lujiangge.glb', modelScale: 5 },
+            { id: 'byt', name: '八元堂', pos: [7.2, 0, -4.5], color: '#8b5cf6', type: '古建', baseWaitTime: 10, schedules: ['11:30', '14:30', '15:30', '18:00'], desc: '八元堂，又名宁乡会馆...', img: './bayuantang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.mp4', audio: './bayuantang.mp3', modelUrl: './bayuantang.glb', modelScale: 5 },
+            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米...', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3', modelUrl: './piyingxi.glb', modelScale: 5 },
+            { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆...', img: './laodianyingyuan.jpg', audio: './laodianyingyuan.mp3', modelUrl: './laodianyingbowuguan.glb', modelScale: 5 },
+            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场...', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './liangdianminsu.mp3', modelUrl: './liangdianminsubowuguan.glb', modelScale: 5 },
+            { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所...', img: './taochengguju.jpg', audio: './taochengshiji.mp3', modelUrl: './taochengguju.glb', modelScale: 5 },
+            { id: 'chmd', name: '楚河码头', pos: [-4.4, 0, -6.4], color: '#0ea5e9', type: '水运', baseWaitTime: 18, schedules: ['13:20', '16:20'], desc: '核心登船点。', img: './chuhematou.JPG', modelUrl: './chuhematou.glb', modelScale: 5 },
             { id: 'zymd', name: '正义码头', pos: [14.8, 0, 3.6], color: '#0ea5e9', type: '水运', baseWaitTime: 12, schedules: ['12:30', '16:00'], desc: '漕运历史码头。', img: './zhengyimatou.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/zhengyimatou.mp4' },
-            { id: 'hnsy', name: '中共湖南省委旧址', pos: [8.2, 0, -7.0], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '系原中共湖南地下省委在靖港以碓坊作掩护设立的临时办事处，是一栋“一担柴”式灰墙红瓦的老平房...', img: './zhonggonghunanshengweijiuzhi.jpg', audio: './zhonggongshengweijiuzhi.mp3' },
-            { id: 'htf', name: '宏泰坊', pos: [-0.5, 0, -8], color: '#7c2d12', type: '展馆', baseWaitTime: 0, desc: '长沙最后一座清代青楼遗址。宏泰坊又名鸿泰行，长沙的最后一座清代青楼遗址，距今270多年前的雍正七年...', img: './hongtaifang.jpg', audio: './hongtaifang.mp3' },
-            { id: 'ysm', name: '杨泗庙', pos: [-11.1, 0, -11.3], color: '#d97706', type: '民俗', baseWaitTime: 0, desc: '古镇唯一保存良好的庙宇，悠悠古刹千年钟，见证了当年鼎盛繁华。古时候的运输业是靠船帮支撑的...', img: './yangsimiao.jpg', audio: './yangsimiao.mp3' },
-            { id: 'tqg', name: '铁器文化馆', pos: [-7.3, 0, -12.1], color: '#475569', type: '展馆', baseWaitTime: 0, desc: '它是靖港非物质文化遗产之一的民间绝艺，它也是见证靖港古镇昔日繁华的实物标本，当我们听到叮当叮当的铁锤声响时...', img: './tieqiwenhuaguan.jpg' },
-            { id: 'edj', name: '二当家商社', pos: [18.9, 0, -1.6], color: '#16a34a', type: '商贸', baseWaitTime: 0, desc: '古镇商社复原。', img: './erdangjiashangshe.JPG' },
-            { id: 'chy', name: '锄禾源', pos: [16.6, 0, -2.8], color: '#65a30d', type: '科普', baseWaitTime: 10, desc: '旧时的农具渔具体现渔民文化，锄禾源里展出的是旧时的农具、渔具。靖港土地肥沃，气候适宜水稻生长...', img: './chuheyuan.png', audio: './chuheyuan.mp3' }
+            { id: 'hnsy', name: '中共湖南省委旧址', pos: [8.2, 0, -7.0], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '系原中共湖南地下省委在靖港以碓坊作掩护设立的临时办事处...', img: './zhonggonghunanshengweijiuzhi.jpg', audio: './zhonggongshengweijiuzhi.mp3' },
+            { id: 'htf', name: '宏泰坊', pos: [-0.5, 0, -8], color: '#7c2d12', type: '展馆', baseWaitTime: 0, desc: '长沙最后一座清代青楼遗址...', img: './hongtaifang.jpg', audio: './hongtaifang.mp3' },
+            { id: 'ysm', name: '杨泗庙', pos: [-11.1, 0, -11.3], color: '#d97706', type: '民俗', baseWaitTime: 0, desc: '古镇唯一保存良好的庙宇...', img: './yangsimiao.jpg', audio: './yangsimiao.mp3', modelUrl: './guanyinsi.glb', modelScale: 5 },
+            { id: 'tqg', name: '铁器文化馆', pos: [-7.3, 0, -12.1], color: '#475569', type: '展馆', baseWaitTime: 0, desc: '它是靖港非物质文化遗产之一的民间绝艺...', img: './tieqiwenhuaguan.jpg', modelUrl: './tieqiwenhuaguan.glb', modelScale: 5 },
+            { id: 'edj', name: '二当家商社', pos: [18.9, 0, -1.6], color: '#16a34a', type: '商贸', baseWaitTime: 0, desc: '古镇商社复原。', img: './erdangjiashangshe.JPG', modelUrl: './wedangjiashangshe.glb', modelScale: 5 },
+            { id: 'chy', name: '锄禾源', pos: [16.6, 0, -2.8], color: '#65a30d', type: '科普', baseWaitTime: 10, desc: '旧时的农具渔具体现渔民文化...', img: './chuheyuan.png', audio: './chuheyuan.mp3', modelUrl: './chuheyuan.glb', modelScale: 5 }
         ];
         POI_RAW_DATA.forEach(poi => { poi.lngLat = sceneToLngLat(poi.pos[0], poi.pos[2]); });
 
@@ -519,7 +521,6 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
             
-            // 🚨 初始化控制器时，传入最后的焦点！
             createControls(lastExplorerState.target);
             
             clock = new THREE.Clock();
@@ -550,7 +551,6 @@
             }
         }
 
-        // 🚨 修复Bug：接收传入的 target，防止重置视角到地图中心
         function createControls(target) {
             if (controls) controls.dispose();
             controls = new THREE.OrbitControls(camera, renderer.domElement); 
@@ -563,7 +563,6 @@
             if (viewMode === '2D' && appState === 'EXPLORER') { 
                 controls.enableRotate = false; 
                 controls.maxPolarAngle = 0;
-                // 2D模式下，让左键(单指)负责平移，符合传统地图习惯
                 controls.mouseButtons = {
                     LEFT: THREE.MOUSE.PAN,
                     MIDDLE: THREE.MOUSE.DOLLY,
@@ -574,7 +573,6 @@
                     TWO: THREE.TOUCH.DOLLY_ROTATE
                 };
             } else {
-                // 3D模式下，恢复经典左键旋转、右键平移
                 controls.enableRotate = true;
                 controls.mouseButtons = {
                     LEFT: THREE.MOUSE.ROTATE,
@@ -694,44 +692,25 @@
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
             
             if (poi.noModel) {
-                // 如果标记了 noModel，则绝对不渲染任何3D建筑或小房子
+                // 如果标记了 noModel，绝对不渲染任何3D建筑！直接跳过！
             } else if (poi.modelUrl) {
                 gltfLoader.load(poi.modelUrl, function(gltf) {
                     const model = gltf.scene;
                     
-                    // ==========================================
-                    // 🌟 自动缩放与居中黑科技代码
-                    // ==========================================
-                    // 先把模型放回原点和原始比例，确保计算包围盒准确无误
-                    model.position.set(0, 0, 0);
-                    model.scale.set(1, 1, 1);
-                    model.updateMatrixWorld(true);
-
-                    const box = new THREE.Box3().setFromObject(model);
-                    const center = new THREE.Vector3();
-                    box.getCenter(center);
-                    const size = new THREE.Vector3();
-                    box.getSize(size);
+                    // 🚨 彻底抛弃坑人的自动边界框居中逻辑！
+                    // 因为模型一旦带了隐藏地面，中心点就会偏得离谱，导致模型飞出屏幕。
+                    // 现在改为：绝对原地放置法！
                     
-                    if (size.x === 0 && size.y === 0 && size.z === 0) {
-                        console.error("加载的模型体积为0，请检查模型文件是否正常！");
-                        return;
-                    }
-
-                    const wrapper = new THREE.Group();
-                    model.position.set(-center.x, -box.min.y, -center.z);
-                    wrapper.add(model);
+                    // 1. 设置模型缩放倍率（默认放大5倍，你可以在上方POI数据里改）
+                    const s = poi.modelScale || 5; 
+                    model.scale.set(s, s, s);
                     
-                    const maxDim = Math.max(size.x, size.y, size.z);
-                    const targetSize = 5.0; 
-                    const scale = (maxDim > 0) ? (targetSize / maxDim) : 1;
-                    wrapper.scale.set(scale, scale, scale);
+                    // 2. 强行将模型放置在坐标点正中心（如果悬空，改POI数据里的 modelOffsetY）
+                    const offsetY = poi.modelOffsetY || 0;
+                    model.position.set(poi.pos[0], poi.pos[1] + offsetY, poi.pos[2]); 
                     
-                    wrapper.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
-                    
-                    detailGroup.add(wrapper);
+                    detailGroup.add(model);
                 }, undefined, function(error) {
-                    // 当你指定的模型文件还没上传，或者路径错误时，它会自动召唤“彩色小房子”来替班！
                     console.error('⚠️ 模型加载失败，使用默认房子垫底：', error);
                     const building = createChineseBuilding(poi.color); 
                     building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
@@ -744,9 +723,10 @@
                 detailGroup.add(building);
             }
 
-            // 🚨 修复机位视角，确保模型处于屏幕偏上方，完美避开底部的卡片
-            const camOffset = new THREE.Vector3(0, 6, 12); 
-            const targetOffset = new THREE.Vector3(0, 0, 0); 
+            // 🚨 重置上帝视角：高度10，向后拉远15。完美解决被卡片遮挡的问题
+            const camOffset = new THREE.Vector3(0, 10, 15); 
+            // 焦点往上抬一点，这样模型就在屏幕的偏上方了
+            const targetOffset = new THREE.Vector3(0, 2, 0); 
 
             animateCamera(
                 new THREE.Vector3(poi.pos[0] + camOffset.x, poi.pos[1] + camOffset.y, poi.pos[2] + camOffset.z),
@@ -780,7 +760,6 @@
             animateCamera(targetPos, targetLookAt);
         }
 
-        // 🚨 修复动画结束后注视点被清空的Bug
         function animateCamera(newPos, newTarget, customDuration = 700) {
             const currentTarget = controls ? controls.target.clone() : new THREE.Vector3(0,0,0);
             if (controls) { controls.dispose(); controls = null; }
@@ -796,7 +775,6 @@
                 camera.lookAt(tempTarget);
                 if (progress < 1) requestAnimationFrame(update); else { 
                     camera.position.copy(newPos); 
-                    // 动画结束后，创建新控制器并立刻锁死焦点！
                     createControls(newTarget);
                 }
             } update();
@@ -832,7 +810,6 @@
                 });
                 POI_RAW_DATA.forEach(poi => { if (poi.ring) { const s = 1 + Math.sin(elapsed * 3) * 0.2; poi.ring.scale.set(s, s, s); poi.ring.material.opacity = 0.5 - (s-1)*2; } });
             } else if (appState === 'DETAIL' && detailGroup.children[0]) { 
-                // 让加载的模型或者简易建筑原地完美旋转
                 detailGroup.children[0].rotation.y += 0.005;
             }
             renderer.render(scene, camera);
