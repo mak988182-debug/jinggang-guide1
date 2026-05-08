@@ -683,35 +683,21 @@
             
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
             
-            // 👇 全新升级的黑科技：自动检测模型大小并缩放对齐
             if (poi.modelUrl) {
                 gltfLoader.load(poi.modelUrl, function(gltf) {
                     const model = gltf.scene;
                     
                     // ==========================================
-                    // 🌟 自动缩放与居中黑科技代码
+                    // 放弃自动计算，使用纯手动暴力缩放！
                     // ==========================================
-                    // 1. 计算出这个模型真实的体积盒子
-                    const box = new THREE.Box3().setFromObject(model);
-                    const size = box.getSize(new THREE.Vector3());
                     
-                    // 2. 找出模型（长、宽、高）里最大的一条边
-                    const maxDim = Math.max(size.x, size.y, size.z);
+                    // 1. 暴力修改比例（如果还小，就改成 100, 100, 100 甚至更大）
+                    // 你可以根据实际情况修改这里的数字 30
+                    model.scale.set(30, 30, 30); 
                     
-                    // 3. 设定你期望它在地图上显示的“标准大小”（目前设为 6）
-                    // 提示：如果你觉得自动缩放出来还是偏大/偏小，只改这个 targetSize 即可！
-                    const targetSize = 6; 
+                    // 2. 暴力修改位置（如果模型悬空或沉底，就调整中间那个数字，比如 poi.pos[1] + 5 就是抬高 5 米）
+                    model.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
                     
-                    // 4. 计算出缩放倍率并应用 (加个判断防止极端情况除以0)
-                    const scale = (maxDim > 0) ? (targetSize / maxDim) : 1;
-                    model.scale.set(scale, scale, scale);
-                    
-                    // 5. 自动修复底部（防止模型悬空或陷入地下）
-                    const newBox = new THREE.Box3().setFromObject(model);
-                    const bottomOffset = newBox.min.y;
-                    
-                    // 6. 将模型放到景点对应的坐标点，并把底部贴齐地面
-                    model.position.set(poi.pos[0], poi.pos[1] - bottomOffset, poi.pos[2]); 
                     // ==========================================
                     
                     detailGroup.add(model);
