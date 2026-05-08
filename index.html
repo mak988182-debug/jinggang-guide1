@@ -515,7 +515,8 @@
             camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.copy(lastExplorerState.pos);
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
-            createControls();
+            // 修正：初始化时创建controls不需要传参，因为默认为0,0,0
+            createControls(lastExplorerState.target);
             clock = new THREE.Clock();
             mapGroup = new THREE.Group(); detailGroup = new THREE.Group(); scene.add(mapGroup); scene.add(detailGroup);
             pickerPoint = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })); pickerPoint.visible = false; scene.add(pickerPoint);
@@ -544,16 +545,19 @@
             }
         }
 
-        function createControls() {
+        // 修复：加入传入 target 设定，防止重置为0,0,0
+        function createControls(target) {
             if (controls) controls.dispose();
             controls = new THREE.OrbitControls(camera, renderer.domElement); 
+            if (target) {
+                controls.target.copy(target);
+            }
             controls.enableDamping = true; 
             controls.maxPolarAngle = Math.PI / 2.1;
             
             if (viewMode === '2D' && appState === 'EXPLORER') { 
                 controls.enableRotate = false; 
                 controls.maxPolarAngle = 0;
-                // 2D模式下，让左键(单指)负责平移，符合传统地图习惯
                 controls.mouseButtons = {
                     LEFT: THREE.MOUSE.PAN,
                     MIDDLE: THREE.MOUSE.DOLLY,
@@ -564,7 +568,6 @@
                     TWO: THREE.TOUCH.DOLLY_ROTATE
                 };
             } else {
-                // 3D模式下，恢复经典左键旋转、右键平移
                 controls.enableRotate = true;
                 controls.mouseButtons = {
                     LEFT: THREE.MOUSE.ROTATE,
@@ -692,6 +695,11 @@
                     // ==========================================
                     // 🌟 自动缩放与居中黑科技代码
                     // ==========================================
+                    // 先把模型放回原点和原始比例，确保计算包围盒准确无误
+                    model.position.set(0, 0, 0);
+                    model.scale.set(1, 1, 1);
+                    model.updateMatrixWorld(true);
+
                     // 1. 计算出这个模型真实的体积盒子
                     const box = new THREE.Box3().setFromObject(model);
                     const size = box.getSize(new THREE.Vector3());
@@ -699,19 +707,20 @@
                     // 2. 找出模型（长、宽、高）里最大的一条边
                     const maxDim = Math.max(size.x, size.y, size.z);
                     
-                    // 3. 设定你期望它在地图上显示的“标准大小”（目前设为 6）
-                    // 提示：如果你觉得自动缩放出来还是偏大/偏小，只改这个 targetSize 即可！
-                    const targetSize = 6; 
+                    // 3. 设定精确对齐原默认小房子（花开靖港剧场示例模型）的大小
+                    // 原圆锥屋顶直径为5.6，这里设定目标最大边长为 5.0 可达到视觉大小完全一致
+                    const targetSize = 5.0; 
                     
                     // 4. 计算出缩放倍率并应用 (加个判断防止极端情况除以0)
                     const scale = (maxDim > 0) ? (targetSize / maxDim) : 1;
                     model.scale.set(scale, scale, scale);
+                    model.updateMatrixWorld(true); // 缩放后再次更新世界矩阵
                     
                     // 5. 自动修复底部（防止模型悬空或陷入地下）
                     const newBox = new THREE.Box3().setFromObject(model);
                     const bottomOffset = newBox.min.y;
                     
-                    // 6. 将模型放到景点对应的坐标点，并把底部贴齐地面
+                    // 6. 将模型放到景点对应的坐标点，并把底部严丝合缝地贴齐地面
                     model.position.set(poi.pos[0], poi.pos[1] - bottomOffset, poi.pos[2]); 
                     // ==========================================
                     
@@ -726,7 +735,15 @@
                 detailGroup.add(building);
             }
 
-            animateCamera(new THREE.Vector3(poi.pos[0] + 12, poi.pos[1] + 10, poi.pos[2] + 12), new THREE.Vector3(poi.pos[0], poi.pos[1] + 1.5, poi.pos[2]));
+            // 👇 核心修复：修改摄像机机位，让模型居中偏上，避开底部详情卡片！
+            // 摄像机镜头偏移设置
+            const camOffset = new THREE.Vector3(0, 10, 12); 
+            const targetOffset = new THREE.Vector3(0, 0, 3); // 将注视点往镜头方向（+Z）拉近3个单位，模型就会在画面中上浮
+
+            animateCamera(
+                new THREE.Vector3(poi.pos[0] + camOffset.x, poi.pos[1] + camOffset.y, poi.pos[2] + camOffset.z),
+                new THREE.Vector3(poi.pos[0] + targetOffset.x, poi.pos[1] + targetOffset.y, poi.pos[2] + targetOffset.z)
+            );
             
             document.getElementById('detailTitle').innerText = poi.name;
             document.getElementById('detailDesc').innerText = poi.desc;
@@ -755,11 +772,11 @@
             animateCamera(targetPos, targetLookAt);
         }
 
+        // 修复：修复核心Bug，在销毁旧控制器前克隆旧target，并在动画结束后赋予新控制器
         function animateCamera(newPos, newTarget, customDuration = 700) {
-            if (controls) { controls.dispose();
-            controls = null; }
+            const currentTarget = controls ? controls.target.clone() : new THREE.Vector3(0,0,0);
+            if (controls) { controls.dispose(); controls = null; }
             const startPos = camera.position.clone();
-            const currentTarget = (controls ? controls.target.clone() : new THREE.Vector3(0,0,0));
             const startTime = performance.now();
             function update() {
                 const now = performance.now();
@@ -769,7 +786,10 @@
                 camera.position.lerpVectors(startPos, newPos, t);
                 const tempTarget = new THREE.Vector3().lerpVectors(currentTarget, newTarget, t);
                 camera.lookAt(tempTarget);
-                if (progress < 1) requestAnimationFrame(update); else { camera.position.copy(newPos); createControls();
+                if (progress < 1) requestAnimationFrame(update); else { 
+                    camera.position.copy(newPos); 
+                    // 动画结束后，立刻创建新的控制权，并将镜头目标对准模型！
+                    createControls(newTarget);
                 }
             } update();
         }
