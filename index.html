@@ -147,7 +147,7 @@
     <div id="qrModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="glass-panel rounded-3xl p-8 max-w-sm w-full text-center">
             <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center justify-center gap-2">
-                <i data-lucide="smartphone" size="20"></i> 手機掃描進入導覽
+                <i data-lucide="smartphone" size="20"></i> 手機掃描进入導覽
             </h3>
             <div class="bg-white rounded-2xl p-4 inline-block mb-4">
                 <img id="qrImage" src="" alt="導覽二維碼" class="w-56 h-56">
@@ -208,7 +208,22 @@
                 
                 <div class="flex-1 flex flex-col">
                     <p id="detailDesc" class="text-sm text-slate-500 leading-relaxed italic overflow-y-auto max-h-32 desc-scrollbar pr-2">加载描述中...</p>
-                    <div class="mt-auto pt-6 flex gap-3">
+                    
+                    <div id="audioSection" style="display: none;" class="mt-3 p-3 bg-slate-50/80 backdrop-blur-md border border-slate-200/60 rounded-2xl items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i data-lucide="headphones" size="16"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-800">景点语音导览</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">倾听古镇历史，感受岁月芳华</div>
+                            </div>
+                        </div>
+                        <button id="audioPlayBtn" onclick="toggleAudioState()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                            <i data-lucide="play" size="14"></i> 播放
+                        </button>
+                    </div>
+                    <div class="mt-auto pt-5 flex gap-3">
                         <button onclick="currentDetailPOI && planRoute(currentDetailPOI)" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
                             <i data-lucide="navigation-2" size="18"></i> 规划路线
                         </button>
@@ -252,18 +267,14 @@
             return [lng, lat];
         }
 
-        // 初始化加载器
         const gltfLoader = new THREE.GLTFLoader();
 
-        // 🚨 核心修改区域！
         const POI_RAW_DATA = [
-            // ❌ 按照你的要求：完全屏蔽以下 4 个点位的 3D 模型渲染，只推视角！
             { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站，项目总投资3000多万元，主要包含建筑面积6000多平方米的游客服务中心以及建筑面积600多平方米的配套用房。由湖南大学教授魏春雨设计，整体设计采用清水混凝土结构，保持建筑结构的原生态面貌，屋面为连续折板造型，几何线条和光影艺术交织，体现建筑宏伟、壮观的空间感，新游客服务中心面积更大、接待能力更强，是游客接待中心，也是网红长沙文化艺术新地标。', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', noModel: true },
             { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅，靠近古镇东入口，位于主街道——保安街保安桥畔。餐厅面朝芦江，背靠夹河，三面环水，景观视野在整个古镇餐馆饭店间实属最佳。走进八大碗餐厅，如同穿越时空走进了千年前繁华的“小汉口”：油纸伞、仿古木窗、花格屏风……散发着浓浓的鱼米水乡风情，尽显国风的雅致和岁月的沧桑。餐厅共有上下2层，可摆45桌、主题包间3个，容纳450-480人同时就餐。以“靖港八大碗”为主推特色，靖港河鲜、古镇小炒、农家菜园、老火靓汤、精美凉菜等各种菜色一应俱全。', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
             { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
             { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹，通过丰富的历史资料和实物展品，生动展现了刘畴西从黄埔一期生成长为红军高级将领的辉煌历程。‌刘畴西，‌1897年出生于湖南长沙，‌是中国共产党早期的军事领导人之一。刘畴西在革命生涯中表现出色，‌曾参加平定广州商团叛乱的战斗，‌并在战斗中负重伤，‌失去了左臂，‌因此被誉为“独臂将军”。‌他先后担任过红21军军长、‌闽浙赣军区司令员兼红军新编第10军军长等职务，‌为红军培养了大批军政干部，‌并在多次反“围剿”作战中立下赫赫战功。‌1934年，‌刘畴西率领红10军团北上抗日先遣队，‌最终在浙赣边界的怀玉山区被国民党军包围，‌虽奋力突围但终未能成功，‌于1935年1月被俘。‌他的一生充满了传奇色彩，‌从参加学生运动、‌加入中国社会主义青年团，‌到成为黄埔军校的第一期毕业生，‌再到担任红军的高级指挥官，‌刘畴西的经历体现了中国早期革命者的英勇和坚定。', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
 
-            // ✅ 其他景点正常保留（要替换模型，把对应的 ./xxx.glb 换成你的真实链接即可，如果太大记得传云端）
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: './dongpaifang.glb', modelScale: 5},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: './xipaifang.glb', modelScale: 5},
             { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建，古色古香的芦江阁耸立在望城靖港古镇芦江岸边，临水而建，毗邻沩水，北侧为芦江，东侧紧邻潇湘北路延路，为多层传统楼阁式建筑物。新建成的芦江阁共3层，檐口及屋脊也融入了湖南地域的建筑符号，每层均建有连廊，为游客提供了360度全景观景体验。芦江阁周边配套有芦苇湿地公园，在水面较开阔和水系坡度较缓的区域打造生态驳岸，设有游路、生态浮桥、观景平台等游览设施，让游客们可尽情饱览独具魅力的江南水乡美景。此外，芦江阁还实施了夜景亮化工程，夜幕降临下映衬古镇夜色更梦幻唯美，芦江水韵更动人心弦。', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: './lujiangge.glb', modelScale: 5 },
@@ -727,7 +738,6 @@
                 gltfLoader.load(poi.modelUrl, function(gltf) {
                     const model = gltf.scene;
                     
-                    // 彻底抛弃坑人的自动边界框居中逻辑！改为绝对原地放置法
                     const s = poi.modelScale || 5; 
                     model.scale.set(s, s, s);
                     
@@ -767,6 +777,7 @@
             }
             switchDetailMedia('img');
 
+            // 🚨 音频播报的显隐控制逻辑
             const audioSection = document.getElementById('audioSection');
             if (audioSection) {
                 if (poi.audio) {
