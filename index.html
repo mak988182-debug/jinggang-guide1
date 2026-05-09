@@ -9,7 +9,14 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: '04e12e1329562725e64887957962c050', // 请在此替换为您高德 Key 对应的安全密钥
+        }
+    </script>
     <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639"></script>
+
     <style>
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #f1f5f9; }
         #canvas-container { width: 100vw; height: 100vh; }
@@ -48,7 +55,6 @@
         .desc-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 4px; }
         .desc-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
         .desc-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
-
         #detailCard.minimized { transform: translate(-50%, calc(100% - 90px)) !important; }
         #detailContentBody { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; opacity: 1; }
         #detailCard.minimized #detailContentBody { opacity: 0; pointer-events: none; height: 0; margin-top: 0; }
@@ -245,7 +251,8 @@
     </div>
 
     <script>
-        const AMAP_WEATHER_KEY = '22bbaf9f484b83ceeb6af9dbec0ae0db';
+        // 🚨 修复 3：统一配置常量 🚨
+        const AMAP_KEY = '29eb222f604720dd3aea5ce4c79d2639';
         const AMAP_CITY_CODE = '430112';
         
         const CALIBRATION_DATA = {
@@ -271,29 +278,27 @@
         const gltfLoader = new THREE.GLTFLoader();
 
         const POI_RAW_DATA = [
-            // 🚨 已彻底屏蔽以下 5 个点位的 3D 模型渲染，并保留完整描述和功能
-            { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站，项目总投资3000多万元，主要包含建筑面积6000多平方米的游客服务中心以及建筑面积600多平方米的配套用房。由湖南大学教授魏春雨设计，整体设计采用清水混凝土结构，保持建筑结构的原生态面貌，屋面为连续折板造型，几何线条和光影艺术交织，体现建筑宏伟、壮观的空间感，新游客服务中心面积更大、接待能力更强，是游客接待中心，也是网红长沙文化艺术新地标。', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', audio: './youkefuwuzhongxin.mp3', noModel: true },
-            { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅，靠近古镇东入口，位于主街道——保安街保安桥畔。餐厅面朝芦江，背靠夹河，三面环水，景观视野在整个古镇餐馆饭店间实属最佳。走进八大碗餐厅，如同穿越时空走进了千年前繁华的“小汉口”：油纸伞、仿古木窗、花格屏风……散发着浓浓的鱼米水乡风情，尽显国风的雅致和岁月的沧桑。餐厅共有上下2层，可摆45桌、主题包间3个，容纳450-480人同时就餐。以“靖港八大碗”为主推特色，靖港河鲜、古镇小炒、农家菜园、老火靓汤、精美凉菜等各种菜色一应俱全。', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
-            { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
-            { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹，通过丰富的历史资料和实物展品，生动展现了刘畴西从黄埔一期生成长为红军高级将领的辉煌历程。‌刘畴西，‌1897年出生于湖南长沙，‌是中国共产党早期的军事领导人之一。刘畴西在革命生涯中表现出色，‌曾参加平定广州商团叛乱的战斗，‌并在战斗中负重伤，‌失去了左臂，‌因此被誉为“独臂将军”。‌他先后担任过红21军军长、‌闽浙赣军区司令员兼红军新编第10军军长等职务，‌为红军培养了大批军政干部，‌并在多次反“围剿”作战中立下赫赫战功。‌1934年，‌刘畴西率领红10军团北上抗日先遣队，‌最终在浙赣边界的怀玉山区被国民党军包围，‌虽奋力突围但终未能成功，‌于1935年1月被俘。‌他的一生充满了传奇色彩，‌从参加学生运动、‌加入中国社会主义青年团，‌到成为黄埔军校的第一期毕业生，‌再到担任红军的高级指挥官，‌刘畴西的经历体现了中国早期革命者的英勇和坚定。', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
-            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3', noModel: true },
-            // ✅ 以下点位保留模型（可在此处更换 modelUrl 链接，并用 modelScale 调整大小，如果穿模可用 modelOffsetY 微调）
+            { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站...', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', audio: './youkefuwuzhongxin.mp3', noModel: true },
+            { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅...', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
+            { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
+            { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹...', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
+            { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '皮影作为中国非物质文化遗产...', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3', noModel: true },
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/dongpaifang.glb', modelScale: 5},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/xipaifang.glb', modelScale: 5},
-            { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建，古色古香的芦江阁耸立在望城靖港古镇芦江岸边，临水而建，毗邻沩水，北侧为芦江，东侧紧邻潇湘北路延路，为多层传统楼阁式建筑物。新建成的芦江阁共3层，檐口及屋脊也融入了湖南地域的建筑符号，每层均建有连廊，为游客提供了360度全景观景体验。芦江阁周边配套有芦苇湿地公园，在水面较开阔和水系坡度较缓的区域打造生态驳岸，设有游路、生态浮桥、观景平台等游览设施，让游客们可尽情饱览独具魅力的江南水乡美景。此外，芦江阁还实施了夜景亮化工程，夜幕降临下映衬古镇夜色更梦幻唯美，芦江水韵更动人心弦。', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/lujiangge.glb', modelScale: 5 },
-            { id: 'byt', name: '八元堂', pos: [7.2, 0, -4.5], color: '#8b5cf6', type: '古建', baseWaitTime: 10, schedules: ['11:30', '14:30', '15:30', '18:00'], desc: '八元堂，又名宁乡会馆，清咸丰十一年(公元1861年)宁邑八捐建，砖木结构，建筑面积1200平方米，为宁乡沩水通湘江水运管理人员驻靖港公务会所。在当时是一个管理宁乡船舶和谷米销售的据点，也是为来靖港的宁乡老乡下榻休息和联络乡情等的服务机构。八元堂，前有商铺，内有戏台。会馆内雕梁画栋、古色古香，大厅宽阔，可容纳百余人聚会。厅中两根四方形花岗石柱，柱基略阔于柱身，四周有浮雕图饰。木楼古戏台常有民间艺人唱着湘味实足的地花鼓，有《秦雪梅》、《洪兰桂打酒》、《刘海砍樵》、《张先生讨学钱》等著名的花鼓戏曲目演出，非常适合聚集休息、听戏品茶，让人感觉古镇原汁原味的韵律。', img: './bayuantang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.mp4', audio: './bayuantang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.glb', modelScale: 5 },
-            { id: 'hkjc', name: '花开靖港剧场', pos: [-9.2, 0, -4.9], color: '#ec4899', type: '演艺', baseWaitTime: 0, schedules: ['19:00'], desc: '沉浸式大型演艺秀，再现千年繁华。靖港古镇的《花开靖港》剧场是一个大型沉浸式实景演艺项目，以1938年长沙文夕大火为背景，通过创新的观演模式和丰富的文化元素，再现老长沙的繁华与湖湘儿女的家国情怀。', img: './huakaijinggangjuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.mp4', audio: './huakaijinggang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.glb', modelScale: 5 },
-            { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆是一个充满怀旧气息的特色文化场馆，旨在让游客在光影交错中重温经典，感受历史的温度与时代的芳华。馆内每日定时放映纪录片、文艺片、战争片及红色教育影片，营造出如同儿时露天影院般的情感共鸣氛围。作为古镇“时光穿越之旅”的重要一站，这里不仅是观影的场所，更是体验老长沙慢生活、在古镇中享受沉浸式文化记忆的绝佳去处。', img: './laodianyingyuan.jpg', audio: './laodianyingbowuguan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/laodianyingbowuguan.glb', modelScale: 5 },
-            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场，位于靖港古镇保粮正街13号，总面积2400平方米，是望城地区收藏、陈列民俗物品、研究民风民俗、弘扬民间优秀传统文化的重要传播地点，如今已经升级改造成为靖港古镇全域浸水漫游演艺《花开靖港》日间演艺《黄金年代“捌零”奇妙夜》的沉浸式演艺剧场，通过复原靖港八十年代的复古街景、商铺行当、歌舞表演厅等场景，包含复古Disco派对、时光市集、怀旧影集等精彩互动，还原轻松幽默的情境演艺、自由浪漫的时代风貌，展现时代之光，重温金色年华，为观众呈现一场精彩纷呈的视听双重盛宴。', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './huangjinqimiaoye.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/liangdianminsubowuguan.glb', modelScale: 5 },
-            { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所，一栋土砖老式房，室内布局还原了陶承早年的生活场景，并配有图片、书籍等实物展出。陶承原名刘桃英，1893年生于靖港。上世纪20年代她的先生欧阳梅当时在湖南省担任总工会秘书长，1927年长沙“马日事变”后转移至武汉，陶承携带子女，随梅先生一起投身于革命，先后在武汉、上海、重庆、延安负责机要，后勤工作。建国后，在政务院、内务院、最高人民法院西南院工作，之后以自己的一生经历写了本书《我的一家》，发行600多万册，成为进行革命传统、革命理想的优秀教材，后被北京电影制片厂拍成电影《革命家庭》，她的一生都奉献给了革命事业，被誉为“革命母亲”。1986年，7月11日，病逝于长沙。', img: './taochengguju.jpg', audio: './taochengshijichenlieshi.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/taochengguju.glb', modelScale: 5 },
+            { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建...', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/lujiangge.glb', modelScale: 5 },
+            { id: 'byt', name: '八元堂', pos: [7.2, 0, -4.5], color: '#8b5cf6', type: '古建', baseWaitTime: 10, schedules: ['11:30', '14:30', '15:30', '18:00'], desc: '八元堂，又名宁乡会馆...', img: './bayuantang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.mp4', audio: './bayuantang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/bayuantang.glb', modelScale: 5 },
+            { id: 'hkjc', name: '花开靖港剧场', pos: [-9.2, 0, -4.9], color: '#ec4899', type: '演艺', baseWaitTime: 0, schedules: ['19:00'], desc: '沉浸式大型演艺秀，再现千年繁华。', img: './huakaijinggangjuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.mp4', audio: './huakaijinggang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/huakaijinggang.glb', modelScale: 5 },
+            { id: 'ldy', name: '老电影院', pos: [12.5, 0, -4.2], color: '#111827', type: '休闲', baseWaitTime: 5, schedules: ['10:30', '13:30', '15:30'], desc: '靖港古镇老电影博物馆...', img: './laodianyingyuan.jpg', audio: './laodianyingbowuguan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/laodianyingbowuguan.glb', modelScale: 5 },
+            { id: 'ms馆', name: '亮点民俗收藏馆', pos: [-14.4, 0, -12.4], color: '#06b6d4', type: '展馆', baseWaitTime: 12, schedules: ['10:30', '13:30'], desc: '黄金年代“捌零”奇妙夜演艺剧场...', img: './liangdianminsushoucangguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/huangjinniandai.mp4', audio: './huangjinqimiaoye.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/liangdianminsubowuguan.glb', modelScale: 5 },
+            { id: 'tcs', name: '陶承事迹陈列室', pos: [14.2, 0, -5.0], color: '#ef4444', type: '红色', baseWaitTime: 5, schedules: ['10:30', '14:30'], desc: '革命母亲陶承生平居所...', img: './taochengguju.jpg', audio: './taochengguju.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/taochengguju.glb', modelScale: 5 },
             { id: 'chmd', name: '楚河码头', pos: [-4.4, 0, -6.4], color: '#0ea5e9', type: '水运', baseWaitTime: 18, schedules: ['13:20', '16:20'], desc: '核心登船点。', img: './chuhematou.JPG', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/chuhematou.glb', modelScale: 5 },
             { id: 'zymd', name: '正义码头', pos: [14.8, 0, 3.6], color: '#0ea5e9', type: '水运', baseWaitTime: 12, schedules: ['12:30', '16:00'], desc: '漕运历史码头。', img: './zhengyimatou.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/zhengyimatou.mp4', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/zhengyimatou.glb', modelScale: 5 },
-            { id: 'hnsy', name: '中共湖南省委旧址', pos: [8.2, 0, -7.0], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '系原中共湖南地下省委在靖港以碓坊作掩护设立的临时办事处，是一栋“一担柴”式灰墙红瓦的老平房，原来是碓坊，也就是米厂。1927年，长沙城发生了“马日事变”，大部分党组织和工农团体遭到破坏，一万多名中共党员和工农运动骨干被屠杀，轰轰烈烈的大革命转入低潮。1930年11月，中共湖南省委机关几经转移后迁到靖港这栋屋内，当时这里是一个米厂，驻守机关的是省委委员王首道的夫人王绍坤和她的妹妹王绍兰。两人公开的身份是望江楼鞋厂的女工，当时省委书记是宁迪卿，省委主要负责人有蒋长卿，王首道，张学琅，郭立三等。后来省委机关暴露，不得不再度转移，在转移途中由于叛徒出卖，王绍坤和王绍兰两姐妹被捕，在长沙识字岭英勇就义。曾被誉为“革命母亲”的靖港优秀儿女陶承，在《我的一家》这本书中，把中共地下省委组织在靖港的活动作为书中主要故事情节，详细描叙了这段历史。', img: './zhonggonghunanshengweijiuzhi.jpg', audio: './zhonggonghunanshengweijiuzhi.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/zhonggonghunanshengweijiuzhi.glb', modelScale: 5 },
-            { id: 'htf', name: '宏泰坊', pos: [-0.5, 0, -8], color: '#7c2d12', type: '展馆', baseWaitTime: 0, desc: '长沙最后一座清代青楼遗址。宏泰坊又名鸿泰行，长沙的最后一座清代青楼遗址，距今270多年前的雍正七年，也就是公元1729年开建，1733年开张营业。在那个以水路为主要交通方式的年代，靖港地处湘江沩水交汇之处，占尽地利优势，成为湖南交通要塞。俗话说：船到靖港口，有风也不走。发达的商业文明，使宏泰坊声色犬马，夜夜笙歌。穿越风雨和时空，宏泰坊见证了清代风月史，见证了封建社会对女性身心摧残，也见证了靖港古镇昔日的繁华。', img: './hongtaifang.jpg', audio: './hongtaifang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/hongtaifang.glb', modelScale: 5 },
-            { id: 'ysm', name: '杨泗庙', pos: [-11.1, 0, -11.3], color: '#d97706', type: '民俗', baseWaitTime: 0, desc: '古镇唯一保存良好的庙宇，悠悠古刹千年钟，见证了当年鼎盛繁华。古时候的运输业是靠船帮支撑的，当时很多船帮都是以船为家， 以船为业。每当有船下水作业时首先得祭拜水神，以求一帆风顺，洞庭湖区所供奉的水神就是大名鼎鼎的平浪王爷——杨泗将军，因此靖港也有一座古庙——杨泗庙，靖港的杨泗庙是湖区唯一保存最好的寺庙。现今为了扩大古庙的规模，于2003年在杨泗庙原有的基础上，在旁边增建了一座观音殿，正门上的“观音寺”三个鎏金大字和陶制飞天玉女图惟妙惟肖，两侧各有一圆门，门上有佛家箴言。观音寺共三进三殿，前为山门，入山门即是大雄宝殿，殿前立有观音像，殿后有两小殿。寺内大殿分两层，一层供奉西方弥勒佛，二层有讲经堂，逢观音圣诞或其它宗教节日时，常在此处讲经说法。侧有合金大钟，贴挂信徒之祈愿，每日有众多的信徒来此礼佛，全国各地的游客前来参观、朝拜，香火旺盛。每年农历六月初六杨泗将军的生日和九月十九观音圣诞，来此参拜的人数以万计，明清时期世人形容其盛况是：朝有千人作揖，夜有万盏明灯。', img: './yangsimiao.jpg', audio: './yangsimiao.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/guanyinsi.glb', modelScale: 5 },
-            { id: 'tqg', name: '铁器文化馆', pos: [-7.3, 0, -12.1], color: '#475569', type: '展馆', baseWaitTime: 0, desc: '它是靖港非物质文化遗产之一的民间绝艺，它也是见证靖港古镇昔日繁华的实物标本，当我们听到叮当叮当的铁锤声响时，能引起我们回忆那峥嵘岁月，仿佛身处一种还璞归真的境界。打铁这一行当，是中国古代农耕时代的产物，靖港在清朝年间有十多家铁铺，这些铁铺除了打造农具满足大众垸农民日常生活耕作需要，更主要的业务是打制船上所需的五花八门的铁零件。作为当时繁荣的“小汉口”，每天停泊在靖港七八个码头上的船只达数千艘，所以每个铁铺自然是忙得不亦乐乎。当时一条长街上，铁铺传出的叮当声从早到晚不绝于耳。进入二十一世纪，如同棕麻业、车木业、纸伞业、帆船业以及铜匠铺、金银铺等因水而兴的靖港传统手工业一样，铁铺也在完成它的历史使命后慢慢淡出了人们的视线。', img: './tieqiwenhuaguan.jpg', audio: './tieqiwenhuaguan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/tieqiwenhuaguan.glb', modelScale: 5 },
+            { id: 'hnsy', name: '中共湖南省委旧址', pos: [8.2, 0, -7.0], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '原中共湖南地下省委在靖港以碓坊作掩护设立的临时办事处...', img: './zhonggonghunanshengweijiuzhi.jpg', audio: './zhonggonghunanshengweijiuzhi.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/zhonggonghunanshengweijiuzhi.glb', modelScale: 5 },
+            { id: 'htf', name: '宏泰坊', pos: [-0.5, 0, -8], color: '#7c2d12', type: '展馆', baseWaitTime: 0, desc: '长沙最后一座清代青楼遗址...', img: './hongtaifang.jpg', audio: './hongtaifang.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/hongtaifang.glb', modelScale: 5 },
+            { id: 'ysm', name: '杨泗庙', pos: [-11.1, 0, -11.3], color: '#d97706', type: '民俗', baseWaitTime: 0, desc: '古镇唯一保存良好的庙宇...', img: './yangsimiao.jpg', audio: './yangsimiao.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/guanyinsi.glb', modelScale: 5 },
+            { id: 'tqg', name: '铁器文化馆', pos: [-7.3, 0, -12.1], color: '#475569', type: '展馆', baseWaitTime: 0, desc: '它是靖港非物质文化遗产之一的民间绝艺...', img: './tieqiwenhuaguan.jpg', audio: './tieqiwenhuaguan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/tieqiwenhuaguan.glb', modelScale: 5 },
             { id: 'edj', name: '二当家商社', pos: [18.9, 0, -1.6], color: '#16a34a', type: '商贸', baseWaitTime: 0, desc: '古镇商社复原。', img: './erdangjiashangshe.JPG', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/erdangjiashangshe.glb', modelScale: 5 },
-            { id: 'chy', name: '锄禾源', pos: [16.6, 0, -2.8], color: '#65a30d', type: '科普', baseWaitTime: 10, desc: '旧时的农具渔具体现渔民文化，锄禾源里展出的是旧时的农具、渔具。靖港土地肥沃，气候适宜水稻生长，是典型的稻作农业地区，这里文化源头之一便是江南农耕文化。从团头湖考古发掘到当代靖港人生活习俗中都能处处发现长达数千年稻作文化遗留下来的文化传统。在农耕用具的另一面就是捕鱼工具，古代靖港属于“八百里洞庭”的边缘地区。加之湘江、芦江的眷顾，这里同时也孕育着湖区渔民文化，千百年来，靖港渔民照迎日出，暮送斜晖，浆声橹影，穿梭期间。在这里，靖港的渔民亦农亦渔，以渔为辅。经过长期渔业实践，靖港文化中有着极为浓厚的湖区渔民文化色彩。', img: './chuheyuan.png', audio: './chuheyuan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/chuheyuan.glb', modelScale: 5 }
+            { id: 'chy', name: '锄禾源', pos: [16.6, 0, -2.8], color: '#65a30d', type: '科普', baseWaitTime: 10, desc: '旧时的农具渔具体现渔民文化...', img: './chuheyuan.png', audio: './chuheyuan.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/chuheyuan.glb', modelScale: 5 }
         ];
         POI_RAW_DATA.forEach(poi => { poi.lngLat = sceneToLngLat(poi.pos[0], poi.pos[2]); });
 
@@ -343,7 +348,6 @@
                 updateAudioBtnUI();
                 lucide.createIcons();
             }).catch(e => {
-                console.log("音频播放需用户交互触发或链接无效", e);
                 isAudioPlaying = false;
                 updateAudioBtnUI();
             });
@@ -362,51 +366,35 @@
         }
 
         function toggleAudioState() {
-            if (isAudioPlaying) {
-                stopAudio();
-            } else {
-                if (currentDetailPOI) playPoiAudio(currentDetailPOI);
-            }
+            if (isAudioPlaying) stopAudio();
+            else if (currentDetailPOI) playPoiAudio(currentDetailPOI);
         }
 
-        let isWeatherCollapsed = false;
         function toggleWeather() {
-            isWeatherCollapsed = !isWeatherCollapsed;
             const content = document.getElementById('weatherContent');
             const icon = document.getElementById('weatherToggleIcon');
-            if (isWeatherCollapsed) { content.classList.add('hidden'); icon.setAttribute('data-lucide', 'chevron-down');
-            } 
-            else { content.classList.remove('hidden'); icon.setAttribute('data-lucide', 'chevron-up');
-            }
+            content.classList.toggle('hidden');
+            const isHidden = content.classList.contains('hidden');
+            icon.setAttribute('data-lucide', isHidden ? 'chevron-down' : 'chevron-up');
             lucide.createIcons();
         }
 
-        let isTrafficCollapsed = false;
         function toggleTraffic() {
-            isTrafficCollapsed = !isTrafficCollapsed;
-            const panelContainer = document.getElementById('sideContainer');
-            const innerPanel = document.getElementById('trafficInnerPanel');
             const list = document.getElementById('poiList');
             const icon = document.getElementById('trafficToggleIcon');
-            if (isTrafficCollapsed) {
-                list.classList.add('hidden'); panelContainer.classList.remove('bottom-24');
-                innerPanel.classList.remove('h-full'); icon.setAttribute('data-lucide', 'chevron-down');
-            } else {
-                list.classList.remove('hidden');
-                panelContainer.classList.add('bottom-24'); innerPanel.classList.add('h-full'); icon.setAttribute('data-lucide', 'chevron-up');
-            }
+            list.classList.toggle('hidden');
+            const isHidden = list.classList.contains('hidden');
+            icon.setAttribute('data-lucide', isHidden ? 'chevron-down' : 'chevron-up');
             lucide.createIcons();
         }
 
         function toggleSidePanel() {
             isPanelOpen = !isPanelOpen;
-            const container = document.getElementById('sideContainer');
-            if (isPanelOpen) container.classList.remove('closed'); else container.classList.add('closed');
+            document.getElementById('sideContainer').classList.toggle('closed', !isPanelOpen);
         }
 
         function toggleDetailCard() {
-            const card = document.getElementById('detailCard');
-            card.classList.toggle('minimized');
+            document.getElementById('detailCard').classList.toggle('minimized');
             lucide.createIcons();
         }
 
@@ -424,16 +412,16 @@
                 let displayString = '';
                 let statusClass = '';
                 if (poi.schedules && poi.schedules.length > 0) {
-                   let nextShowMins = -1;
+                    let nextShowMins = -1;
                     for (let timeStr of poi.schedules) {
                         const [h, m] = timeStr.split(':').map(Number);
                         const showMins = h * 60 + m;
                         if (showMins > currentMinutes) { nextShowMins = showMins; break; }
                     }
-                    if (nextShowMins === -1) { displayString = "今日结束"; statusClass = "time-ended"; waitMins = 0; } 
+                    if (nextShowMins === -1) { displayString = "今日结束"; statusClass = "time-ended"; } 
                     else { waitMins = nextShowMins - currentMinutes; displayString = `下一场 ${waitMins}min`; statusClass = getWaitTimeClass(waitMins); }
                 } else {
-                    if (poi.baseWaitTime === 0) { waitMins = 0; displayString = "无需等待"; statusClass = "time-low"; } 
+                    if (poi.baseWaitTime === 0) { displayString = "无需等待"; statusClass = "time-low"; } 
                     else {
                         const fluctuation = Math.floor(Math.sin(currentMinutes / 5 + poi.pos[0]) * 5);
                         waitMins = Math.max(0, poi.baseWaitTime + fluctuation);
@@ -444,126 +432,49 @@
                 poi.currentDisplay = displayString;
                 poi.currentClass = statusClass;
                 const mapLabel = document.getElementById(`wait-time-tag-${poi.id}`);
-                if (mapLabel) { mapLabel.className = `wait-time-tag ${statusClass}`; mapLabel.innerText = displayString;
-                }
-                const listIndicator = document.getElementById(`list-wait-indicator-${poi.id}`);
-                const listText = document.getElementById(`list-wait-text-${poi.id}`);
-                if (listIndicator && listText) {
-                    let bgClass = 'bg-slate-500';
-                    if(statusClass.includes('time-low')) bgClass = 'bg-green-500';
-                    else if(statusClass.includes('time-med')) bgClass = 'bg-amber-500';
-                    else if(statusClass.includes('time-high')) bgClass = 'bg-red-500';
-                    listIndicator.className = `w-1.5 h-1.5 rounded-full ${bgClass}`;
-                    listText.innerText = displayString;
-                }
+                if (mapLabel) { mapLabel.className = `wait-time-tag ${statusClass}`; mapLabel.innerText = displayString; }
             });
         }
 
         function fetchAmapWeather() {
-            if (!AMAP_WEATHER_KEY || AMAP_WEATHER_KEY === 'YOUR_AMAP_KEY') return;
-            const callbackName = '_amapWeatherCallback_' + Date.now();
-            window[callbackName] = function(res) {
-                delete window[callbackName];
+            const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${AMAP_CITY_CODE}&key=${AMAP_KEY}`;
+            fetch(url).then(res => res.json()).then(res => {
                 if (res.status === '1' && res.lives && res.lives[0]) {
                     const w = res.lives[0];
                     document.getElementById('weatherTemp').innerText = w.temperature + '°C';
                     document.getElementById('weatherDesc').innerText = w.weather;
-                    
-                    // 🚨 天气 UI 修复 🚨
                     document.getElementById('weatherWind').innerText = w.winddirection + '风 ' + w.windpower + '级';
                     document.getElementById('weatherHumidity').innerText = '湿度 ' + w.humidity + '%';
-                    
                     document.getElementById('weatherLoading').style.display = 'none';
-                    const weatherDataEl = document.getElementById('weatherData');
-                    weatherDataEl.classList.remove('hidden');
-                    weatherDataEl.classList.add('flex');
-                } else {
-                    document.getElementById('weatherLoading').innerText = "获取失败";
-                }
-            };
-            const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${AMAP_CITY_CODE}&key=${AMAP_WEATHER_KEY}&callback=${callbackName}`;
-            const script = document.createElement('script'); script.src = url;
-            script.onerror = function() {
-                document.getElementById('weatherLoading').innerText = "网络异常";
-            }
-            document.head.appendChild(script);
-        }
-
-        function initAmapLocation() {
-
-    if (typeof AMap === 'undefined') return;
-
-    AMap.plugin('AMap.Geolocation', function () {
-
-        const geo = new AMap.Geolocation({
-
-            enableHighAccuracy: true,
-
-            timeout: 10000,
-
-            maximumAge: 0,
-
-            convert: true,
-
-            showButton: false,
-
-            GeoLocationFirst: true,
-
-            useNative: true
-        });
-
-        function doLocate() {
-
-            geo.getCurrentPosition(function (status, result) {
-
-                console.log('定位结果:', status, result);
-
-                if (status === 'complete' && result.position) {
-
-                    userLocation = {
-
-                        lng: result.position.lng,
-
-                        lat: result.position.lat
-                    };
-
-                    updateUserMarker();
-
-                } else {
-
-                    console.warn('真实定位失败，启用模拟定位');
-
-                    userLocation = {
-
-                        lng: 112.7915,
-
-                        lat: 28.4545
-                    };
-
-                    updateUserMarker();
+                    document.getElementById('weatherData').classList.remove('hidden');
+                    document.getElementById('weatherData').classList.add('flex');
                 }
             });
         }
 
-        doLocate();
+        function initAmapLocation() {
+            if (typeof AMap === 'undefined') return;
+            AMap.plugin('AMap.Geolocation', function () {
+                const geo = new AMap.Geolocation({ enableHighAccuracy: true, timeout: 10000 });
+                const doLocate = () => {
+                    geo.getCurrentPosition((status, result) => {
+                        if (status === 'complete' && result.position) {
+                            userLocation = { lng: result.position.lng, lat: result.position.lat };
+                            updateUserMarker();
+                        } else {
+                            // 模拟定位（调试用）
+                            userLocation = { lng: 112.7915, lat: 28.4545 };
+                            updateUserMarker();
+                        }
+                    });
+                };
+                doLocate(); setInterval(doLocate, 30000);
+            });
+        }
 
-        setInterval(doLocate, 30000);
-    });
-}
-
-        // 🚨 专门针对“定位按钮点击”的独立函数 🚨
         function locateToUser() {
-            if (!userLocation) {
-                alert("正在努力获取您的位置，请确保已授予浏览器的定位权限！");
-                return;
-            }
+            if (!userLocation) { alert("定位获取中，请稍候..."); return; }
             const p = lngLatToScene(userLocation.lng, userLocation.lat);
-            
-            // 防白屏检查：如果你实际在办公室（不在古镇），弹窗提醒
-            if (Math.abs(p[0]) > 100 || Math.abs(p[2]) > 100) {
-                alert("提示：您当前的物理位置似乎不在靖港古镇景区内哦！\n（镜头将飞向您所在的坐标点，因为太远，您看到的地图可能是空白的）");
-            }
-            
             animateCamera(new THREE.Vector3(p[0] + 15, 25, p[2] + 15), new THREE.Vector3(p[0], 0, p[2]), 800);
         }
 
@@ -580,386 +491,131 @@
         }
 
         function planRoute(targetPOI) {
-
-    if (typeof AMap === 'undefined') {
-
-        alert('高德地图加载失败');
-
-        return;
-    }
-
-    toggleViewMode('2D');
-
-    const endLngLat = targetPOI.lngLat;
-
-    let startLngLat = endLngLat;
-
-    if (userLocation) {
-
-        startLngLat = [
-
-            userLocation.lng,
-
-            userLocation.lat
-        ];
-
-    } else {
-
-        alert('正在获取您的位置，请稍后重试');
-
-        initAmapLocation();
-
-        return;
-    }
-
-    clearRoute();
-
-    AMap.plugin('AMap.Walking', function () {
-
-        const walking = new AMap.Walking();
-
-        walking.search(
-
-            startLngLat,
-
-            endLngLat,
-
-            function (status, result) {
-
-                console.log(
-
-                    '路线规划:',
-
-                    status,
-
-                    result
-                );
-
-                if (
-
-                    status === 'complete' &&
-
-                    result.routes &&
-
-                    result.routes[0]
-
-                ) {
-
-                    const route = result.routes[0];
-
-                    const points = [];
-
-                    route.steps.forEach(step => {
-
-                        if (
-
-                            step.path &&
-
-                            step.path.length
-                        ) {
-
+            if (typeof AMap === 'undefined') return;
+            toggleViewMode('2D');
+            const endLngLat = targetPOI.lngLat;
+            if (!userLocation) { initAmapLocation(); alert('正在获取定位，请重试'); return; }
+            clearRoute();
+            AMap.plugin('AMap.Walking', function () {
+                const walking = new AMap.Walking();
+                walking.search([userLocation.lng, userLocation.lat], endLngLat, (status, result) => {
+                    if (status === 'complete' && result.routes && result.routes[0]) {
+                        const points = [];
+                        result.routes[0].steps.forEach(step => {
                             step.path.forEach(p => {
-
-                                let lng, lat;
-
-                                if (Array.isArray(p)) {
-
-                                    lng = p[0];
-
-                                    lat = p[1];
-
-                                } else if (
-
-                                    typeof p.lng === 'number'
-                                ) {
-
-                                    lng = p.lng;
-
-                                    lat = p.lat;
-
-                                } else {
-
-                                    lng = p.getLng();
-
-                                    lat = p.getLat();
-                                }
-
-                                const scenePos =
-                                    lngLatToScene(
-                                        lng,
-                                        lat
-                                    );
-
-                                points.push(
-
-                                    new THREE.Vector3(
-
-                                        scenePos[0],
-
-                                        0.15,
-
-                                        scenePos[2]
-                                    )
-                                );
+                                const scenePos = lngLatToScene(p.lng, p.lat);
+                                points.push(new THREE.Vector3(scenePos[0], 0.15, scenePos[2]));
                             });
-                        }
-                    });
-
-                    if (points.length < 2) {
-
-                        alert('路线数据异常');
-
-                        return;
+                        });
+                        const curve = new THREE.CatmullRomCurve3(points);
+                        routeLineMesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 180, 0.22, 12, false), new THREE.MeshBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.95 }));
+                        mapGroup.add(routeLineMesh);
+                        document.getElementById('clearRouteBtn')?.classList.remove('hidden');
+                        const mid = points[Math.floor(points.length / 2)];
+                        setTimeout(() => animateCamera(new THREE.Vector3(mid.x, 45, mid.z + 0.01), new THREE.Vector3(mid.x, 0, mid.z), 1000), 500);
+                    } else {
+                        alert('路线规划失败，请检查网络或 Key 权限');
                     }
-
-                    const curve =
-                        new THREE.CatmullRomCurve3(
-                            points
-                        );
-
-                    const tubeGeo =
-                        new THREE.TubeGeometry(
-
-                            curve,
-
-                            180,
-
-                            0.22,
-
-                            12,
-
-                            false
-                        );
-
-                    routeLineMesh =
-                        new THREE.Mesh(
-
-                            tubeGeo,
-
-                            new THREE.MeshBasicMaterial({
-
-                                color: 0x2563eb,
-
-                                transparent: true,
-
-                                opacity: 0.95
-                            })
-                        );
-
-                    mapGroup.add(routeLineMesh);
-
-                    document
-
-                        .getElementById(
-                            'clearRouteBtn'
-                        )
-
-                        ?.classList.remove(
-                            'hidden'
-                        );
-
-                    const mid =
-                        points[
-                            Math.floor(
-                                points.length / 2
-                            )
-                        ];
-
-                    setTimeout(() => {
-
-                        animateCamera(
-
-                            new THREE.Vector3(
-
-                                mid.x,
-
-                                45,
-
-                                mid.z + 0.01
-                            ),
-
-                            new THREE.Vector3(
-
-                                mid.x,
-
-                                0,
-
-                                mid.z
-                            ),
-
-                            1000
-                        );
-
-                    }, 500);
-
-                } else {
-
-                    console.error(
-
-                        '路线规划失败:',
-
-                        status,
-
-                        result
-                    );
-
-                    alert(
-
-                        '路线规划失败\\n\\n请检查：\\n1. 高德 KEY\\n2. 域名白名单\\n3. 网络'
-                    );
-                }
-            }
-        );
-    });
-}
+                });
+            });
+        }
 
         function clearRoute() {
-            if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh);
-            routeLineMesh.geometry.dispose(); routeLineMesh.material.dispose(); routeLineMesh = null; }
+            if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh); routeLineMesh = null; }
             document.getElementById('clearRouteBtn')?.classList.add('hidden');
         }
 
         function showQRModal() {
             const url = window.location.href;
             document.getElementById('qrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=224x224&data=' + encodeURIComponent(url);
-            document.getElementById('qrUrl').innerText = url; document.getElementById('qrModal').classList.remove('hidden'); document.getElementById('qrModal').classList.add('flex'); lucide.createIcons();
+            document.getElementById('qrUrl').innerText = url;
+            document.getElementById('qrModal').classList.remove('hidden');
+            document.getElementById('qrModal').classList.add('flex');
+            lucide.createIcons();
         }
-        function hideQRModal() { document.getElementById('qrModal').classList.add('hidden'); document.getElementById('qrModal').classList.remove('flex');
-        }
-        function copyQRUrl() { const url = document.getElementById('qrUrl').innerText; navigator.clipboard.writeText(url).then(() => alert('已复制到剪贴簿'));
-        }
+        function hideQRModal() { document.getElementById('qrModal').classList.add('hidden'); }
+        function copyQRUrl() { navigator.clipboard.writeText(document.getElementById('qrUrl').innerText).then(() => alert('已复制')); }
 
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf1f5f9);
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.copy(lastExplorerState.pos);
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.copy(lastExplorerState.pos);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             document.getElementById('canvas-container').appendChild(renderer.domElement);
-            
             createControls(lastExplorerState.target);
-            
             clock = new THREE.Clock();
             mapGroup = new THREE.Group(); detailGroup = new THREE.Group(); scene.add(mapGroup); scene.add(detailGroup);
             pickerPoint = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })); pickerPoint.visible = false; scene.add(pickerPoint);
-            addLights(); createDefaultMap(); updateAllWaitTimes(); createPOIs();
-            initUI(); fetchAmapWeather(); initAmapLocation(); 
+            addLights(); createDefaultMap(); updateAllWaitTimes(); createPOIs(); initUI(); fetchAmapWeather(); initAmapLocation(); 
             lucide.createIcons(); animate();
-            window.addEventListener('resize', onWindowResize); window.addEventListener('mousedown', onCanvasClick);
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousedown', onCanvasClick);
         }
 
         function togglePicker() {
             isPickerEnabled = !isPickerEnabled;
             document.getElementById('picker-status').innerText = isPickerEnabled ? "开" : "关";
-            document.getElementById('coord-display').style.display = isPickerEnabled ? "block" : "none"; pickerPoint.visible = isPickerEnabled;
+            document.getElementById('coord-display').style.display = isPickerEnabled ? "block" : "none";
+            pickerPoint.visible = isPickerEnabled;
         }
 
         function onCanvasClick(event) {
             if (!isPickerEnabled || appState === 'DETAIL' || event.button !== 0) return;
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObject(mapPlaneMesh);
             if (intersects.length > 0) {
                 const p = intersects[0].point;
-                const x = Math.round(p.x * 10) / 10; const z = Math.round(p.z * 10) / 10;
-                pickerPoint.position.set(x, 0.1, z);
-                document.getElementById('coord-display').innerText = `已选坐标: [${x}, 0, ${z}]`;
+                pickerPoint.position.set(p.x, 0.1, p.z);
+                document.getElementById('coord-display').innerText = `已选坐标: [${p.x.toFixed(1)}, 0, ${p.z.toFixed(1)}]`;
             }
         }
 
         function createControls(target) {
             if (controls) controls.dispose();
             controls = new THREE.OrbitControls(camera, renderer.domElement); 
-            if (target) {
-                controls.target.copy(target);
-            }
-            controls.enableDamping = true; 
+            if (target) controls.target.copy(target);
+            controls.enableDamping = true;
             controls.maxPolarAngle = Math.PI / 2.1;
-            
-            if (viewMode === '2D' && appState === 'EXPLORER') { 
-                controls.enableRotate = false; 
+            if (viewMode === '2D' && appState === 'EXPLORER') {
+                controls.enableRotate = false;
                 controls.maxPolarAngle = 0;
-                controls.mouseButtons = {
-                    LEFT: THREE.MOUSE.PAN,
-                    MIDDLE: THREE.MOUSE.DOLLY,
-                    RIGHT: THREE.MOUSE.ROTATE
-                };
-                controls.touches = {
-                    ONE: THREE.TOUCH.PAN,
-                    TWO: THREE.TOUCH.DOLLY_ROTATE
-                };
-            } else {
-                controls.enableRotate = true;
-                controls.mouseButtons = {
-                    LEFT: THREE.MOUSE.ROTATE,
-                    MIDDLE: THREE.MOUSE.DOLLY,
-                    RIGHT: THREE.MOUSE.PAN
-                };
-                controls.touches = {
-                    ONE: THREE.TOUCH.ROTATE,
-                    TWO: THREE.TOUCH.DOLLY_PAN
-                };
             }
-        }
-
-        function handleMapUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                new THREE.TextureLoader().load(e.target.result, (texture) => {
-                    if (mapPlaneMesh) { mapPlaneMesh.material.map = texture; document.getElementById('status-text').innerText = "✅ 实景地图已加载"; document.getElementById('upload-btn').style.display = 'none'; }
-                });
-            }; reader.readAsDataURL(file);
         }
 
         function createDefaultMap() {
-            mapPlaneMesh = new THREE.Mesh(
-                new THREE.PlaneGeometry(60, 40), 
-                new THREE.MeshBasicMaterial({ color: 0xf8fafc, side: THREE.DoubleSide })
-            );
-            mapPlaneMesh.rotation.x = -Math.PI / 2; 
-            mapGroup.add(mapPlaneMesh);
-
-            const textureLoader = new THREE.TextureLoader();
-            textureLoader.load('./map.png', 
-                function(texture) {
-                    mapPlaneMesh.material.map = texture;
-                    mapPlaneMesh.material.color.setHex(0xffffff); 
-                    mapPlaneMesh.material.needsUpdate = true;
-                    document.getElementById('status-text').innerText = "✅ 实景底图已加载";
-                    document.getElementById('status-text').className = "status-badge font-bold text-green-600";
-                },
-                undefined,
-                function(err) {
-                    console.error("底图加载失败:", err);
-                    document.getElementById('status-text').innerText = "⚠️ 底图加载失败(请检查云端是否有 map.png)";
-                    document.getElementById('status-text').className = "status-badge text-red-600";
-                }
-            );
+            mapPlaneMesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+            mapPlaneMesh.rotation.x = -Math.PI / 2; mapGroup.add(mapPlaneMesh);
+            new THREE.TextureLoader().load('./map.png', (texture) => {
+                mapPlaneMesh.material.map = texture; mapPlaneMesh.material.needsUpdate = true;
+                document.getElementById('status-text').innerText = "✅ 实景底图已加载";
+            });
         }
 
-        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-        function addLights() { scene.add(new THREE.AmbientLight(0xffffff, 0.8)); const directional = new THREE.DirectionalLight(0xffffff, 0.5);
-        directional.position.set(20, 40, 20); scene.add(directional); }
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+        function addLights() { scene.add(new THREE.AmbientLight(0xffffff, 0.8)); const d = new THREE.DirectionalLight(0xffffff, 0.5); d.position.set(20, 40, 20); scene.add(d); }
 
         function createChineseBuilding(color) {
             const group = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(3, 2.5, 3), new THREE.MeshPhongMaterial({ color: 0xffffff })); body.position.y = 1.25; group.add(body);
-            const roof = new THREE.Mesh(new THREE.CylinderGeometry(0, 2.8, 1.5, 4), new THREE.MeshPhongMaterial({ color })); roof.position.y = 3.25; roof.rotation.y = Math.PI/4; group.add(roof);
+            const b = new THREE.Mesh(new THREE.BoxGeometry(3, 2.5, 3), new THREE.MeshPhongMaterial({ color: 0xffffff })); b.position.y = 1.25; group.add(b);
+            const r = new THREE.Mesh(new THREE.CylinderGeometry(0, 2.8, 1.5, 4), new THREE.MeshPhongMaterial({ color })); r.position.y = 3.25; r.rotation.y = Math.PI/4; group.add(r);
             return group;
         }
 
         function createPOIs() {
-            const labelContainer = document.getElementById('labels-container');
-            labelContainer.innerHTML = ''; labels = [];
+            const container = document.getElementById('labels-container');
+            container.innerHTML = ''; labels = [];
             POI_RAW_DATA.forEach(poi => {
                 const ring = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.6, 32), new THREE.MeshBasicMaterial({ color: poi.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
                 ring.rotation.x = -Math.PI / 2; ring.position.set(...poi.pos); mapGroup.add(ring); poi.ring = ring;
                 const div = document.createElement('div'); div.className = 'poi-label';
                 div.onclick = (e) => { e.stopPropagation(); enterDetailMode(poi); };
                 div.innerHTML = `<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wait-time-tag-${poi.id}" class="wait-time-tag ${poi.currentClass}">${poi.currentDisplay}</span></div><div class="poi-pin" style="background: ${poi.color}"></div></div>`;
-                labelContainer.appendChild(div);
+                container.appendChild(div);
                 labels.push({ element: div, position: new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0, 0.5, 0)), data: poi });
             });
         }
@@ -978,140 +634,86 @@
         function switchDetailMedia(mode) {
             const imgEl = document.getElementById('detailImg');
             const videoEl = document.getElementById('detailVideo');
-            const tabImg = document.getElementById('tabImg');
-            const tabVideo = document.getElementById('tabVideo');
             if (mode === 'video' && currentDetailPOI.video) {
-                stopAudio();
-                imgEl.classList.add('hidden');
-                videoEl.classList.remove('hidden');
-                videoEl.src = currentDetailPOI.video;
-                tabVideo.classList.add('active');
-                tabImg.classList.remove('active');
+                stopAudio(); imgEl.classList.add('hidden'); videoEl.classList.remove('hidden'); videoEl.src = currentDetailPOI.video;
             } else {
-                videoEl.pause();
-                videoEl.classList.add('hidden');
-                imgEl.classList.remove('hidden');
-                tabImg.classList.add('active');
-                tabVideo.classList.remove('active');
+                videoEl.pause(); videoEl.classList.add('hidden'); imgEl.classList.remove('hidden');
             }
         }
 
         function enterDetailMode(poi) {
-            if (viewMode === '3D') { controls.update();
-            lastExplorerState.pos.copy(camera.position); lastExplorerState.target.copy(controls.target); }
+            if (viewMode === '3D') { controls.update(); lastExplorerState.pos.copy(camera.position); lastExplorerState.target.copy(controls.target); }
             appState = 'DETAIL'; currentDetailPOI = poi;
             document.body.className = 'mode-detail'; detailGroup.visible = true;
-            
             document.getElementById('detailCard').classList.remove('minimized');
-            
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
-            
-            if (poi.noModel) {
-                // 如果标记了 noModel，绝对不渲染任何3D建筑！直接跳过！
-            } else if (poi.modelUrl) {
-                gltfLoader.load(poi.modelUrl, function(gltf) {
-                    const model = gltf.scene;
-                    
-                    const s = poi.modelScale || 5; 
-                    model.scale.set(s, s, s);
-                    
-                    model.updateMatrixWorld(true);
-                    const box = new THREE.Box3().setFromObject(model);
-                    const bottomOffset = box.min.y; 
-                    
-                    const offsetY = poi.modelOffsetY || 0;
-                    model.position.set(poi.pos[0], poi.pos[1] - bottomOffset + offsetY, poi.pos[2]); 
-                    
-                    detailGroup.add(model);
-                }, undefined, function(error) {
-                    console.error('⚠️ 模型加载失败，使用默认房子垫底：', error);
-                    const building = createChineseBuilding(poi.color); 
-                    building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
-                    detailGroup.add(building);
-                });
-            } else {
-                const building = createChineseBuilding(poi.color); 
-                building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
-                detailGroup.add(building);
+            if (!poi.noModel) {
+                if (poi.modelUrl) {
+                    gltfLoader.load(poi.modelUrl, (gltf) => {
+                        const m = gltf.scene; const s = poi.modelScale || 5; m.scale.set(s,s,s);
+                        m.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); detailGroup.add(m);
+                    }, undefined, () => {
+                        const b = createChineseBuilding(poi.color); b.position.set(...poi.pos); detailGroup.add(b);
+                    });
+                } else {
+                    const b = createChineseBuilding(poi.color); b.position.set(...poi.pos); detailGroup.add(b);
+                }
             }
-
-            const camOffset = new THREE.Vector3(0, 10, 15); 
-            const targetOffset = new THREE.Vector3(0, 2, 0); 
-
-            animateCamera(
-                new THREE.Vector3(poi.pos[0] + camOffset.x, poi.pos[1] + camOffset.y, poi.pos[2] + camOffset.z),
-                new THREE.Vector3(poi.pos[0] + targetOffset.x, poi.pos[1] + targetOffset.y, poi.pos[2] + targetOffset.z)
-            );
-            
+            animateCamera(new THREE.Vector3(poi.pos[0], 10, poi.pos[2] + 15), new THREE.Vector3(poi.pos[0], 2, poi.pos[2]));
             document.getElementById('detailTitle').innerText = poi.name;
             document.getElementById('detailDesc').innerText = poi.desc;
             document.getElementById('detailImg').src = poi.img;
-            
-            const switcher = document.getElementById('mediaSwitcher');
-            if (poi.video) { switcher.classList.remove('hidden'); } else { switcher.classList.add('hidden');
-            }
+            document.getElementById('mediaSwitcher').classList.toggle('hidden', !poi.video);
             switchDetailMedia('img');
-
-            const audioSection = document.getElementById('audioSection');
-            if (audioSection) {
-                if (poi.audio) {
-                    audioSection.style.display = 'flex'; 
-                    updateAudioBtnUI();
-                } else {
-                    audioSection.style.display = 'none';
-                }
-            }
-
-            const card = document.getElementById('detailCard');
-            card.style.transform = 'translate(-50%, 0)'; card.style.opacity = '1';
+            document.getElementById('audioSection').style.display = poi.audio ? 'flex' : 'none';
+            document.getElementById('detailCard').style.transform = 'translate(-50%, 0)';
+            document.getElementById('detailCard').style.opacity = '1';
+            updateAudioBtnUI();
         }
 
         function exitDetailMode() {
-            stopAudio();
-            const videoEl = document.getElementById('detailVideo');
-            if (videoEl) { videoEl.pause(); videoEl.src = ""; }
-            appState = 'EXPLORER';
+            stopAudio(); appState = 'EXPLORER';
             document.body.className = 'mode-explorer'; detailGroup.visible = false;
-            document.getElementById('detailCard').style.transform = 'translate(-50%, 150%)'; document.getElementById('detailCard').style.opacity = '0';
-            let targetPos = (viewMode === '2D') ?
-            new THREE.Vector3(0, 50, 0.001) : lastExplorerState.pos.clone();
-            let targetLookAt = (viewMode === '2D') ? new THREE.Vector3(0, 0, 0) : lastExplorerState.target.clone();
-            animateCamera(targetPos, targetLookAt);
+            document.getElementById('detailCard').style.transform = 'translate(-50%, 150%)';
+            document.getElementById('detailCard').style.opacity = '0';
+            animateCamera(viewMode === '2D' ? new THREE.Vector3(0, 50, 0.001) : lastExplorerState.pos, viewMode === '2D' ? new THREE.Vector3(0,0,0) : lastExplorerState.target);
         }
 
-        function animateCamera(newPos, newTarget, customDuration = 700) {
-            const currentTarget = controls ? controls.target.clone() : new THREE.Vector3(0,0,0);
-            if (controls) { controls.dispose(); controls = null; }
+        function animateCamera(newPos, newTarget, duration = 700) {
             const startPos = camera.position.clone();
+            const startTarget = controls ? controls.target.clone() : new THREE.Vector3(0,0,0);
+            if (controls) { controls.dispose(); controls = null; }
             const startTime = performance.now();
-            function update() {
-                const now = performance.now();
-                const progress = Math.min((now - startTime) / customDuration, 1);
-                const t = progress < 0.5 ?
-                2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            const step = () => {
+                const progress = Math.min((performance.now() - startTime) / duration, 1);
+                const t = progress < 0.5 ? 2*progress*progress : 1-Math.pow(-2*progress+2,2)/2;
                 camera.position.lerpVectors(startPos, newPos, t);
-                const tempTarget = new THREE.Vector3().lerpVectors(currentTarget, newTarget, t);
-                camera.lookAt(tempTarget);
-                if (progress < 1) requestAnimationFrame(update); else { 
-                    camera.position.copy(newPos); 
-                    createControls(newTarget);
-                }
-            } update();
+                const curT = new THREE.Vector3().lerpVectors(startTarget, newTarget, t);
+                camera.lookAt(curT);
+                if (progress < 1) requestAnimationFrame(step);
+                else { camera.position.copy(newPos); createControls(newTarget); }
+            }; step();
         }
 
         function toggleViewMode(mode) {
             if (viewMode === mode && appState !== 'DETAIL') return;
-            viewMode = mode; document.getElementById('btn2D').classList.toggle('active', mode === '2D'); document.getElementById('btn3D').classList.toggle('active', mode === '3D');
+            viewMode = mode;
+            document.getElementById('btn2D').classList.toggle('active', mode === '2D');
+            document.getElementById('btn3D').classList.toggle('active', mode === '3D');
             if (appState === 'DETAIL') exitDetailMode();
-            else { if (mode === '2D') { controls.update(); lastExplorerState.pos.copy(camera.position); animateCamera(new THREE.Vector3(0, 50, 0.001), new THREE.Vector3(0, 0, 0));
-            } 
-                   else animateCamera(lastExplorerState.pos.clone(), lastExplorerState.target.clone());
-            }
+            else toggleViewModeInternal(mode);
         }
 
-        function filterPOIs(query) {
-            const items = document.getElementById('poiList').children;
-            POI_RAW_DATA.forEach((poi, i) => { const match = poi.name.includes(query); items[i].style.display = match ? 'flex' : 'none'; labels[i].element.style.opacity = match ? '1' : '0.1'; });
+        function toggleViewModeInternal(mode) {
+            if (mode === '2D') animateCamera(new THREE.Vector3(0, 50, 0.001), new THREE.Vector3(0, 0, 0));
+            else animateCamera(lastExplorerState.pos, lastExplorerState.target);
+        }
+
+        function filterPOIs(q) {
+            labels.forEach((l, i) => {
+                const match = l.data.name.includes(q);
+                l.element.style.opacity = match ? '1' : '0.1';
+            });
         }
 
         function animate() {
@@ -1119,21 +721,21 @@
             if (controls) controls.update();
             const elapsed = clock.getElapsedTime();
             if (appState === 'EXPLORER') {
-                labels.forEach(label => {
-                    const vector = label.position.clone(); const distance = camera.position.distanceTo(vector); vector.project(camera);
-                    if (vector.z < 1) { 
-                        label.element.style.display = 'flex'; label.element.style.left = `${(vector.x * 0.5 + 0.5) * window.innerWidth}px`; label.element.style.top = `${(-(vector.y * 0.5) + 0.5) * window.innerHeight}px`; 
-                        const scale = Math.max(0.65, 1.2 - distance / 60); const wrapper = label.element.querySelector('.poi-scale-wrapper');
-                        if(wrapper) wrapper.style.transform = `scale(${scale})`;
-                    } else label.element.style.display = 'none'; 
+                labels.forEach(l => {
+                    const v = l.position.clone(); const dist = camera.position.distanceTo(v); v.project(camera);
+                    if (v.z < 1) {
+                        l.element.style.display = 'flex';
+                        l.element.style.left = `${(v.x * 0.5 + 0.5) * window.innerWidth}px`;
+                        l.element.style.top = `${(-(v.y * 0.5) + 0.5) * window.innerHeight}px`;
+                        const s = Math.max(0.65, 1.2 - dist / 60);
+                        l.element.querySelector('.poi-scale-wrapper').style.transform = `scale(${s})`;
+                    } else l.element.style.display = 'none';
                 });
-                POI_RAW_DATA.forEach(poi => { if (poi.ring) { const s = 1 + Math.sin(elapsed * 3) * 0.2; poi.ring.scale.set(s, s, s); poi.ring.material.opacity = 0.5 - (s-1)*2; } });
-            } else if (appState === 'DETAIL' && detailGroup.children[0]) { 
-                detailGroup.children[0].rotation.y += 0.005;
+                POI_RAW_DATA.forEach(p => { if (p.ring) { const s = 1 + Math.sin(elapsed * 3) * 0.2; p.ring.scale.set(s,s,s); p.ring.material.opacity = 0.5 - (s-1)*2; } });
             }
             renderer.render(scene, camera);
         }
         window.onload = init;
     </script>
 </body>
-</html>请针对这两个问题进行代码修改并提供完整代码
+</html>
