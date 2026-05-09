@@ -490,33 +490,66 @@
         }
 
         function initAmapLocation() {
-            if (typeof AMap === 'undefined') return;
-            
-            // 🚨 针对定位功能的修复 🚨
-            AMap.plugin('AMap.Geolocation', function() {
-                const geo = new AMap.Geolocation({ 
-                    enableHighAccuracy: true, 
-                    timeout: 5000, 
-                    buttonPosition: 'RB' 
-                });
-                
-                function doLocate() {
-                    geo.getCurrentPosition(function(status, result) {
-                        if (status === 'complete' && result.position) { 
-                            userLocation = { lng: result.position.lng, lat: result.position.lat }; 
-                            updateUserMarker(); 
-                        } else {
-                            // 为了演示效果，给一个古镇内的默认坐标
-                            console.warn("真实定位失败，已启用模拟定位供测试。");
-                            userLocation = { lng: 112.7915, lat: 28.4545 };
-                            updateUserMarker();
-                        }
-                    });
+
+    if (typeof AMap === 'undefined') return;
+
+    AMap.plugin('AMap.Geolocation', function () {
+
+        const geo = new AMap.Geolocation({
+
+            enableHighAccuracy: true,
+
+            timeout: 10000,
+
+            maximumAge: 0,
+
+            convert: true,
+
+            showButton: false,
+
+            GeoLocationFirst: true,
+
+            useNative: true
+        });
+
+        function doLocate() {
+
+            geo.getCurrentPosition(function (status, result) {
+
+                console.log('定位结果:', status, result);
+
+                if (status === 'complete' && result.position) {
+
+                    userLocation = {
+
+                        lng: result.position.lng,
+
+                        lat: result.position.lat
+                    };
+
+                    updateUserMarker();
+
+                } else {
+
+                    console.warn('真实定位失败，启用模拟定位');
+
+                    userLocation = {
+
+                        lng: 112.7915,
+
+                        lat: 28.4545
+                    };
+
+                    updateUserMarker();
                 }
-                doLocate(); 
-                setInterval(doLocate, 30000); 
             });
         }
+
+        doLocate();
+
+        setInterval(doLocate, 30000);
+    });
+}
 
         // 🚨 专门针对“定位按钮点击”的独立函数 🚨
         function locateToUser() {
@@ -547,45 +580,238 @@
         }
 
         function planRoute(targetPOI) {
-            if (typeof AMap === 'undefined') return;
-            toggleViewMode('2D');
-            const endLngLat = targetPOI.lngLat; let startLngLat = endLngLat;
-            if (userLocation) { startLngLat = [userLocation.lng, userLocation.lat];
-            } 
-            else { alert('正在获获取您的位置，请稍候再试'); initAmapLocation(); return;
-            }
-            clearRoute();
-            AMap.plugin('AMap.Walking', function() {
-                const walking = new AMap.Walking();
-                walking.search(startLngLat, endLngLat, function(status, result) {
-                    if (status === 'complete' && result.routes && result.routes[0]) {
-                        const route = result.routes[0]; const path = [];
-                        if (route.steps) {
-                            route.steps.forEach(step => {
-                                if (step.path && step.path.length) {
-                                     step.path.forEach(p => {
-                                        let lng, lat;
-                                        if (Array.isArray(p)) { lng = p[0]; lat = p[1]; } else if (typeof p.lng === 'number') { lng = p.lng; lat = p.lat; } else { lng = p.getLng(); lat = p.getLat(); }
-                                        path.push(...lngLatToScene(lng, lat));
-                                    });
+
+    if (typeof AMap === 'undefined') {
+
+        alert('高德地图加载失败');
+
+        return;
+    }
+
+    toggleViewMode('2D');
+
+    const endLngLat = targetPOI.lngLat;
+
+    let startLngLat = endLngLat;
+
+    if (userLocation) {
+
+        startLngLat = [
+
+            userLocation.lng,
+
+            userLocation.lat
+        ];
+
+    } else {
+
+        alert('正在获取您的位置，请稍后重试');
+
+        initAmapLocation();
+
+        return;
+    }
+
+    clearRoute();
+
+    AMap.plugin('AMap.Walking', function () {
+
+        const walking = new AMap.Walking();
+
+        walking.search(
+
+            startLngLat,
+
+            endLngLat,
+
+            function (status, result) {
+
+                console.log(
+
+                    '路线规划:',
+
+                    status,
+
+                    result
+                );
+
+                if (
+
+                    status === 'complete' &&
+
+                    result.routes &&
+
+                    result.routes[0]
+
+                ) {
+
+                    const route = result.routes[0];
+
+                    const points = [];
+
+                    route.steps.forEach(step => {
+
+                        if (
+
+                            step.path &&
+
+                            step.path.length
+                        ) {
+
+                            step.path.forEach(p => {
+
+                                let lng, lat;
+
+                                if (Array.isArray(p)) {
+
+                                    lng = p[0];
+
+                                    lat = p[1];
+
+                                } else if (
+
+                                    typeof p.lng === 'number'
+                                ) {
+
+                                    lng = p.lng;
+
+                                    lat = p.lat;
+
+                                } else {
+
+                                    lng = p.getLng();
+
+                                    lat = p.getLat();
                                 }
+
+                                const scenePos =
+                                    lngLatToScene(
+                                        lng,
+                                        lat
+                                    );
+
+                                points.push(
+
+                                    new THREE.Vector3(
+
+                                        scenePos[0],
+
+                                        0.15,
+
+                                        scenePos[2]
+                                    )
+                                );
                             });
                         }
-                        if (path.length >= 6) {
-                            const points = [];
-                            for (let i = 0; i < path.length; i += 3) points.push(new THREE.Vector3(path[i], path[i+1] + 0.15, path[i+2]));
-                            const curve = new THREE.CatmullRomCurve3(points);
-                            const tubeGeo = new THREE.TubeGeometry(curve, Math.min(points.length * 2, 128), 0.2, 8, false);
-                            routeLineMesh = new THREE.Mesh(tubeGeo, new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.9 }));
-                            mapGroup.add(routeLineMesh);
-                            document.getElementById('clearRouteBtn')?.classList.remove('hidden');
-                            const mid = points[Math.floor(points.length / 2)];
-                            setTimeout(() => { animateCamera(new THREE.Vector3(mid.x, 45, mid.z + 0.01), new THREE.Vector3(mid.x, 0, mid.z), 1000); }, 500);
-                        }
+                    });
+
+                    if (points.length < 2) {
+
+                        alert('路线数据异常');
+
+                        return;
                     }
-                });
-            });
-        }
+
+                    const curve =
+                        new THREE.CatmullRomCurve3(
+                            points
+                        );
+
+                    const tubeGeo =
+                        new THREE.TubeGeometry(
+
+                            curve,
+
+                            180,
+
+                            0.22,
+
+                            12,
+
+                            false
+                        );
+
+                    routeLineMesh =
+                        new THREE.Mesh(
+
+                            tubeGeo,
+
+                            new THREE.MeshBasicMaterial({
+
+                                color: 0x2563eb,
+
+                                transparent: true,
+
+                                opacity: 0.95
+                            })
+                        );
+
+                    mapGroup.add(routeLineMesh);
+
+                    document
+
+                        .getElementById(
+                            'clearRouteBtn'
+                        )
+
+                        ?.classList.remove(
+                            'hidden'
+                        );
+
+                    const mid =
+                        points[
+                            Math.floor(
+                                points.length / 2
+                            )
+                        ];
+
+                    setTimeout(() => {
+
+                        animateCamera(
+
+                            new THREE.Vector3(
+
+                                mid.x,
+
+                                45,
+
+                                mid.z + 0.01
+                            ),
+
+                            new THREE.Vector3(
+
+                                mid.x,
+
+                                0,
+
+                                mid.z
+                            ),
+
+                            1000
+                        );
+
+                    }, 500);
+
+                } else {
+
+                    console.error(
+
+                        '路线规划失败:',
+
+                        status,
+
+                        result
+                    );
+
+                    alert(
+
+                        '路线规划失败\\n\\n请检查：\\n1. 高德 KEY\\n2. 域名白名单\\n3. 网络'
+                    );
+                }
+            }
+        );
+    });
+}
 
         function clearRoute() {
             if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh);
