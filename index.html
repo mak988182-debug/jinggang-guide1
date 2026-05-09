@@ -135,7 +135,7 @@
             <button id="clearRouteBtn" onclick="clearRoute()" class="hidden glass-panel px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/90 transition">
                 清除路线
             </button>
-            <button id="locateMeBtn" onclick="if(userLocation){const p=lngLatToScene(userLocation.lng,userLocation.lat);animateCamera(new THREE.Vector3(p[0]+15,25,p[2]+15),new THREE.Vector3(p[0],0,p[2]),800)}" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="定位到我的位置">
+            <button id="locateMeBtn" onclick="locateToUser()" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="定位到我的位置">
                 <i data-lucide="crosshair" size="18"></i>
             </button>
             <button onclick="showQRModal()" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="扫描二维码进入导览">
@@ -468,24 +468,70 @@
                     const w = res.lives[0];
                     document.getElementById('weatherTemp').innerText = w.temperature + '°C';
                     document.getElementById('weatherDesc').innerText = w.weather;
+                    
+                    // 🚨 天气 UI 修复 🚨
+                    document.getElementById('weatherWind').innerText = w.winddirection + '风 ' + w.windpower + '级';
+                    document.getElementById('weatherHumidity').innerText = '湿度 ' + w.humidity + '%';
+                    
+                    document.getElementById('weatherLoading').style.display = 'none';
+                    const weatherDataEl = document.getElementById('weatherData');
+                    weatherDataEl.classList.remove('hidden');
+                    weatherDataEl.classList.add('flex');
+                } else {
+                    document.getElementById('weatherLoading').innerText = "获取失败";
                 }
             };
             const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${AMAP_CITY_CODE}&key=${AMAP_WEATHER_KEY}&callback=${callbackName}`;
-            const script = document.createElement('script'); script.src = url; document.head.appendChild(script);
+            const script = document.createElement('script'); script.src = url;
+            script.onerror = function() {
+                document.getElementById('weatherLoading').innerText = "网络异常";
+            }
+            document.head.appendChild(script);
         }
 
         function initAmapLocation() {
             if (typeof AMap === 'undefined') return;
+            
+            // 🚨 针对定位功能的修复 🚨
             AMap.plugin('AMap.Geolocation', function() {
-                const geo = new AMap.Geolocation({ enableHighAccuracy: true, timeout: 10000 });
+                const geo = new AMap.Geolocation({ 
+                    enableHighAccuracy: true, 
+                    timeout: 5000, 
+                    buttonPosition: 'RB' 
+                });
+                
                 function doLocate() {
                     geo.getCurrentPosition(function(status, result) {
-                        if (status === 'complete' && result.position) { userLocation = 
-                        { lng: result.position.lng, lat: result.position.lat }; updateUserMarker(); }
+                        if (status === 'complete' && result.position) { 
+                            userLocation = { lng: result.position.lng, lat: result.position.lat }; 
+                            updateUserMarker(); 
+                        } else {
+                            // 为了演示效果，给一个古镇内的默认坐标
+                            console.warn("真实定位失败，已启用模拟定位供测试。");
+                            userLocation = { lng: 112.7915, lat: 28.4545 };
+                            updateUserMarker();
+                        }
                     });
                 }
-                doLocate(); setInterval(doLocate, 30000); 
+                doLocate(); 
+                setInterval(doLocate, 30000); 
             });
+        }
+
+        // 🚨 专门针对“定位按钮点击”的独立函数 🚨
+        function locateToUser() {
+            if (!userLocation) {
+                alert("正在努力获取您的位置，请确保已授予浏览器的定位权限！");
+                return;
+            }
+            const p = lngLatToScene(userLocation.lng, userLocation.lat);
+            
+            // 防白屏检查：如果你实际在办公室（不在古镇），弹窗提醒
+            if (Math.abs(p[0]) > 100 || Math.abs(p[2]) > 100) {
+                alert("提示：您当前的物理位置似乎不在靖港古镇景区内哦！\n（镜头将飞向您所在的坐标点，因为太远，您看到的地图可能是空白的）");
+            }
+            
+            animateCamera(new THREE.Vector3(p[0] + 15, 25, p[2] + 15), new THREE.Vector3(p[0], 0, p[2]), 800);
         }
 
         function updateUserMarker() {
@@ -740,18 +786,14 @@
                 gltfLoader.load(poi.modelUrl, function(gltf) {
                     const model = gltf.scene;
                     
-                    // 彻底抛弃坑人的自动边界框居中逻辑！
-                    // 1. 设置模型缩放倍率（你可以通过 modelScale 直接调整大小）
                     const s = poi.modelScale || 5; 
                     model.scale.set(s, s, s);
                     
-                    // 2. 强行计算并贴地！
                     model.updateMatrixWorld(true);
                     const box = new THREE.Box3().setFromObject(model);
-                    const bottomOffset = box.min.y; // 算出脚底板到原点的距离
+                    const bottomOffset = box.min.y; 
                     
                     const offsetY = poi.modelOffsetY || 0;
-                    // 3. 原地放置，并向上抬高到底部刚好贴到 y=0
                     model.position.set(poi.pos[0], poi.pos[1] - bottomOffset + offsetY, poi.pos[2]); 
                     
                     detailGroup.add(model);
@@ -762,15 +804,12 @@
                     detailGroup.add(building);
                 });
             } else {
-                // 如果没配置模型，则用原来的默认中式小房子垫底
                 const building = createChineseBuilding(poi.color); 
                 building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
                 detailGroup.add(building);
             }
 
-            // 🚨 重置上帝视角：高度10，向后拉远15。完美解决被卡片遮挡的问题
             const camOffset = new THREE.Vector3(0, 10, 15); 
-            // 焦点往上抬一点，这样模型就在屏幕的偏上方了
             const targetOffset = new THREE.Vector3(0, 2, 0); 
 
             animateCamera(
@@ -871,4 +910,4 @@
         window.onload = init;
     </script>
 </body>
-</html>
+</html>请针对这两个问题进行代码修改并提供完整代码
