@@ -9,14 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script type="text/javascript">
-        window._AMapSecurityConfig = {
-            securityJsCode: '776c21116479f14a564a4777ce448cdc',
-        }
-    </script>
-    <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639&plugin=AMap.Geolocation,AMap.Walking"></script>
-    
+    <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639"></script>
     <style>
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #f1f5f9; }
         #canvas-container { width: 100vw; height: 100vh; }
@@ -284,7 +277,7 @@
             { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
             { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹，通过丰富的历史资料和实物展品，生动展现了刘畴西从黄埔一期生成长为红军高级将领的辉煌历程。‌刘畴西，‌1897年出生于湖南长沙，‌是中国共产党早期的军事领导人之一。刘畴西在革命生涯中表现出色，‌曾参加平定广州商团叛乱的战斗，‌并在战斗中负重伤，‌失去了左臂，‌因此被誉为“独臂将军”。‌他先后担任过红21军军长、‌闽浙赣军区司令员兼红军新编第10军军长等职务，‌为红军培养了大批军政干部，‌并在多次反“围剿”作战中立下赫赫战功。‌1934年，‌刘畴西率领红10军团北上抗日先遣队，‌最终在浙赣边界的怀玉山区被国民党军包围，‌虽奋力突围但终未能成功，‌于1935年1月被俘。‌他的一生充满了传奇色彩，‌从参加学生运动、‌加入中国社会主义青年团，‌到成为黄埔军校的第一期毕业生，‌再到担任红军的高级指挥官，‌刘畴西的经历体现了中国早期革命者的英勇和坚定。', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
             { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3', noModel: true },
-            // ✅ 以下点位保留模型
+            // ✅ 以下点位保留模型（可在此处更换 modelUrl 链接，并用 modelScale 调整大小，如果穿模可用 modelOffsetY 微调）
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/dongpaifang.glb', modelScale: 5},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/xipaifang.glb', modelScale: 5},
             { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建，古色古香的芦江阁耸立在望城靖港古镇芦江岸边，临水而建，毗邻沩水，北侧为芦江，东侧紧邻潇湘北路延路，为多层传统楼阁式建筑物。新建成的芦江阁共3层，檐口及屋脊也融入了湖南地域的建筑符号，每层均建有连廊，为游客提供了360度全景观景体验。芦江阁周边配套有芦苇湿地公园，在水面较开阔和水系坡度较缓的区域打造生态驳岸，设有游路、生态浮桥、观景平台等游览设施，让游客们可尽情饱览独具魅力的江南水乡美景。此外，芦江阁还实施了夜景亮化工程，夜幕降临下映衬古镇夜色更梦幻唯美，芦江水韵更动人心弦。', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/lujiangge.glb', modelScale: 5 },
@@ -496,58 +489,69 @@
             document.head.appendChild(script);
         }
 
-        // 🚨 修复 3：真实的实时定位与防精度漂移检测 🚨
         function initAmapLocation() {
-            if (typeof AMap === 'undefined' || !AMap.Geolocation) return;
-            AMap.plugin('AMap.Geolocation', function () {
-                const geo = new AMap.Geolocation({
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0,
-                    convert: true,
-                    showButton: false,
-                    GeoLocationFirst: true,
-                    useNative: true
-                });
-                
-                function doLocate() {
-                    geo.getCurrentPosition(function (status, result) {
-                        const statusEl = document.getElementById('status-text');
-                        if (status === 'complete' && result.position) {
-                            userLocation = {
-                                lng: result.position.lng,
-                                lat: result.position.lat
-                            };
-                            
-                            // 精度超过300米提示用户信号弱
-                            if (result.accuracy && result.accuracy > 300) {
-                                statusEl.innerText = "⚠️ 信号弱 (基站/IP定位，可能有误差)";
-                                statusEl.className = "status-badge text-amber-600";
-                            } else {
-                                statusEl.innerText = "✅ 实时 GPS 定位中";
-                                statusEl.className = "status-badge text-green-600 font-bold";
-                            }
-                            
-                            updateUserMarker();
-                        } else {
-                            console.warn('真实定位失败，启用模拟定位');
-                            userLocation = {
-                                lng: 112.7915,
-                                lat: 28.4545
-                            };
-                            statusEl.innerText = "❌ 定位失败 (请检查手机定位权限)";
-                            statusEl.className = "status-badge text-red-600";
-                            updateUserMarker();
-                        }
-                    });
+
+    if (typeof AMap === 'undefined') return;
+
+    AMap.plugin('AMap.Geolocation', function () {
+
+        const geo = new AMap.Geolocation({
+
+            enableHighAccuracy: true,
+
+            timeout: 10000,
+
+            maximumAge: 0,
+
+            convert: true,
+
+            showButton: false,
+
+            GeoLocationFirst: true,
+
+            useNative: true
+        });
+
+        function doLocate() {
+
+            geo.getCurrentPosition(function (status, result) {
+
+                console.log('定位结果:', status, result);
+
+                if (status === 'complete' && result.position) {
+
+                    userLocation = {
+
+                        lng: result.position.lng,
+
+                        lat: result.position.lat
+                    };
+
+                    updateUserMarker();
+
+                } else {
+
+                    console.warn('真实定位失败，启用模拟定位');
+
+                    userLocation = {
+
+                        lng: 112.7915,
+
+                        lat: 28.4545
+                    };
+
+                    updateUserMarker();
                 }
-                
-                doLocate();
-                setInterval(doLocate, 5000); // 5秒轮询
             });
         }
 
-        // 🚨 修复 4：专门针对“定位按钮点击”的独立防白屏函数 🚨
+        doLocate();
+
+        setInterval(doLocate, 30000);
+    });
+}
+
+        // 🚨 专门针对“定位按钮点击”的独立函数 🚨
         function locateToUser() {
             if (!userLocation) {
                 alert("正在努力获取您的位置，请确保已授予浏览器的定位权限！");
@@ -555,10 +559,9 @@
             }
             const p = lngLatToScene(userLocation.lng, userLocation.lat);
             
-            // 防白屏检查：如果超出地图范围，弹窗提醒拦截
-            if (Math.abs(p[0]) > 200 || Math.abs(p[2]) > 200) {
-                alert(`📍 定位成功！\n\n系统检测到您当前未在靖港古镇景区内。\n您的真实坐标: 经度 ${userLocation.lng.toFixed(4)}, 纬度 ${userLocation.lat.toFixed(4)}\n\n(为防止画面空白，镜头将留在古镇地图上)`);
-                return;
+            // 防白屏检查：如果你实际在办公室（不在古镇），弹窗提醒
+            if (Math.abs(p[0]) > 100 || Math.abs(p[2]) > 100) {
+                alert("提示：您当前的物理位置似乎不在靖港古镇景区内哦！\n（镜头将飞向您所在的坐标点，因为太远，您看到的地图可能是空白的）");
             }
             
             animateCamera(new THREE.Vector3(p[0] + 15, 25, p[2] + 15), new THREE.Vector3(p[0], 0, p[2]), 800);
@@ -576,71 +579,239 @@
             userMarkerGroup.position.set(x, 0, z); mapGroup.add(userMarkerGroup);
         }
 
-        // 🚨 修复 5：路线防打结与平滑过滤处理 🚨
         function planRoute(targetPOI) {
-            if (typeof AMap === 'undefined' || !AMap.Walking) {
-                alert('高德地图加载失败或缺少步行导航插件');
-                return;
-            }
-            toggleViewMode('2D');
-            const endLngLat = targetPOI.lngLat;
-            let startLngLat = userLocation ? [userLocation.lng, userLocation.lat] : endLngLat;
-            clearRoute();
 
-            AMap.plugin('AMap.Walking', function () {
-                const walking = new AMap.Walking();
-                walking.search(startLngLat, endLngLat, function (status, result) {
-                    if (status === 'complete' && result.routes && result.routes[0]) {
-                        const points = [];
-                        let lastPos = null;
+    if (typeof AMap === 'undefined') {
 
-                        result.routes[0].steps.forEach(step => {
-                            if (step.path && step.path.length) {
-                                step.path.forEach(p => {
-                                    let lng = typeof p.lng === 'number' ? p.lng : (p.getLng ? p.getLng() : p[0]);
-                                    let lat = typeof p.lat === 'number' ? p.lat : (p.getLat ? p.getLat() : p[1]);
-                                    
-                                    const scenePos = lngLatToScene(lng, lat);
-                                    const vec = new THREE.Vector3(scenePos[0], 0.15, scenePos[2]);
+        alert('高德地图加载失败');
 
-                                    // 过滤掉距离小于 0.5 的密集点位，防止模型重叠打结
-                                    if (!lastPos || lastPos.distanceTo(vec) > 0.5) {
-                                        points.push(vec);
-                                        lastPos = vec;
-                                    }
-                                });
-                            }
-                        });
+        return;
+    }
 
-                        if (points.length < 2) {
-                            alert('距离太近，无需导航');
-                            return;
+    toggleViewMode('2D');
+
+    const endLngLat = targetPOI.lngLat;
+
+    let startLngLat = endLngLat;
+
+    if (userLocation) {
+
+        startLngLat = [
+
+            userLocation.lng,
+
+            userLocation.lat
+        ];
+
+    } else {
+
+        alert('正在获取您的位置，请稍后重试');
+
+        initAmapLocation();
+
+        return;
+    }
+
+    clearRoute();
+
+    AMap.plugin('AMap.Walking', function () {
+
+        const walking = new AMap.Walking();
+
+        walking.search(
+
+            startLngLat,
+
+            endLngLat,
+
+            function (status, result) {
+
+                console.log(
+
+                    '路线规划:',
+
+                    status,
+
+                    result
+                );
+
+                if (
+
+                    status === 'complete' &&
+
+                    result.routes &&
+
+                    result.routes[0]
+
+                ) {
+
+                    const route = result.routes[0];
+
+                    const points = [];
+
+                    route.steps.forEach(step => {
+
+                        if (
+
+                            step.path &&
+
+                            step.path.length
+                        ) {
+
+                            step.path.forEach(p => {
+
+                                let lng, lat;
+
+                                if (Array.isArray(p)) {
+
+                                    lng = p[0];
+
+                                    lat = p[1];
+
+                                } else if (
+
+                                    typeof p.lng === 'number'
+                                ) {
+
+                                    lng = p.lng;
+
+                                    lat = p.lat;
+
+                                } else {
+
+                                    lng = p.getLng();
+
+                                    lat = p.getLat();
+                                }
+
+                                const scenePos =
+                                    lngLatToScene(
+                                        lng,
+                                        lat
+                                    );
+
+                                points.push(
+
+                                    new THREE.Vector3(
+
+                                        scenePos[0],
+
+                                        0.15,
+
+                                        scenePos[2]
+                                    )
+                                );
+                            });
                         }
+                    });
 
-                        // 引入 'centripetal' 算法消除打结，调低 tension
-                        const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.2);
-                        const tubeGeo = new THREE.TubeGeometry(curve, points.length * 4, 0.15, 6, false);
-                        
-                        routeLineMesh = new THREE.Mesh(tubeGeo, new THREE.MeshBasicMaterial({ 
-                            color: 0x2563eb, transparent: true, opacity: 0.85 
-                        }));
-                        
-                        mapGroup.add(routeLineMesh);
+                    if (points.length < 2) {
 
-                        document.getElementById('clearRouteBtn')?.classList.remove('hidden');
+                        alert('路线数据异常');
 
-                        const mid = points[Math.floor(points.length / 2)];
-                        setTimeout(() => {
-                            animateCamera(new THREE.Vector3(mid.x, 40, mid.z + 0.01), new THREE.Vector3(mid.x, 0, mid.z), 1000);
-                        }, 500);
-
-                    } else {
-                        console.error('路线规划失败:', status, result);
-                        alert('路线规划失败：\n' + (result.info || '暂无合适路线'));
+                        return;
                     }
-                });
-            });
-        }
+
+                    const curve =
+                        new THREE.CatmullRomCurve3(
+                            points
+                        );
+
+                    const tubeGeo =
+                        new THREE.TubeGeometry(
+
+                            curve,
+
+                            180,
+
+                            0.22,
+
+                            12,
+
+                            false
+                        );
+
+                    routeLineMesh =
+                        new THREE.Mesh(
+
+                            tubeGeo,
+
+                            new THREE.MeshBasicMaterial({
+
+                                color: 0x2563eb,
+
+                                transparent: true,
+
+                                opacity: 0.95
+                            })
+                        );
+
+                    mapGroup.add(routeLineMesh);
+
+                    document
+
+                        .getElementById(
+                            'clearRouteBtn'
+                        )
+
+                        ?.classList.remove(
+                            'hidden'
+                        );
+
+                    const mid =
+                        points[
+                            Math.floor(
+                                points.length / 2
+                            )
+                        ];
+
+                    setTimeout(() => {
+
+                        animateCamera(
+
+                            new THREE.Vector3(
+
+                                mid.x,
+
+                                45,
+
+                                mid.z + 0.01
+                            ),
+
+                            new THREE.Vector3(
+
+                                mid.x,
+
+                                0,
+
+                                mid.z
+                            ),
+
+                            1000
+                        );
+
+                    }, 500);
+
+                } else {
+
+                    console.error(
+
+                        '路线规划失败:',
+
+                        status,
+
+                        result
+                    );
+
+                    alert(
+
+                        '路线规划失败\\n\\n请检查：\\n1. 高德 KEY\\n2. 域名白名单\\n3. 网络'
+                    );
+                }
+            }
+        );
+    });
+}
 
         function clearRoute() {
             if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh);
@@ -965,4 +1136,4 @@
         window.onload = init;
     </script>
 </body>
-</html>
+</html>请针对这两个问题进行代码修改并提供完整代码
