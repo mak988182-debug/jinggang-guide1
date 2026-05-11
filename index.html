@@ -2,13 +2,15 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>靖港古镇3D智能导览系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639&plugin=AMap.Geolocation,AMap.Walking"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script type="text/javascript">
@@ -16,83 +18,94 @@
             securityJsCode: '776c21116479f14a564a4777ce448cdc',
         }
     </script>
-    <script src="https://webapi.amap.com/maps?v=2.0&key=29eb222f604720dd3aea5ce4c79d2639&plugin=AMap.Geolocation,AMap.Walking"></script>
 
     <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; overflow: hidden; background: #f1f5f9; touch-action: none; }
-        #canvas-container { width: 100vw; height: 100vh; outline: none; }
-        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
-        
-        /* POI 与微交互动画 */
-        .poi-label { position: absolute; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer; transition: z-index 0.3s; }
-        .poi-scale-wrapper { display: flex; flex-direction: column; align-items: center; transform-origin: bottom center; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .poi-label:hover .poi-scale-wrapper { transform: scale(1.15); }
-        .poi-bubble { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 4px 6px 4px 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: nowrap; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; overflow: hidden; background: #f1f5f9; }
+        #canvas-container { width: 100vw; height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
+        .poi-label { position: absolute; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer; }
+        .poi-scale-wrapper { display: flex; flex-direction: column; align-items: center; transform-origin: bottom center; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .poi-label:hover .poi-scale-wrapper { transform: scale(1.15) !important; }
+        .poi-bubble { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 30px; padding: 3px 4px 3px 10px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: nowrap; }
         .poi-name { color: #ffffff; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
         .wait-time-tag { font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s; }
-        .time-low { background: #22c55e; color: white; } .time-med { background: #f59e0b; color: white; } .time-high { background: #ef4444; color: white; } .time-ended { background: #64748b; color: white; }
-        .poi-pin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); transition: all 0.3s; }
-        
-        /* 点击跳动动画 */
-        @keyframes markerBounce { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.2) translateY(-10px); } }
-        .poi-active { z-index: 50; }
-        .poi-active .poi-scale-wrapper { animation: markerBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
-        .poi-active .poi-pin { box-shadow: 0 0 20px currentColor; }
-
-        /* 隐藏滚动条 */
+        .time-low { background: #22c55e; color: white; }
+        .time-med { background: #f59e0b; color: white; }
+        .time-high { background: #ef4444; color: white; }
+        .time-ended { background: #64748b; color: white; }
+        .poi-pin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* 抽屉卡片样式 */
-        #detailCard { transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); will-change: transform; touch-action: pan-y; }
-        .drawer-handle-area { display: flex; justify-content: center; align-items: center; height: 24px; width: 100%; cursor: grab; }
-        .drawer-handle { width: 40px; height: 5px; background: #cbd5e1; border-radius: 99px; transition: background 0.3s; }
-        .drawer-handle-area:active .drawer-handle { background: #94a3b8; }
-        
-        /* 语音声波涟漪 */
-        @keyframes ripple { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); } 100% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); } }
-        .audio-playing { animation: ripple 1.5s infinite; border-radius: 0.75rem; }
-
-        /* 波浪音轨 */
+        .mode-explorer #sideContainer, .mode-explorer #labels-container, .mode-explorer .view-switch, .mode-explorer #weatherPanel { display: flex; }
+        .mode-detail #sideContainer, .mode-detail #labels-container, .mode-detail .view-switch, .mode-detail #weatherPanel { display: none !important; }
+        #backBtn { display: none; }
+        .mode-detail #backBtn { display: flex; }
+        .view-switch { background: white; border-radius: 99px; padding: 4px; display: flex; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .view-switch button { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .view-switch button.active { background: #2563eb; color: white; }
+        #status-indicator { position: fixed; bottom: 20px; left: 20px; z-index: 100; font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .status-badge { color: #64748b; background: rgba(255,255,255,0.8); padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(4px); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        #sideContainer.closed { transform: translateX(calc(100% - 24px)); }
+        #togglePanelBtn i { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sideContainer.closed #togglePanelBtn i { transform: rotate(180deg); }
+        #coord-display { background: rgba(15, 23, 42, 0.9); color: white; padding: 8px 12px; border-radius: 12px; font-family: monospace; font-size: 12px; display: none; pointer-events: none; width: max-content; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .weather-panel { min-width: 140px; flex-direction: column; }
+        .media-tab { flex: 1; padding: 4px 0; font-size: 10px; font-weight: bold; color: #64748b; transition: all 0.2s; border-radius: 8px; }
+        .media-tab.active { background: white; color: #2563eb; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         @keyframes soundWave { 0%, 100% { height: 4px; } 50% { height: 16px; } }
         .wave-bar { width: 3px; background: #2563eb; border-radius: 2px; animation: soundWave 1s ease-in-out infinite; }
+        .desc-scrollbar::-webkit-scrollbar { width: 4px; }
+        .desc-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 4px; }
+        .desc-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+        .desc-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
 
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .poi-bubble { padding: 5px 8px 5px 14px; }
-            .poi-name { font-size: 13px; }
-            .poi-pin { width: 16px; height: 16px; border-width: 3px; }
-            .status-badge { padding: 8px 16px; font-size: 13px; }
-            #detailCard { left: 0 !important; width: 100vw !important; border-radius: 1.5rem 1.5rem 0 0 !important; padding: 0 20px 24px 20px !important; }
-        }
+        #detailCard.minimized { transform: translate(-50%, calc(100% - 90px)) !important; }
+        #detailContentBody { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; opacity: 1; }
+        #detailCard.minimized #detailContentBody { opacity: 0; pointer-events: none; height: 0; margin-top: 0; }
+        #minimizeIcon { transition: transform 0.4s; }
+        #detailCard.minimized #minimizeIcon { transform: rotate(180deg); }
     </style>
 </head>
-<body class="mode-explorer text-slate-800">
+<body class="mode-explorer">
 
     <div id="canvas-container"></div>
     
-    <div class="fixed top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[600px] z-20 transition-transform duration-500">
-        <div class="glass-panel w-full rounded-2xl p-2.5 md:p-3 flex items-center shadow-lg">
-            <div class="px-2 text-slate-400"><i data-lucide="search" size="20"></i></div>
-            <input id="searchInput" type="text" placeholder="搜索古镇景点..." class="bg-transparent border-none outline-none flex-1 text-slate-700 placeholder-slate-400 min-w-0 text-base" oninput="filterPOIs(this.value)">
-            <button class="bg-blue-600 text-white py-2 px-5 rounded-xl hover:bg-blue-700 active:scale-95 transition font-bold text-sm">搜索</button>
+    <div id="status-indicator">
+        <div id="coord-display">坐标: [0, 0, 0]</div>
+        <div id="status-text" class="status-badge">正在初始化底图...</div>
+        <div class="flex gap-2">
+            <button onclick="togglePicker()" id="picker-btn" class="status-badge hover:bg-white transition-all flex items-center gap-2">
+                <i data-lucide="crosshair" size="14"></i>
+                坐标拾取: <span id="picker-status">关</span>
+            </button>
         </div>
     </div>
 
-    <div id="status-indicator" class="fixed top-24 left-4 z-10 pointer-events-none">
-        <div id="status-text" class="status-badge glass-panel font-bold text-slate-600 shadow-sm flex items-center gap-2">
-            <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            地图引擎启动中...
+    <button id="backBtn" onclick="exitDetailMode()" class="fixed top-8 left-8 z-50 glass-panel p-3 rounded-2xl items-center gap-2 text-slate-700 hover:bg-white transition-all font-bold shadow-xl">
+        <i data-lucide="arrow-left" size="20"></i> 返回古镇地图
+    </button>
+
+    <div id="audioController" class="fixed bottom-40 right-8 z-50 glass-panel rounded-2xl p-4 hidden items-center gap-4 shadow-2xl border-l-4 border-l-blue-500 transition-all duration-500">
+        <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">语音讲解中</span>
+            <span id="audioPoiName" class="text-sm font-bold text-slate-800">景点名称</span>
         </div>
-        <button id="clearRouteBtn" onclick="clearRoute()" class="hidden mt-3 pointer-events-auto bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-white shadow-lg active:scale-95 transition flex items-center gap-2">
-            <i data-lucide="route-off" size="16"></i> 结束导航
-        </button>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 h-5">
+                <div class="wave-bar" style="animation-delay: 0s"></div>
+                <div class="wave-bar" style="animation-delay: 0.2s"></div>
+                <div class="wave-bar" style="animation-delay: 0.4s"></div>
+            </div>
+            <button onclick="stopAudio()" class="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-100 transition active:scale-90">
+                <i data-lucide="square" size="16" fill="currentColor"></i>
+            </button>
+        </div>
     </div>
 
-    <div id="weatherPanel" class="fixed top-36 left-4 z-30 glass-panel rounded-2xl px-4 py-3 weather-panel shadow-lg transition-all duration-300">
+    <div id="weatherPanel" class="fixed top-6 left-4 sm:left-6 z-30 glass-panel rounded-2xl px-4 py-3 weather-panel shadow-lg transition-all duration-300">
         <div class="flex justify-between items-center cursor-pointer group" onclick="toggleWeather()">
             <div class="flex items-center gap-2">
                 <i data-lucide="cloud" class="text-slate-500" size="18"></i>
-                <span class="text-xs font-semibold text-slate-500">靖港古鎮 · 即时天气</span>
+                <span class="text-xs font-semibold text-slate-500">靖港古鎮 · 即時天气</span>
             </div>
             <div class="text-slate-400 group-hover:text-slate-600 transition-colors ml-4 bg-white/50 rounded-full p-0.5">
                 <i id="weatherToggleIcon" data-lucide="chevron-up" size="14"></i>
@@ -116,222 +129,212 @@
         </div>
     </div>
 
-    <div id="audioController" class="fixed bottom-32 left-4 md:bottom-10 md:left-10 z-50 glass-panel rounded-2xl p-4 hidden items-center gap-4 shadow-2xl border-l-4 border-l-blue-500 transition-all duration-500">
-        <div class="flex flex-col">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">语音讲解中</span>
-            <span id="audioPoiName" class="text-sm font-bold text-slate-800">景点名称</span>
+    <div class="fixed top-6 right-4 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-20 flex flex-col items-end sm:items-center gap-4 w-[calc(100vw-190px)] sm:w-full max-w-xl px-0 sm:px-4 transition-transform duration-500">
+        <div id="searchBar" class="glass-panel w-full rounded-2xl p-2 flex items-center shadow-lg">
+            <div class="p-2 text-slate-400"><i data-lucide="search"></i></div>
+            <input id="searchInput" type="text" placeholder="搜索景点..." class="bg-transparent border-none outline-none flex-1 text-slate-700 placeholder-slate-400 min-w-0" oninput="filterPOIs(this.value)">
+            <button class="bg-blue-600 text-white p-2 px-4 sm:px-5 rounded-xl hover:bg-blue-700 transition font-medium text-sm sm:text-base">搜索</button>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 h-5">
-                <div class="wave-bar" style="animation-delay: 0s"></div>
-                <div class="wave-bar" style="animation-delay: 0.2s"></div>
-                <div class="wave-bar" style="animation-delay: 0.4s"></div>
+
+        <div class="flex items-center gap-2">
+            <div class="view-switch glass-panel">
+                <button id="btn2D" onclick="toggleViewMode('2D')">2D 平面</button>
+                <button id="btn3D" onclick="toggleViewMode('3D')" class="active">3D 漫游</button>
             </div>
-            <button onclick="stopAudio()" class="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-100 transition active:scale-90">
-                <i data-lucide="square" size="16" fill="currentColor"></i>
+            <button id="clearRouteBtn" onclick="clearRoute()" class="hidden glass-panel px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/90 transition">
+                清除路线
+            </button>
+            <button id="locateMeBtn" onclick="locateToUser()" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="定位到我的位置">
+                <i data-lucide="crosshair" size="18"></i>
+            </button>
+            <button onclick="showQRModal()" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="扫描二维码进入导览">
+                <i data-lucide="qr-code" size="18"></i>
+            </button>
+            <button onclick="showFeedbackModal()" class="glass-panel p-2 rounded-xl text-slate-600 hover:bg-white/90 transition" title="意见与建议">
+                <i data-lucide="message-square-edit" size="18"></i>
             </button>
         </div>
     </div>
 
-    <div class="hidden md:flex fixed top-24 right-6 z-20 flex-col gap-3 items-end">
-        <div class="view-switch glass-panel p-1.5 rounded-2xl flex gap-1 shadow-md">
-            <button id="btn2D" onclick="toggleViewMode('2D')" class="px-5 py-2.5 rounded-xl font-bold text-sm transition text-slate-500 hover:bg-slate-100">平面视图</button>
-            <button id="btn3D" onclick="toggleViewMode('3D')" class="px-5 py-2.5 rounded-xl font-bold text-sm transition bg-blue-600 text-white shadow-md">3D漫游</button>
-        </div>
-        <div class="flex gap-3">
-            <button onclick="locateToUser()" class="glass-panel p-3.5 rounded-2xl text-slate-600 hover:text-blue-600 transition shadow-md" title="我的位置"><i data-lucide="crosshair" size="20"></i></button>
-            <button onclick="showQRModal()" class="glass-panel p-3.5 rounded-2xl text-slate-600 hover:text-blue-600 transition shadow-md" title="手机扫码浏览"><i data-lucide="smartphone" size="20"></i></button>
-            <button onclick="showFeedbackModal()" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-lg shadow-blue-200/50 hover:-translate-y-0.5 transition flex items-center justify-center relative" title="意见箱">
-                <i data-lucide="message-square-edit" size="20"></i>
-                <span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-blue-600"></span></span>
-            </button>
+    <div id="qrModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="glass-panel rounded-3xl p-8 max-w-sm w-full text-center">
+            <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center justify-center gap-2">
+                <i data-lucide="smartphone" size="20"></i> 手机扫描进入导览
+            </h3>
+            <div class="bg-white rounded-2xl p-4 inline-block mb-4">
+                <img id="qrImage" src="" alt="导览二维码" class="w-56 h-56">
+            </div>
+            <p id="qrUrl" class="text-xs text-slate-600 break-all mb-4 font-mono"></p>
+            <button onclick="copyQRUrl()" class="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition">复制网址</button>
+            <button onclick="hideQRModal()" class="w-full mt-2 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition">关闭</button>
         </div>
     </div>
 
-    <nav id="mobileNav" class="md:hidden fixed bottom-0 left-0 w-full z-40 glass-panel !bg-white/95 !rounded-none !border-x-0 border-t border-slate-200 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.08)] transition-transform duration-500">
-        <div class="flex justify-around items-end px-2 pt-2 pb-6">
-            <button onclick="toggleViewMode('2D')" class="flex flex-col items-center p-2 text-slate-400 active:scale-90 transition">
-                <i data-lucide="map" size="24" class="mb-1"></i>
-                <span class="text-[11px] font-bold">平面</span>
+    <div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 max-w-md w-full relative">
+            <button onclick="hideFeedbackModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition">
+                <i data-lucide="x" size="20"></i>
             </button>
-            <button onclick="toggleViewMode('3D')" class="flex flex-col items-center p-2 text-blue-600 active:scale-90 transition">
-                <i data-lucide="box" size="24" class="mb-1"></i>
-                <span class="text-[11px] font-bold">3D视图</span>
-            </button>
-            <div class="relative -top-6">
-                <button onclick="locateToUser()" class="flex flex-col items-center justify-center bg-gradient-to-tr from-blue-600 to-blue-500 text-white h-16 w-16 rounded-full shadow-xl shadow-blue-300 active:scale-90 transition border-4 border-white">
-                    <i data-lucide="navigation" size="26" class="mr-0.5 mt-0.5"></i>
-                </button>
-            </div>
-            <button onclick="toggleTraffic()" class="flex flex-col items-center p-2 text-slate-400 active:scale-90 transition">
-                <i data-lucide="list-video" size="24" class="mb-1"></i>
-                <span class="text-[11px] font-bold">景点</span>
-            </button>
-            <button onclick="showFeedbackModal()" class="flex flex-col items-center p-2 text-slate-400 active:scale-90 transition relative">
-                <div class="relative">
-                    <i data-lucide="message-square-edit" size="24" class="mb-1"></i>
-                    <span class="absolute -top-0.5 -right-1 flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span></span>
+            
+            <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+                <i data-lucide="mail" class="text-blue-500" size="20"></i> 意见收集箱
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">感谢您的使用！有任何问题或建议，请告诉我们。</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">反馈类型</label>
+                    <select id="feedbackType" class="w-full p-2.5 rounded-xl bg-white/70 border border-slate-200 outline-none text-sm text-slate-700 focus:border-blue-500 transition">
+                        <option value="suggestion">💡 功能建议</option>
+                        <option value="bug">🐛 错误报告</option>
+                        <option value="content">📝 内容纠错 (如地点不准)</option>
+                        <option value="other">💬 其他</option>
+                    </select>
                 </div>
-                <span class="text-[11px] font-bold">反馈</span>
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">详细描述</label>
+                    <textarea id="feedbackContent" rows="4" placeholder="请详细描述您遇到的问题或建议..." class="w-full p-3 rounded-xl bg-white/70 border border-slate-200 outline-none text-sm text-slate-700 focus:border-blue-500 transition resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">联系方式 (选填)</label>
+                    <input id="feedbackContact" type="text" placeholder="留下您的微信/电话/邮箱，方便我们回复" class="w-full p-2.5 rounded-xl bg-white/70 border border-slate-200 outline-none text-sm text-slate-700 focus:border-blue-500 transition">
+                </div>
+            </div>
+            
+            <button id="submitFeedbackBtn" onclick="submitFeedback()" class="w-full mt-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 active:scale-95">
+                <i data-lucide="send" size="16"></i> 提交反馈
             </button>
         </div>
-    </nav>
+    </div>
 
-    <div id="sideContainer" class="fixed top-24 bottom-24 right-0 z-30 transition-transform duration-500 translate-x-[120%] md:translate-x-0 flex items-center md:items-start">
-        <button id="togglePanelBtn" onclick="toggleTraffic()" class="hidden md:flex glass-panel w-8 h-24 rounded-l-2xl items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-[-4px_0_15px_rgba(0,0,0,0.05)]">
+    <div id="sideContainer" class="fixed right-0 top-32 bottom-24 z-20 transition-transform duration-500 ease-in-out flex items-center">
+        <button id="togglePanelBtn" onclick="toggleSidePanel()" class="glass-panel w-8 h-20 rounded-l-xl flex items-center justify-center text-slate-500 hover:text-blue-600 transition-colors shadow-[-4px_0_15px_rgba(0,0,0,0.05)]">
             <i data-lucide="chevron-right" size="20"></i>
         </button>
-        <div class="glass-panel h-full w-full md:w-80 md:rounded-3xl p-5 md:mr-6 flex flex-col shadow-2xl">
-            <div class="md:hidden flex justify-between items-center mb-4">
-                <h2 class="text-xl font-black text-slate-800">全部景点</h2>
-                <button onclick="toggleTraffic()" class="p-2 bg-slate-100 rounded-full text-slate-500 active:bg-slate-200"><i data-lucide="x" size="20"></i></button>
+        <div id="sidePanel" class="w-72 h-full pr-6 pl-1 transition-all duration-300">
+            <div id="trafficInnerPanel" class="glass-panel h-full rounded-3xl p-6 flex flex-col shadow-2xl transition-all duration-300">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-between cursor-pointer group" onclick="toggleTraffic()">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="compass" class="text-blue-500" size="18"></i> 实时客流导览
+                    </div>
+                    <div class="text-slate-400 group-hover:text-slate-600 transition-colors bg-slate-100 rounded-full p-1">
+                        <i id="trafficToggleIcon" data-lucide="chevron-up" size="16"></i>
+                    </div>
+                </h2>
+                <div id="poiList" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 pr-1 transition-all duration-300 origin-top"></div>
             </div>
-            <h2 class="hidden md:flex text-lg font-bold text-slate-800 mb-4 items-center gap-2">
-                <i data-lucide="compass" class="text-blue-500" size="20"></i> 实时客流导览
-            </h2>
-            <div id="poiList" class="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-1"></div>
         </div>
     </div>
 
-    <div id="detailCard" class="fixed md:bottom-8 z-[60] glass-panel !bg-white/95 border-t border-slate-100 md:border md:rounded-[2.5rem] shadow-[0_-20px_40px_rgba(0,0,0,0.15)] md:shadow-2xl flex flex-col transform translate-y-[150%] md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-2xl h-[85vh] md:h-auto max-h-[85vh]">
-        
-        <div class="md:hidden drawer-handle-area" id="drawerHandleArea">
-            <div class="drawer-handle"></div>
-        </div>
+    <div id="detailCard" class="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl z-40 transition-all duration-700 translate-y-[150%] opacity-0">
+        <div class="glass-panel rounded-[2.5rem] p-8 relative shadow-2xl border-2 border-white">
+            
+            <button onclick="toggleDetailCard()" class="absolute top-8 right-8 p-1.5 rounded-full hover:bg-slate-100 text-slate-500 transition-colors cursor-pointer z-10" title="收起/展开详情">
+                <i id="minimizeIcon" data-lucide="chevron-down" size="24"></i>
+            </button>
 
-        <button onclick="exitDetailMode()" class="hidden md:block absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 transition cursor-pointer z-10" title="关闭">
-            <i data-lucide="x" size="24"></i>
-        </button>
-
-        <div class="flex-1 overflow-y-auto no-scrollbar pb-6 px-0 md:p-8" id="detailScrollArea">
-            <div class="flex justify-between items-start pt-2 md:pt-0">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h3 id="detailTitle" class="text-2xl md:text-3xl font-black text-slate-900 pr-12">景点名称</h3>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-blue-50 text-blue-600 border border-blue-100 text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">文化地标</span>
-                        <span id="detailWaitTime" class="bg-green-50 text-green-600 border border-green-100 text-[11px] font-bold px-2.5 py-1 rounded-md transition-colors">等待 5min</span>
+                    <h3 id="detailTitle" class="text-2xl font-black text-slate-900 pr-12">景点名称</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span id="detailBadge" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">文化地标</span>
+                        <span id="detailWaitTime" class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors">等待 5min</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-5 md:gap-6 mt-6">
-                <div class="flex flex-col gap-3 w-full md:w-48 shrink-0">
-                    <div class="w-full aspect-video md:aspect-square rounded-2xl md:rounded-3xl bg-slate-100 overflow-hidden shadow-inner relative group border border-slate-200">
+            <div id="detailContentBody" class="flex flex-col md:flex-row gap-6 mt-6">
+                <div class="flex flex-col gap-3">
+                    <div class="w-full md:w-40 h-40 rounded-3xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-md relative group">
                         <img id="detailImg" src="" alt="poi" class="w-full h-full object-cover transition-opacity duration-300">
                         <video id="detailVideo" controls class="hidden w-full h-full object-cover bg-black"></video>
                     </div>
-                    <div id="mediaSwitcher" class="hidden flex bg-slate-100 p-1.5 rounded-xl gap-1">
-                        <button id="tabImg" onclick="switchDetailMedia('img')" class="media-tab active py-1.5 rounded-lg">图文</button>
-                        <button id="tabVideo" onclick="switchDetailMedia('video')" class="media-tab py-1.5 rounded-lg">视频</button>
+                    <div id="mediaSwitcher" class="hidden flex bg-slate-200/50 p-1 rounded-xl gap-1">
+                        <button id="tabImg" onclick="switchDetailMedia('img')" class="media-tab active">图片</button>
+                        <button id="tabVideo" onclick="switchDetailMedia('video')" class="media-tab">视频</button>
                     </div>
                 </div>
                 
-                <div class="flex-1 flex flex-col min-h-[200px]">
-                    <p id="detailDesc" class="text-sm md:text-base text-slate-600 leading-loose md:leading-relaxed text-justify">加载描述中...</p>
+                <div class="flex-1 flex flex-col">
+                    <p id="detailDesc" class="text-sm text-slate-500 leading-relaxed italic overflow-y-auto max-h-32 desc-scrollbar pr-2">加载描述中...</p>
                     
-                    <div id="audioSection" style="display: none;" class="mt-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
-                                <i data-lucide="headphones" size="20"></i>
+                    <div id="audioSection" style="display: none;" class="mt-3 p-3 bg-slate-50/80 backdrop-blur-md border border-slate-200/60 rounded-2xl items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i data-lucide="headphones" size="16"></i>
                             </div>
                             <div>
-                                <div class="text-sm font-bold text-slate-800">语音金牌讲解</div>
-                                <div class="text-[11px] text-slate-400 mt-0.5">倾听古镇的千年回响</div>
+                                <div class="text-xs font-bold text-slate-800">景点语音导览</div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">倾听古镇历史，感受岁月芳华</div>
                             </div>
                         </div>
-                        <button id="audioPlayBtn" onclick="toggleAudioState()" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-95 transition flex items-center gap-2">
-                            <i data-lucide="play" size="16"></i> 播放
+                        <button id="audioPlayBtn" onclick="toggleAudioState()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5 active:scale-95">
+                            <i data-lucide="play" size="14"></i> 播放
                         </button>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-slate-100 flex gap-4">
-                        <button onclick="currentDetailPOI && planRoute(currentDetailPOI)" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl text-base font-bold hover:bg-black shadow-xl shadow-slate-300/50 transition-all active:scale-95 flex items-center justify-center gap-2">
-                            <i data-lucide="route" size="20"></i> 带我去这
+                    <div class="mt-auto pt-5 flex gap-3">
+                        <button onclick="currentDetailPOI && planRoute(currentDetailPOI)" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <i data-lucide="navigation-2" size="18"></i> 规划路线
                         </button>
-                        <button class="w-14 shrink-0 flex items-center justify-center rounded-2xl border-2 border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 active:bg-slate-50 transition"><i data-lucide="heart" size="22"></i></button>
+                        <button class="w-12 h-12 flex items-center justify-center rounded-2xl border-2 border-slate-100 text-slate-600 hover:bg-slate-50 transition-all"><i data-lucide="bookmark" size="20"></i></button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-sm w-full relative shadow-2xl">
-            <button onclick="hideFeedbackModal()" class="absolute top-5 right-5 p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition active:scale-90">
-                <i data-lucide="x" size="18"></i>
-            </button>
-            <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-2">
-                <div class="p-2 bg-blue-100 text-blue-600 rounded-xl"><i data-lucide="mail" size="20"></i></div> 意见反馈
-            </h3>
-            <p class="text-xs text-slate-500 mb-6 font-medium">感谢您的使用！任何报错或吐槽都是我们进步的动力。</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">反馈类型</label>
-                    <select id="feedbackType" class="w-full p-3.5 rounded-2xl bg-slate-50 border-2 border-transparent outline-none text-sm text-slate-800 focus:border-blue-500 focus:bg-white transition font-medium">
-                        <option value="💡 功能建议">💡 给点建议</option>
-                        <option value="🐛 错误报告">🐛 遇到 Bug (卡顿/报错)</option>
-                        <option value="📍 定位/地图报错">📍 地图不准/路线绕路</option>
-                        <option value="💬 其他">💬 其他吐槽</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">详细描述</label>
-                    <textarea id="feedbackContent" rows="4" placeholder="请详细描述您遇到的情况..." class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-transparent outline-none text-sm text-slate-800 focus:border-blue-500 focus:bg-white transition resize-none"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5 ml-1">联系方式 (选填)</label>
-                    <input id="feedbackContact" type="text" placeholder="留下微信或手机号，以便发放体验奖励" class="w-full p-3.5 rounded-2xl bg-slate-50 border-2 border-transparent outline-none text-sm text-slate-800 focus:border-blue-500 focus:bg-white transition">
-                </div>
-            </div>
-            <button id="submitFeedbackBtn" onclick="submitFeedback()" class="w-full mt-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-base font-bold shadow-xl shadow-blue-200 transition-all flex items-center justify-center gap-2 active:scale-95">
-                <i data-lucide="send" size="18"></i> 立即提交
-            </button>
-        </div>
-    </div>
-
-    <div id="qrModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-8 max-w-xs w-full text-center relative shadow-2xl">
-            <button onclick="hideQRModal()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-400 active:scale-90"><i data-lucide="x" size="16"></i></button>
-            <div class="mx-auto w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4"><i data-lucide="smartphone" size="24"></i></div>
-            <h3 class="text-lg font-black text-slate-800 mb-1">手机无缝体验</h3>
-            <p class="text-xs text-slate-500 mb-6">扫码将导览随身携带，随时定位</p>
-            <div class="bg-slate-50 rounded-2xl p-4 inline-block mb-4 border border-slate-100"><img id="qrImage" src="" alt="二维码" class="w-48 h-48 mix-blend-multiply"></div>
-            <button onclick="copyQRUrl()" class="w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-300 active:scale-95 transition">复制当前网址</button>
         </div>
     </div>
 
     <div id="labels-container" class="fixed inset-0 pointer-events-none z-10"></div>
+    <div id="userLocationLabel" class="hidden fixed z-10 poi-label" style="pointer-events: none;">
+        <div class="poi-bubble" style="background: #2563eb; border: none;">
+            <span class="poi-name" style="margin:0 6px;">我的位置</span>
+        </div>
+        <div class="poi-pin" style="background: #ffffff"></div>
+    </div>
 
     <script>
-        // 🚨 数据库与地图核心配置
+        // 初始化 Supabase 客户端 (已替换为你的 URL 和 Key)
         const { createClient } = window.supabase;
-        const supabaseUrl = 'https://tknsypfzzynlliccnaoq.supabase.co'; 
+        const supabaseUrl = 'https://tknsypfzzynlliccnaoq.supabase.co'; // 注意这里去掉了 /rest/v1/，只需要域名
         const supabaseKey = 'sb_publishable_xEIXLtGzvofP2aC-w2wZBg_rxvMtHz_'; 
         const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
         const AMAP_WEATHER_KEY = '22bbaf9f484b83ceeb6af9dbec0ae0db';
         const AMAP_CITY_CODE = '430112';
         
-        const CALIBRATION_DATA = { westGate: { lng: 112.795474, lat: 28.456884, x: -25.2, z: -10.4 }, eastGate: { lng: 112.784846, lat: 28.452443, x: 28.7, z: -5.4 } };
+        const CALIBRATION_DATA = {
+            westGate: { lng: 112.795474, lat: 28.456884, x: -25.2, z: -10.4 },
+            eastGate: { lng: 112.784846, lat: 28.452443, x: 28.7, z: -5.4 }
+        };
+
         const PRECISION_SCALEX = (CALIBRATION_DATA.eastGate.x - CALIBRATION_DATA.westGate.x) / (CALIBRATION_DATA.eastGate.lng - CALIBRATION_DATA.westGate.lng);
         const PRECISION_SCALEZ = (CALIBRATION_DATA.eastGate.z - CALIBRATION_DATA.westGate.z) / (CALIBRATION_DATA.eastGate.lat - CALIBRATION_DATA.westGate.lat);
 
         function lngLatToScene(lng, lat) {
-            return [CALIBRATION_DATA.westGate.x + (lng - CALIBRATION_DATA.westGate.lng) * PRECISION_SCALEX, 0, CALIBRATION_DATA.westGate.z + (lat - CALIBRATION_DATA.westGate.lat) * PRECISION_SCALEZ];
+            const x = CALIBRATION_DATA.westGate.x + (lng - CALIBRATION_DATA.westGate.lng) * PRECISION_SCALEX;
+            const z = CALIBRATION_DATA.westGate.z + (lat - CALIBRATION_DATA.westGate.lat) * PRECISION_SCALEZ;
+            return [x, 0, z];
         }
+
         function sceneToLngLat(x, z) {
-            return [CALIBRATION_DATA.westGate.lng + (x - CALIBRATION_DATA.westGate.x) / PRECISION_SCALEX, CALIBRATION_DATA.westGate.lat + (z - CALIBRATION_DATA.westGate.z) / PRECISION_SCALEZ];
+            const lng = CALIBRATION_DATA.westGate.lng + (x - CALIBRATION_DATA.westGate.x) / PRECISION_SCALEX;
+            const lat = CALIBRATION_DATA.westGate.lat + (z - CALIBRATION_DATA.westGate.z) / PRECISION_SCALEZ;
+            return [lng, lat];
         }
 
         const gltfLoader = new THREE.GLTFLoader();
 
-        // 🚨 完整保留的所有景点原版长篇文本，没有丝毫删减！
         const POI_RAW_DATA = [
+            // 已彻底屏蔽以下 5 个点位的 3D 模型渲染，并保留完整描述和功能
             { id: 'vc', name: '游客服务中心', pos: [10.1, 0, 9.4], color: '#f59e0b', type: '服务', baseWaitTime: 0, desc: '靖港古镇游客服务中心是游客进入靖港古镇的第一站，项目总投资3000多万元，主要包含建筑面积6000多平方米的游客服务中心以及建筑面积600多平方米的配套用房。由湖南大学教授魏春雨设计，整体设计采用清水混凝土结构，保持建筑结构的原生态面貌，屋面为连续折板造型，几何线条和光影艺术交织，体现建筑宏伟、壮观的空间感，新游客服务中心面积更大、接待能力更强，是游客接待中心，也是网红长沙文化艺术新地标。', img: './youkefuwuzhongxin.png', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/youkefuwuzhongxin.mp4', audio: './youkefuwuzhongxin.mp3', noModel: true },
             { id: 'bdw', name: '靖港八大碗', pos: [19.1, 0, -4.3], color: '#ef4444', type: '美食', baseWaitTime: 25, schedules: ['12:00', '17:00'], desc: '靖港古镇景区官方自营演艺餐厅，靠近古镇东入口，位于主街道——保安街保安桥畔。餐厅面朝芦江，背靠夹河，三面环水，景观视野在整个古镇餐馆饭店间实属最佳。走进八大碗餐厅，如同穿越时空走进了千年前繁华的“小汉口”：油纸伞、仿古木窗、花格屏风……散发着浓浓的鱼米水乡风情，尽显国风的雅致和岁月的沧桑。餐厅共有上下2层，可摆45桌、主题包间3个，容纳450-480人同时就餐。以“靖港八大碗”为主推特色，靖港河鲜、古镇小炒、农家菜园、老火靓汤、精美凉菜等各种菜色一应俱全。', img: './badawan.jpg', audio: './badawan.mp3', noModel: true },
             { id: 'hsjc', name: '红色剧场', pos: [15.5, 0, -7.2], color: '#dc2626', type: '演艺', baseWaitTime: 0, schedules: ['10:30', '14:30'], desc: '“阳春三月三，芦荡放纸鸢。熏风甜甜惹人醉，江心飘白帆……”这是一曲靖港童谣，亦是一首信仰之歌，唱出了革命母亲陶承和四个儿女举家投身革命、感人至深的红色故事，红色戏剧《母亲的歌》带你感受靖港梦与家国情！', img: './hongsejuchang.jpg', video: 'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/muqindege.mp4', audio: './hongsejuchang.mp3', noModel: true },
             { id: 'lcx', name: '刘畴西事迹室', pos: [11.2, 0, -6.8], color: '#dc2626', type: '红色', baseWaitTime: 0, desc: '纪念和展示刘畴西烈士生平事迹，通过丰富的历史资料和实物展品，生动展现了刘畴西从黄埔一期生成长为红军高级将领的辉煌历程。‌刘畴西，‌1897年出生于湖南长沙，‌是中国共产党早期的军事领导人之一。刘畴西在革命生涯中表现出色，‌曾参加平定广州商团叛乱的战斗，‌并在战斗中负重伤，‌失去了左臂，‌因此被誉为“独臂将军”。‌他先后担任过红21军军长、‌闽浙赣军区司令员兼红军新编第10军军长等职务，‌为红军培养了大批军政干部，‌并在多次反“围剿”作战中立下赫赫战功。‌1934年，‌刘畴西率领红10军团北上抗日先遣队，‌最终在浙赣边界的怀玉山区被国民党军包围，‌虽奋力突围但终未能成功，‌于1935年1月被俘。‌他的一生充满了传奇色彩，‌从参加学生运动、‌加入中国社会主义青年团，‌到成为黄埔军校的第一期毕业生，‌再到担任红军的高级指挥官，‌刘畴西的经历体现了中国早期革命者的英勇和坚定。', img: './liuchouxichenlieshi.jpg', audio: './liuchouxi.mp3', noModel: true },
             { id: 'pyx', name: '皮影戏体验馆', pos: [3.8, 0, -5.8], color: '#d97706', type: '民俗', baseWaitTime: 0, schedules: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:30'], desc: '占地近300平米，分为两层，一楼主要是展示厅，二楼主要是表演厅和互动厅。皮影作为中国非物质文化遗产，它历史悠久，相传起源于汉、发展与唐、盛行于宋，明清时期流传各地。皮影戏，又称“影子戏”、“灯影戏”，是一种以兽皮或纸板做成的人物剪影表演故事的民间戏剧。皮影艺术是中国优秀的传统艺术，在电影、电视产生以前，它是世界上首创的集造型艺术、表演艺术、光影艺术于一体的独特艺术，也被誉为“最早的卡通”。', img: './piyingyishuguan.jpg', video:'https://jinggang-video-1409264716.cos.ap-guangzhou.myqcloud.com/piyingxi.mp4', audio: './piyingxi.mp3', noModel: true },
+            // 以下点位保留模型
             { id: 'dpf', name: '东牌坊', pos: [28.7, 0, -5.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇东面的标志性入口。', img: './dongpaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/dongpaifang.glb', modelScale: 5},
             { id: 'xpf', name: '西牌坊', pos: [-25.2, 0, -10.4], color: '#475569', type: '入口', baseWaitTime: 0, desc: '古镇西侧的主入口。', img: './xipaifang.jpg', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/xipaifang.glb', modelScale: 5},
             { id: 'ljg', name: '芦江阁', pos: [5.5, 0, 1.4], color: '#3b82f6', type: '景观', baseWaitTime: 0, desc: '纪念诗圣杜甫逢故友李龟年而建，古色古香的芦江阁耸立在望城靖港古镇芦江岸边，临水而建，毗邻沩水，北侧为芦江，东侧紧邻潇湘北路延路，为多层传统楼阁式建筑物。新建成的芦江阁共3层，檐口及屋脊也融入了湖南地域的建筑符号，每层均建有连廊，为游客提供了360度全景观景体验。芦江阁周边配套有芦苇湿地公园，在水面较开阔和水系坡度较缓的区域打造生态驳岸，设有游路、生态浮桥、观景平台等游览设施，让游客们可尽情饱览独具魅力的江南水乡美景。此外，芦江阁还实施了夜景亮化工程，夜幕降临下映衬古镇夜色更梦幻唯美，芦江水韵更动人心弦。', img: './lujiangge.jpg', audio: './lujiangge.mp3', modelUrl: 'https://jinggang-3d-1409264716.cos.ap-guangzhou.myqcloud.com/lujiangge.glb', modelScale: 5 },
@@ -355,47 +358,32 @@
         let labels = [];
         let viewMode = '3D';
         let appState = 'EXPLORER';
+        let isPanelOpen = true;
         let mapGroup, detailGroup, mapPlaneMesh;
+        let isPickerEnabled = false;
+        let pickerPoint;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
         let lastExplorerState = { pos: new THREE.Vector3(40, 40, 40), target: new THREE.Vector3(0, 0, 0) };
         let userLocation = null;
         let userMarkerGroup = null;   
         let routeLineMesh = null;     
         let currentDetailPOI = null;
-        let routeCanvasTexture = null;
-        let routeCanvasOffset = 0;
         
         let currentAudio = new Audio();
         let isAudioPlaying = false;
-        
-        // 移动端详情卡片抽屉状态 (hidden, peek, full)
-        let detailDrawerState = 'hidden'; 
-        let isMobile = window.innerWidth <= 768;
-
-        function initRouteTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 16;
-            const ctx = canvas.getContext('2d');
-            const gradient = ctx.createLinearGradient(0,0,256,0);
-            gradient.addColorStop(0, "rgba(255,255,255, 0)");
-            gradient.addColorStop(0.5, "rgba(59, 130, 246, 1)"); 
-            gradient.addColorStop(1, "rgba(255,255,255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0,0,256,16);
-            routeCanvasTexture = new THREE.CanvasTexture(canvas);
-            routeCanvasTexture.wrapS = THREE.RepeatWrapping;
-            routeCanvasTexture.wrapT = THREE.RepeatWrapping;
-            routeCanvasTexture.repeat.set(15, 1);
-        }
+        const audioController = document.getElementById('audioController');
+        const audioPoiName = document.getElementById('audioPoiName');
 
         function updateAudioBtnUI() {
             const btn = document.getElementById('audioPlayBtn');
             if (!btn) return;
             if (isAudioPlaying) {
-                btn.innerHTML = `<i data-lucide="square" size="16" fill="currentColor"></i> 停止播放`;
-                btn.className = "px-5 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-bold shadow-inner transition flex items-center gap-2 audio-playing";
+                btn.innerHTML = `<i data-lucide="square" size="14" fill="currentColor"></i> 停止`;
+                btn.className = "px-4 py-2 bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-1.5 active:scale-95";
             } else {
-                btn.innerHTML = `<i data-lucide="play" size="16"></i> 开始讲解`;
-                btn.className = "px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200 active:scale-95 transition flex items-center gap-2";
+                btn.innerHTML = `<i data-lucide="play" size="14" fill="currentColor"></i> 播放`;
+                btn.className = "px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5 active:scale-95";
             }
             lucide.createIcons();
         }
@@ -406,74 +394,220 @@
             currentAudio.src = poi.audio;
             currentAudio.play().then(() => {
                 isAudioPlaying = true;
-                document.getElementById('audioPoiName').innerText = poi.name;
-                document.getElementById('audioController').classList.replace('hidden', 'flex');
+                audioPoiName.innerText = poi.name;
+                audioController.classList.remove('hidden');
+                audioController.classList.add('flex');
                 updateAudioBtnUI();
+                lucide.createIcons();
             }).catch(e => {
-                console.log("音频播放需交互", e);
-                isAudioPlaying = false; updateAudioBtnUI();
+                console.log("音频播放需用户交互触发或链接无效", e);
+                isAudioPlaying = false;
+                updateAudioBtnUI();
             });
             currentAudio.onended = () => stopAudio();
         }
 
         function stopAudio() {
-            if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
             isAudioPlaying = false;
-            document.getElementById('audioController').classList.replace('flex', 'hidden');
+            audioController.classList.add('hidden');
+            audioController.classList.remove('flex');
             updateAudioBtnUI();
         }
 
         function toggleAudioState() {
-            if (isAudioPlaying) stopAudio(); else if (currentDetailPOI) playPoiAudio(currentDetailPOI);
+            if (isAudioPlaying) {
+                stopAudio();
+            } else {
+                if (currentDetailPOI) playPoiAudio(currentDetailPOI);
+            }
         }
 
-        function toggleTraffic() {
-            const container = document.getElementById('sideContainer');
-            const isClosed = container.classList.contains('translate-x-[120%]') || (isMobile && container.classList.contains('translate-y-full'));
-            
-            if (isMobile) {
-                container.className = `fixed inset-0 z-50 bg-white/95 backdrop-blur-md transition-transform duration-400 ease-out flex flex-col p-4 pt-12 ${isClosed ? 'translate-y-0' : 'translate-y-full'}`;
-                document.getElementById('togglePanelBtn').classList.add('hidden');
-                document.getElementById('sideContainer').firstElementChild.nextElementSibling.classList.replace('shadow-2xl', 'shadow-none');
-                document.getElementById('sideContainer').firstElementChild.nextElementSibling.classList.replace('p-5', 'p-0');
-            } else {
-                container.classList.toggle('translate-x-[120%]');
-                document.getElementById('togglePanelBtn').querySelector('i').style.transform = container.classList.contains('translate-x-[120%]') ? 'rotate(180deg)' : 'rotate(0)';
+        let isWeatherCollapsed = false;
+        function toggleWeather() {
+            isWeatherCollapsed = !isWeatherCollapsed;
+            const content = document.getElementById('weatherContent');
+            const icon = document.getElementById('weatherToggleIcon');
+            if (isWeatherCollapsed) { content.classList.add('hidden'); icon.setAttribute('data-lucide', 'chevron-down');
+            } 
+            else { content.classList.remove('hidden'); icon.setAttribute('data-lucide', 'chevron-up');
             }
             lucide.createIcons();
         }
 
+        let isTrafficCollapsed = false;
+        function toggleTraffic() {
+            isTrafficCollapsed = !isTrafficCollapsed;
+            const panelContainer = document.getElementById('sideContainer');
+            const innerPanel = document.getElementById('trafficInnerPanel');
+            const list = document.getElementById('poiList');
+            const icon = document.getElementById('trafficToggleIcon');
+            if (isTrafficCollapsed) {
+                list.classList.add('hidden'); panelContainer.classList.remove('bottom-24');
+                innerPanel.classList.remove('h-full'); icon.setAttribute('data-lucide', 'chevron-down');
+            } else {
+                list.classList.remove('hidden');
+                panelContainer.classList.add('bottom-24'); innerPanel.classList.add('h-full'); icon.setAttribute('data-lucide', 'chevron-up');
+            }
+            lucide.createIcons();
+        }
+
+        function toggleSidePanel() {
+            isPanelOpen = !isPanelOpen;
+            const container = document.getElementById('sideContainer');
+            if (isPanelOpen) container.classList.remove('closed'); else container.classList.add('closed');
+        }
+
+        function toggleDetailCard() {
+            const card = document.getElementById('detailCard');
+            card.classList.toggle('minimized');
+            lucide.createIcons();
+        }
+
+        function getWaitTimeClass(timeMins) {
+            if (timeMins <= 15) return 'time-low';
+            if (timeMins <= 30) return 'time-med';
+            return 'time-high';
+        }
+
+        function updateAllWaitTimes() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            POI_RAW_DATA.forEach(poi => {
+                let waitMins = poi.baseWaitTime;
+                let displayString = '';
+                let statusClass = '';
+                if (poi.schedules && poi.schedules.length > 0) {
+                   let nextShowMins = -1;
+                    for (let timeStr of poi.schedules) {
+                        const [h, m] = timeStr.split(':').map(Number);
+                        const showMins = h * 60 + m;
+                        if (showMins > currentMinutes) { nextShowMins = showMins; break; }
+                    }
+                    if (nextShowMins === -1) { displayString = "今日结束"; statusClass = "time-ended"; waitMins = 0; } 
+                    else { waitMins = nextShowMins - currentMinutes; displayString = `下一场 ${waitMins}min`; statusClass = getWaitTimeClass(waitMins); }
+                } else {
+                    if (poi.baseWaitTime === 0) { waitMins = 0; displayString = "无需等待"; statusClass = "time-low"; } 
+                    else {
+                        const fluctuation = Math.floor(Math.sin(currentMinutes / 5 + poi.pos[0]) * 5);
+                        waitMins = Math.max(0, poi.baseWaitTime + fluctuation);
+                        displayString = `等待 ${waitMins}min`; statusClass = getWaitTimeClass(waitMins);
+                    }
+                }
+                poi.currentWaitTime = waitMins;
+                poi.currentDisplay = displayString;
+                poi.currentClass = statusClass;
+                const mapLabel = document.getElementById(`wait-time-tag-${poi.id}`);
+                if (mapLabel) { mapLabel.className = `wait-time-tag ${statusClass}`; mapLabel.innerText = displayString;
+                }
+                const listIndicator = document.getElementById(`list-wait-indicator-${poi.id}`);
+                const listText = document.getElementById(`list-wait-text-${poi.id}`);
+                if (listIndicator && listText) {
+                    let bgClass = 'bg-slate-500';
+                    if(statusClass.includes('time-low')) bgClass = 'bg-green-500';
+                    else if(statusClass.includes('time-med')) bgClass = 'bg-amber-500';
+                    else if(statusClass.includes('time-high')) bgClass = 'bg-red-500';
+                    listIndicator.className = `w-1.5 h-1.5 rounded-full ${bgClass}`;
+                    listText.innerText = displayString;
+                }
+            });
+        }
+
+        function fetchAmapWeather() {
+            if (!AMAP_WEATHER_KEY || AMAP_WEATHER_KEY === 'YOUR_AMAP_KEY') return;
+            const callbackName = '_amapWeatherCallback_' + Date.now();
+            window[callbackName] = function(res) {
+                delete window[callbackName];
+                if (res.status === '1' && res.lives && res.lives[0]) {
+                    const w = res.lives[0];
+                    document.getElementById('weatherTemp').innerText = w.temperature + '°C';
+                    document.getElementById('weatherDesc').innerText = w.weather;
+                    
+                    document.getElementById('weatherWind').innerText = w.winddirection + '风 ' + w.windpower + '级';
+                    document.getElementById('weatherHumidity').innerText = '湿度 ' + w.humidity + '%';
+                    
+                    document.getElementById('weatherLoading').style.display = 'none';
+                    const weatherDataEl = document.getElementById('weatherData');
+                    weatherDataEl.classList.remove('hidden');
+                    weatherDataEl.classList.add('flex');
+                } else {
+                    document.getElementById('weatherLoading').innerText = "获取失败";
+                }
+            };
+            const url = `https://restapi.amap.com/v3/weather/weatherInfo?city=${AMAP_CITY_CODE}&key=${AMAP_WEATHER_KEY}&callback=${callbackName}`;
+            const script = document.createElement('script'); script.src = url;
+            script.onerror = function() {
+                document.getElementById('weatherLoading').innerText = "网络异常";
+            }
+            document.head.appendChild(script);
+        }
+
         function initAmapLocation() {
-            if (typeof AMap === 'undefined' || !AMap.Geolocation) return;
+            if (typeof AMap === 'undefined') return;
+
             AMap.plugin('AMap.Geolocation', function () {
-                const geo = new AMap.Geolocation({ enableHighAccuracy: true, timeout: 5000, convert: true, showButton: false, GeoLocationFirst: true });
+                const geo = new AMap.Geolocation({
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                    convert: true,
+                    showButton: false,
+                    GeoLocationFirst: true,
+                    useNative: true
+                });
+
                 function doLocate() {
-                    geo.getCurrentPosition((status, result) => {
+                    geo.getCurrentPosition(function (status, result) {
+                        console.log('定位结果:', status, result);
                         const statusEl = document.getElementById('status-text');
+
                         if (status === 'complete' && result.position) {
-                            userLocation = { lng: result.position.lng, lat: result.position.lat };
-                            statusEl.innerHTML = `<i data-lucide="satellite" size="14" class="text-green-500"></i> ${result.accuracy > 300 ? '模糊定位' : '精准定位'}`;
-                            statusEl.className = "status-badge glass-panel font-bold text-slate-600 flex items-center gap-1.5 shadow-sm";
+                            userLocation = {
+                                lng: result.position.lng,
+                                lat: result.position.lat
+                            };
+                            if (result.accuracy && result.accuracy > 300) {
+                                statusEl.innerText = "⚠️ 信号弱 (基站/IP定位，可能有误差)";
+                                statusEl.className = "status-badge text-amber-600";
+                            } else {
+                                statusEl.innerText = "✅ 实时 GPS 定位中";
+                                statusEl.className = "status-badge text-green-600 font-bold";
+                            }
                             updateUserMarker();
                         } else {
-                            userLocation = { lng: 112.7915, lat: 28.4545 }; // 模拟
-                            statusEl.innerHTML = `<i data-lucide="map-pin-off" size="14" class="text-slate-400"></i> 模拟漫游`;
+                            console.warn('真实定位失败，启用模拟定位');
+                            userLocation = {
+                                lng: 112.7915,
+                                lat: 28.4545
+                            };
+                            statusEl.innerText = "❌ 定位失败 (请检查手机定位权限)";
+                            statusEl.className = "status-badge text-red-600";
                             updateUserMarker();
                         }
-                        lucide.createIcons();
                     });
                 }
-                doLocate(); setInterval(doLocate, 10000); 
+
+                doLocate();
+                setInterval(doLocate, 30000);
             });
         }
 
         function locateToUser() {
-            if (!userLocation) { alert("信号搜索中，请开启定位权限"); return; }
-            const p = lngLatToScene(userLocation.lng, userLocation.lat);
-            if (Math.abs(p[0]) > 200 || Math.abs(p[2]) > 200) {
-                alert(`📍 定位成功\n由于您不在景区内，将留在全局视角。`); return;
+            if (!userLocation) {
+                alert("正在努力获取您的位置，请确保已授予浏览器的定位权限！");
+                return;
             }
-            animateCamera(new THREE.Vector3(p[0] + 10, 20, p[2] + 15), new THREE.Vector3(p[0], 0, p[2]), 1000);
+            const p = lngLatToScene(userLocation.lng, userLocation.lat);
+            
+            if (Math.abs(p[0]) > 100 || Math.abs(p[2]) > 100) {
+                alert(`📍 定位成功！\n\n系统检测到您当前未在靖港古镇景区内。\n您的真实坐标: 经度 ${userLocation.lng.toFixed(4)}, 纬度 ${userLocation.lat.toFixed(4)}\n\n(为防止画面空白，镜头将留在古镇地图上)`);
+                return;
+            }
+            
+            animateCamera(new THREE.Vector3(p[0] + 15, 25, p[2] + 15), new THREE.Vector3(p[0], 0, p[2]), 800);
         }
 
         function updateUserMarker() {
@@ -481,245 +615,492 @@
             if (userMarkerGroup) mapGroup.remove(userMarkerGroup);
             const [x, y, z] = lngLatToScene(userLocation.lng, userLocation.lat);
             userMarkerGroup = new THREE.Group();
-            const ring = new THREE.Mesh(new THREE.RingGeometry(0.3, 0.6, 32), new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
+            const ring = new THREE.Mesh(new THREE.RingGeometry(0.25, 0.45, 32), new THREE.MeshBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0.7, side: THREE.DoubleSide }));
             ring.rotation.x = -Math.PI / 2; userMarkerGroup.add(ring);
-            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-            dot.position.y = 0.2; userMarkerGroup.add(dot);
-            const inner = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshBasicMaterial({ color: 0x2563eb }));
-            inner.position.y = 0.22; userMarkerGroup.add(inner);
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), new THREE.MeshBasicMaterial({ color: 0x2563eb }));
+            dot.position.y = 0.15; userMarkerGroup.add(dot);
             userMarkerGroup.position.set(x, 0, z); mapGroup.add(userMarkerGroup);
         }
 
-        // 路线防打结与流光动效
         function planRoute(targetPOI) {
-            if (typeof AMap === 'undefined' || !AMap.Walking) { alert('导航组件载入中，请稍后'); return; }
+            if (typeof AMap === 'undefined') {
+                alert('高德地图加载失败');
+                return;
+            }
+
             toggleViewMode('2D');
             const endLngLat = targetPOI.lngLat;
-            let startLngLat = userLocation ? [userLocation.lng, userLocation.lat] : endLngLat;
-            
+            let startLngLat = endLngLat;
+
             if (userLocation) {
-                const p = lngLatToScene(userLocation.lng, userLocation.lat);
-                if (Math.abs(p[0]) > 200 || Math.abs(p[2]) > 200) { startLngLat = [112.7915, 28.4545]; } // 距离保护
+                startLngLat = [
+                    userLocation.lng,
+                    userLocation.lat
+                ];
+            } else {
+                alert('正在获取您的位置，请稍后重试');
+                initAmapLocation();
+                return;
             }
 
             clearRoute();
+
             AMap.plugin('AMap.Walking', function () {
                 const walking = new AMap.Walking();
-                walking.search(startLngLat, endLngLat, function (status, result) {
-                    if (status === 'complete' && result.routes && result.routes[0]) {
-                        const points = []; let lastPos = null;
-                        result.routes[0].steps.forEach(step => {
-                            if (step.path) step.path.forEach(p => {
-                                let lng = typeof p.lng === 'number' ? p.lng : (p.getLng ? p.getLng() : p[0]);
-                                let lat = typeof p.lat === 'number' ? p.lat : (p.getLat ? p.getLat() : p[1]);
-                                const scenePos = lngLatToScene(lng, lat);
-                                const vec = new THREE.Vector3(scenePos[0], 0.2, scenePos[2]);
-                                if (!lastPos || lastPos.distanceTo(vec) > 0.5) { points.push(vec); lastPos = vec; }
+                walking.search(
+                    startLngLat,
+                    endLngLat,
+                    function (status, result) {
+                        console.log('路线规划:', status, result);
+
+                        if (status === 'complete' && result.routes && result.routes[0]) {
+                            const route = result.routes[0];
+                            const points = [];
+                            let lastPos = null;
+
+                            route.steps.forEach(step => {
+                                if (step.path && step.path.length) {
+                                    step.path.forEach(p => {
+                                        let lng, lat;
+                                        if (Array.isArray(p)) {
+                                            lng = p[0];
+                                            lat = p[1];
+                                        } else if (typeof p.lng === 'number') {
+                                            lng = p.lng;
+                                            lat = p.lat;
+                                        } else {
+                                            lng = p.getLng();
+                                            lat = p.getLat();
+                                        }
+
+                                        const scenePos = lngLatToScene(lng, lat);
+                                        const vec = new THREE.Vector3(scenePos[0], 0.15, scenePos[2]);
+
+                                        // 过滤掉距离小于 0.5 的密集点位，防止模型重叠打结
+                                        if (!lastPos || lastPos.distanceTo(vec) > 0.5) {
+                                            points.push(vec);
+                                            lastPos = vec;
+                                        }
+                                    });
+                                }
                             });
-                        });
-                        if (points.length < 2) { alert('您已在目标附近'); return; }
 
-                        const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.2);
-                        const tubeGeo = new THREE.TubeGeometry(curve, points.length * 5, 0.25, 8, false);
-                        
-                        routeLineMesh = new THREE.Mesh(tubeGeo, new THREE.MeshBasicMaterial({ 
-                            map: routeCanvasTexture, transparent: true, opacity: 0.9, color: 0xffffff, blending: THREE.AdditiveBlending 
-                        }));
-                        mapGroup.add(routeLineMesh);
-                        document.getElementById('clearRouteBtn')?.classList.remove('hidden');
+                            if (points.length < 2) {
+                                alert('距离太近，无需导航');
+                                return;
+                            }
 
-                        if(isMobile) { setDrawerState('peek'); } // 收起面板以便看路线
-                        
-                        const mid = points[Math.floor(points.length / 2)];
-                        setTimeout(() => animateCamera(new THREE.Vector3(mid.x, 35, mid.z + 5), new THREE.Vector3(mid.x, 0, mid.z), 1200), 100);
-                    } else { alert('无合适步行路线'); }
-                });
+                            // 使用 'centripetal' 防止打结
+                            const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.2);
+                            const tubeGeo = new THREE.TubeGeometry(curve, points.length * 4, 0.22, 12, false);
+
+                            routeLineMesh = new THREE.Mesh(
+                                tubeGeo,
+                                new THREE.MeshBasicMaterial({
+                                    color: 0x2563eb,
+                                    transparent: true,
+                                    opacity: 0.95
+                                })
+                            );
+
+                            mapGroup.add(routeLineMesh);
+
+                            document.getElementById('clearRouteBtn')?.classList.remove('hidden');
+
+                            const mid = points[Math.floor(points.length / 2)];
+                            setTimeout(() => {
+                                animateCamera(
+                                    new THREE.Vector3(mid.x, 45, mid.z + 0.01),
+                                    new THREE.Vector3(mid.x, 0, mid.z),
+                                    1000
+                                );
+                            }, 500);
+
+                        } else {
+                            console.error('路线规划失败:', status, result);
+                            alert('路线规划失败\n\n请检查：\n1. 高德 KEY\n2. 域名白名单\n3. 网络');
+                        }
+                    }
+                );
             });
         }
 
         function clearRoute() {
-            if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh); routeLineMesh.geometry.dispose(); routeLineMesh.material.dispose(); routeLineMesh = null; }
+            if (routeLineMesh && mapGroup) { mapGroup.remove(routeLineMesh);
+            routeLineMesh.geometry.dispose(); routeLineMesh.material.dispose(); routeLineMesh = null; }
             document.getElementById('clearRouteBtn')?.classList.add('hidden');
         }
 
-        // 抽屉状态管理
-        function setDrawerState(state) {
-            const card = document.getElementById('detailCard');
-            const nav = document.getElementById('mobileNav');
-            detailDrawerState = state;
-            if (state === 'hidden') {
-                card.style.transform = isMobile ? 'translateY(150%)' : 'translate(-50%, 150%)';
-                if(nav) nav.style.transform = 'translateY(0)';
-            } else if (state === 'peek') {
-                card.style.transform = 'translateY(calc(100% - 150px))';
-                if(nav) nav.style.transform = 'translateY(150%)';
-            } else if (state === 'full') {
-                card.style.transform = isMobile ? 'translateY(0)' : 'translate(-50%, 0)';
-                if(nav) nav.style.transform = 'translateY(150%)';
+        function showQRModal() {
+            const url = window.location.href;
+            document.getElementById('qrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=224x224&data=' + encodeURIComponent(url);
+            document.getElementById('qrUrl').innerText = url; document.getElementById('qrModal').classList.remove('hidden'); document.getElementById('qrModal').classList.add('flex'); lucide.createIcons();
+        }
+        function hideQRModal() { document.getElementById('qrModal').classList.add('hidden'); document.getElementById('qrModal').classList.remove('flex');
+        }
+        function copyQRUrl() { const url = document.getElementById('qrUrl').innerText; navigator.clipboard.writeText(url).then(() => alert('已复制到剪贴簿'));
+        }
+
+        // ====== 意见收集箱逻辑 ======
+        function showFeedbackModal() {
+            document.getElementById('feedbackModal').classList.remove('hidden');
+            document.getElementById('feedbackModal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function hideFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+            document.getElementById('feedbackModal').classList.remove('flex');
+            document.getElementById('feedbackContent').value = '';
+            document.getElementById('feedbackContact').value = '';
+        }
+
+        async function submitFeedback() {
+            const type = document.getElementById('feedbackType').value;
+            const content = document.getElementById('feedbackContent').value.trim();
+            const contact = document.getElementById('feedbackContact').value.trim();
+            const btn = document.getElementById('submitFeedbackBtn');
+
+            if (!content) {
+                alert("请填写反馈内容哦！");
+                return;
+            }
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 提交中...`;
+            btn.disabled = true;
+
+            const locStr = userLocation ? `${userLocation.lng}, ${userLocation.lat}` : '未获取定位';
+
+            try {
+                // 提交数据至 Supabase
+                const { data, error } = await supabaseClient
+                    .from('feedbacks')
+                    .insert([
+                        { 
+                            type: type, 
+                            content: content, 
+                            contact: contact, 
+                            location: locStr 
+                        }
+                    ]);
+
+                if (error) throw error;
+
+                alert("提交成功！感谢您的反馈，我们会尽快优化。");
+                hideFeedbackModal();
+
+            } catch (error) {
+                console.error("提交反馈出错:", error);
+                alert("提交失败，请检查配置或网络。原因：" + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
-        function initDrawerTouch() {
-            const handle = document.getElementById('drawerHandleArea');
-            let startY = 0;
-            handle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
-            handle.addEventListener('touchend', e => {
-                const diff = e.changedTouches[0].clientY - startY;
-                if (diff > 40 && detailDrawerState === 'full') setDrawerState('peek');
-                else if (diff > 40 && detailDrawerState === 'peek') exitDetailMode();
-                else if (diff < -40 && detailDrawerState === 'peek') setDrawerState('full');
-                else if (Math.abs(diff) < 10) setDrawerState(detailDrawerState === 'peek' ? 'full' : 'peek'); // Click toggle
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf1f5f9);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.copy(lastExplorerState.pos);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            createControls(lastExplorerState.target);
+            
+            clock = new THREE.Clock();
+            mapGroup = new THREE.Group(); detailGroup = new THREE.Group(); scene.add(mapGroup); scene.add(detailGroup);
+            pickerPoint = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })); pickerPoint.visible = false; scene.add(pickerPoint);
+            addLights(); createDefaultMap(); updateAllWaitTimes(); createPOIs();
+            initUI(); fetchAmapWeather(); initAmapLocation(); 
+            lucide.createIcons(); animate();
+            window.addEventListener('resize', onWindowResize); window.addEventListener('mousedown', onCanvasClick);
+        }
+
+        function togglePicker() {
+            isPickerEnabled = !isPickerEnabled;
+            document.getElementById('picker-status').innerText = isPickerEnabled ? "开" : "关";
+            document.getElementById('coord-display').style.display = isPickerEnabled ? "block" : "none"; pickerPoint.visible = isPickerEnabled;
+        }
+
+        function onCanvasClick(event) {
+            if (!isPickerEnabled || appState === 'DETAIL' || event.button !== 0) return;
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(mapPlaneMesh);
+            if (intersects.length > 0) {
+                const p = intersects[0].point;
+                const x = Math.round(p.x * 10) / 10; const z = Math.round(p.z * 10) / 10;
+                pickerPoint.position.set(x, 0.1, z);
+                document.getElementById('coord-display').innerText = `已选坐标: [${x}, 0, ${z}]`;
+            }
+        }
+
+        function createControls(target) {
+            if (controls) controls.dispose();
+            controls = new THREE.OrbitControls(camera, renderer.domElement); 
+            if (target) {
+                controls.target.copy(target);
+            }
+            controls.enableDamping = true; 
+            controls.maxPolarAngle = Math.PI / 2.1;
+            
+            if (viewMode === '2D' && appState === 'EXPLORER') { 
+                controls.enableRotate = false; 
+                controls.maxPolarAngle = 0;
+                controls.mouseButtons = {
+                    LEFT: THREE.MOUSE.PAN,
+                    MIDDLE: THREE.MOUSE.DOLLY,
+                    RIGHT: THREE.MOUSE.ROTATE
+                };
+                controls.touches = {
+                    ONE: THREE.TOUCH.PAN,
+                    TWO: THREE.TOUCH.DOLLY_ROTATE
+                };
+            } else {
+                controls.enableRotate = true;
+                controls.mouseButtons = {
+                    LEFT: THREE.MOUSE.ROTATE,
+                    MIDDLE: THREE.MOUSE.DOLLY,
+                    RIGHT: THREE.MOUSE.PAN
+                };
+                controls.touches = {
+                    ONE: THREE.TOUCH.ROTATE,
+                    TWO: THREE.TOUCH.DOLLY_PAN
+                };
+            }
+        }
+
+        function handleMapUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                new THREE.TextureLoader().load(e.target.result, (texture) => {
+                    if (mapPlaneMesh) { mapPlaneMesh.material.map = texture; document.getElementById('status-text').innerText = "✅ 实景地图已加载"; document.getElementById('upload-btn').style.display = 'none'; }
+                });
+            }; reader.readAsDataURL(file);
+        }
+
+        function createDefaultMap() {
+            mapPlaneMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(60, 40), 
+                new THREE.MeshBasicMaterial({ color: 0xf8fafc, side: THREE.DoubleSide })
+            );
+            mapPlaneMesh.rotation.x = -Math.PI / 2; 
+            mapGroup.add(mapPlaneMesh);
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load('./map.png', 
+                function(texture) {
+                    mapPlaneMesh.material.map = texture;
+                    mapPlaneMesh.material.color.setHex(0xffffff); 
+                    mapPlaneMesh.material.needsUpdate = true;
+                    document.getElementById('status-text').innerText = "✅ 实景底图已加载";
+                    document.getElementById('status-text').className = "status-badge font-bold text-green-600";
+                },
+                undefined,
+                function(err) {
+                    console.error("底图加载失败:", err);
+                    document.getElementById('status-text').innerText = "⚠️ 底图加载失败(请检查云端是否有 map.png)";
+                    document.getElementById('status-text').className = "status-badge text-red-600";
+                }
+            );
+        }
+
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        function addLights() { scene.add(new THREE.AmbientLight(0xffffff, 0.8)); const directional = new THREE.DirectionalLight(0xffffff, 0.5);
+        directional.position.set(20, 40, 20); scene.add(directional); }
+
+        function createChineseBuilding(color) {
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(3, 2.5, 3), new THREE.MeshPhongMaterial({ color: 0xffffff })); body.position.y = 1.25; group.add(body);
+            const roof = new THREE.Mesh(new THREE.CylinderGeometry(0, 2.8, 1.5, 4), new THREE.MeshPhongMaterial({ color })); roof.position.y = 3.25; roof.rotation.y = Math.PI/4; group.add(roof);
+            return group;
+        }
+
+        function createPOIs() {
+            const labelContainer = document.getElementById('labels-container');
+            labelContainer.innerHTML = ''; labels = [];
+            POI_RAW_DATA.forEach(poi => {
+                const ring = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.6, 32), new THREE.MeshBasicMaterial({ color: poi.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
+                ring.rotation.x = -Math.PI / 2; ring.position.set(...poi.pos); mapGroup.add(ring); poi.ring = ring;
+                const div = document.createElement('div'); div.className = 'poi-label';
+                div.onclick = (e) => { e.stopPropagation(); enterDetailMode(poi); };
+                div.innerHTML = `<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wait-time-tag-${poi.id}" class="wait-time-tag ${poi.currentClass}">${poi.currentDisplay}</span></div><div class="poi-pin" style="background: ${poi.color}"></div></div>`;
+                labelContainer.appendChild(div);
+                labels.push({ element: div, position: new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0, 0.5, 0)), data: poi });
             });
         }
 
-        function enterDetailMode(poi) {
-            if (viewMode === '3D') { lastExplorerState.pos.copy(camera.position); lastExplorerState.target.copy(controls.target); }
-            appState = 'DETAIL'; currentDetailPOI = poi; document.body.className = 'mode-detail'; detailGroup.visible = true;
-            
-            // Marker 动画
-            labels.forEach(l => l.element.classList.remove('poi-active'));
-            const activeLabel = labels.find(l => l.data.id === poi.id);
-            if(activeLabel) activeLabel.element.classList.add('poi-active');
-            
-            setDrawerState(isMobile ? 'peek' : 'full');
-            document.getElementById('detailScrollArea').scrollTop = 0; // 重置滚动
+        function initUI() {
+            const list = document.getElementById('poiList');
+            list.innerHTML = '';
+            POI_RAW_DATA.forEach(poi => {
+                const item = document.createElement('div'); item.className = 'bg-white/50 p-3 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-white transition-all shadow-sm';
+                item.onclick = () => enterDetailMode(poi);
+                item.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background: ${poi.color}"><i data-lucide="map-pin" size="14"></i></div><div class="flex-1"><div class="text-[13px] font-bold text-slate-800">${poi.name}</div><div class="text-[9px] text-slate-500">${poi.currentDisplay}</div></div><i data-lucide="chevron-right" size="14" class="text-slate-300"></i>`;
+                list.appendChild(item);
+            });
+        }
 
+        function switchDetailMedia(mode) {
+            const imgEl = document.getElementById('detailImg');
+            const videoEl = document.getElementById('detailVideo');
+            const tabImg = document.getElementById('tabImg');
+            const tabVideo = document.getElementById('tabVideo');
+            if (mode === 'video' && currentDetailPOI.video) {
+                stopAudio();
+                imgEl.classList.add('hidden');
+                videoEl.classList.remove('hidden');
+                videoEl.src = currentDetailPOI.video;
+                tabVideo.classList.add('active');
+                tabImg.classList.remove('active');
+            } else {
+                videoEl.pause();
+                videoEl.classList.add('hidden');
+                imgEl.classList.remove('hidden');
+                tabImg.classList.add('active');
+                tabVideo.classList.remove('active');
+            }
+        }
+
+        function enterDetailMode(poi) {
+            if (viewMode === '3D') { controls.update();
+            lastExplorerState.pos.copy(camera.position); lastExplorerState.target.copy(controls.target); }
+            appState = 'DETAIL'; currentDetailPOI = poi;
+            document.body.className = 'mode-detail'; detailGroup.visible = true;
+            
+            document.getElementById('detailCard').classList.remove('minimized');
+            
             while(detailGroup.children.length > 0) detailGroup.remove(detailGroup.children[0]);
-            if (!poi.noModel) {
-                if (poi.modelUrl) {
-                    gltfLoader.load(poi.modelUrl, g => {
-                        const m = g.scene, s = poi.modelScale || 5; m.scale.set(s, s, s);
-                        m.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(m);
-                        m.position.set(poi.pos[0], poi.pos[1] - box.min.y + (poi.modelOffsetY || 0), poi.pos[2]); detailGroup.add(m);
-                    });
-                } else {
-                    const b = createChineseBuilding(poi.color); b.position.set(...poi.pos); detailGroup.add(b);
-                }
+            
+            if (poi.noModel) {
+                // 如果标记了 noModel，绝对不渲染任何3D建筑！直接跳过！
+            } else if (poi.modelUrl) {
+                gltfLoader.load(poi.modelUrl, function(gltf) {
+                    const model = gltf.scene;
+                    
+                    const s = poi.modelScale || 5; 
+                    model.scale.set(s, s, s);
+                    
+                    model.updateMatrixWorld(true);
+                    const box = new THREE.Box3().setFromObject(model);
+                    const bottomOffset = box.min.y; 
+                    
+                    const offsetY = poi.modelOffsetY || 0;
+                    model.position.set(poi.pos[0], poi.pos[1] - bottomOffset + offsetY, poi.pos[2]); 
+                    
+                    detailGroup.add(model);
+                }, undefined, function(error) {
+                    console.error('⚠️ 模型加载失败，使用默认房子垫底：', error);
+                    const building = createChineseBuilding(poi.color); 
+                    building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
+                    detailGroup.add(building);
+                });
+            } else {
+                const building = createChineseBuilding(poi.color); 
+                building.position.set(poi.pos[0], poi.pos[1], poi.pos[2]); 
+                detailGroup.add(building);
             }
 
-            animateCamera(new THREE.Vector3(poi.pos[0], 12, poi.pos[2] + 16), new THREE.Vector3(poi.pos[0], 2, poi.pos[2]));
+            const camOffset = new THREE.Vector3(0, 10, 15); 
+            const targetOffset = new THREE.Vector3(0, 2, 0); 
+
+            animateCamera(
+                new THREE.Vector3(poi.pos[0] + camOffset.x, poi.pos[1] + camOffset.y, poi.pos[2] + camOffset.z),
+                new THREE.Vector3(poi.pos[0] + targetOffset.x, poi.pos[1] + targetOffset.y, poi.pos[2] + targetOffset.z)
+            );
             
             document.getElementById('detailTitle').innerText = poi.name;
             document.getElementById('detailDesc').innerText = poi.desc;
             document.getElementById('detailImg').src = poi.img;
-            document.getElementById('mediaSwitcher').classList.toggle('hidden', !poi.video);
+            
+            const switcher = document.getElementById('mediaSwitcher');
+            if (poi.video) { switcher.classList.remove('hidden'); } else { switcher.classList.add('hidden');
+            }
             switchDetailMedia('img');
-            document.getElementById('audioSection').style.display = poi.audio ? 'flex' : 'none'; updateAudioBtnUI();
+
+            const audioSection = document.getElementById('audioSection');
+            if (audioSection) {
+                if (poi.audio) {
+                    audioSection.style.display = 'flex'; 
+                    updateAudioBtnUI();
+                } else {
+                    audioSection.style.display = 'none';
+                }
+            }
+
+            const card = document.getElementById('detailCard');
+            card.style.transform = 'translate(-50%, 0)'; card.style.opacity = '1';
         }
 
         function exitDetailMode() {
-            stopAudio(); appState = 'EXPLORER'; document.body.className = 'mode-explorer'; detailGroup.visible = false;
-            labels.forEach(l => l.element.classList.remove('poi-active'));
-            setDrawerState('hidden');
-            animateCamera(viewMode === '2D' ? new THREE.Vector3(0, 50, 0.001) : lastExplorerState.pos, viewMode === '2D' ? new THREE.Vector3(0, 0, 0) : lastExplorerState.target);
+            stopAudio();
+            const videoEl = document.getElementById('detailVideo');
+            if (videoEl) { videoEl.pause(); videoEl.src = ""; }
+            appState = 'EXPLORER';
+            document.body.className = 'mode-explorer'; detailGroup.visible = false;
+            document.getElementById('detailCard').style.transform = 'translate(-50%, 150%)'; document.getElementById('detailCard').style.opacity = '0';
+            let targetPos = (viewMode === '2D') ?
+            new THREE.Vector3(0, 50, 0.001) : lastExplorerState.pos.clone();
+            let targetLookAt = (viewMode === '2D') ? new THREE.Vector3(0, 0, 0) : lastExplorerState.target.clone();
+            animateCamera(targetPos, targetLookAt);
         }
 
-        function switchDetailMedia(mode) {
-            const img = document.getElementById('detailImg'), vid = document.getElementById('detailVideo');
-            if (mode === 'video' && currentDetailPOI.video) { stopAudio(); img.classList.add('hidden'); vid.classList.remove('hidden'); vid.src = currentDetailPOI.video; }
-            else { vid.pause(); vid.classList.add('hidden'); img.classList.remove('hidden'); }
-            document.getElementById('tabImg').className = `media-tab py-1.5 rounded-lg ${mode==='img'?'active':''}`;
-            document.getElementById('tabVideo').className = `media-tab py-1.5 rounded-lg ${mode==='video'?'active':''}`;
-        }
-
-        // Supabase 反馈系统
-        function showFeedbackModal() { document.getElementById('feedbackModal').classList.replace('hidden','flex'); setTimeout(()=>document.getElementById('feedbackModal').firstElementChild.classList.add('scale-100'),10); lucide.createIcons(); }
-        function hideFeedbackModal() { document.getElementById('feedbackModal').classList.replace('flex','hidden'); }
-        
-        async function submitFeedback() {
-            const type = document.getElementById('feedbackType').value, content = document.getElementById('feedbackContent').value.trim(), contact = document.getElementById('feedbackContact').value.trim(), btn = document.getElementById('submitFeedbackBtn');
-            if (!content) return alert("写点内容再提交吧~");
-            const originalText = btn.innerHTML; btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" size="18"></i> 发送中...`; lucide.createIcons(); btn.disabled = true;
-            try {
-                const { error } = await supabaseClient.from('jinggang-suggestion-box').insert([{ content: `[${type}]\n${content}\n📍: ${userLocation ? userLocation.lng+','+userLocation.lat : '未知'}`, contact: contact || '-' }]);
-                if (error) throw error; alert("收到啦！感谢为古镇建设出谋划策~"); hideFeedbackModal(); document.getElementById('feedbackContent').value='';
-            } catch (e) { alert("网络开了小差，提交失败，请重试。"); } finally { btn.innerHTML = originalText; btn.disabled = false; }
-        }
-
-        // 基础交互与生命周期
-        function showQRModal() { document.getElementById('qrModal').classList.replace('hidden','flex'); document.getElementById('qrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(window.location.href); document.getElementById('qrUrl').innerText = window.location.href; lucide.createIcons(); }
-        function hideQRModal() { document.getElementById('qrModal').classList.replace('flex','hidden'); }
-        function copyQRUrl() { navigator.clipboard.writeText(document.getElementById('qrUrl').innerText).then(()=>alert('链接已复制~')); }
-
-        function init() {
-            initRouteTexture();
-            scene = new THREE.Scene(); scene.background = new THREE.Color(0xf1f5f9);
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.copy(lastExplorerState.pos);
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-            controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2.1;
-            clock = new THREE.Clock(); mapGroup = new THREE.Group(); detailGroup = new THREE.Group(); scene.add(mapGroup); scene.add(detailGroup);
-            
-            scene.add(new THREE.AmbientLight(0xffffff, 0.85)); const dir = new THREE.DirectionalLight(0xffffff, 0.6); dir.position.set(20, 50, 20); scene.add(dir);
-            
-            mapPlaneMesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), new THREE.MeshBasicMaterial({ color: 0xf8fafc })); mapPlaneMesh.rotation.x = -Math.PI / 2; mapGroup.add(mapPlaneMesh);
-            new THREE.TextureLoader().load('./map.png', t => { mapPlaneMesh.material.map = t; mapPlaneMesh.material.color.setHex(0xffffff); mapPlaneMesh.material.needsUpdate = true; });
-
-            const labelContainer = document.getElementById('labels-container');
-            POI_RAW_DATA.forEach(poi => {
-                const ring = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.55, 32), new THREE.MeshBasicMaterial({ color: poi.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2; ring.position.set(...poi.pos); mapGroup.add(ring); poi.ring = ring;
-                const div = document.createElement('div'); div.className = 'poi-label'; div.onclick = e => { e.stopPropagation(); enterDetailMode(poi); };
-                div.innerHTML = `<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
-                labelContainer.appendChild(div); labels.push({ element: div, position: new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0, 0.5, 0)), data: poi });
-            });
-
-            // 🚨 恢复了右侧列表的原汁原味内容显示（等待时间指示器），不再使用被截断的描述文本
-            const list = document.getElementById('poiList');
-            POI_RAW_DATA.forEach(poi => {
-                const item = document.createElement('div'); item.className = 'bg-slate-50 p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-slate-100 transition active:scale-95'; 
-                item.onclick = () => { enterDetailMode(poi); if(isMobile) toggleTraffic(); };
-                
-                // 完全恢复原版的等待时间显示，去除文本截断，保留完整性
-                item.innerHTML = `
-                    <div class="w-10 h-10 rounded-[10px] flex items-center justify-center text-white shrink-0 shadow-sm" style="background:${poi.color}"><i data-lucide="map-pin" size="18"></i></div>
-                    <div class="flex-1">
-                        <div class="text-sm font-bold text-slate-800">${poi.name}</div>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <div id="list-wait-indicator-${poi.id}" class="w-2 h-2 rounded-full bg-slate-500"></div>
-                            <div id="list-wait-text-${poi.id}" class="text-[11px] font-medium text-slate-500">${poi.currentDisplay || '计算中...'}</div>
-                        </div>
-                    </div>
-                    <i data-lucide="chevron-right" size="16" class="text-slate-300"></i>
-                `; 
-                list.appendChild(item);
-            });
-
-            updateAllWaitTimes();
-            initAmapLocation(); initDrawerTouch(); lucide.createIcons(); animate();
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); isMobile = window.innerWidth<=768; });
-        }
-
-        function createChineseBuilding(c) { const g = new THREE.Group(), b = new THREE.Mesh(new THREE.BoxGeometry(3,2.5,3), new THREE.MeshPhongMaterial({color:0xffffff})); b.position.y=1.25; g.add(b); const r = new THREE.Mesh(new THREE.CylinderGeometry(0,2.8,1.5,4), new THREE.MeshPhongMaterial({color:c})); r.position.y=3.25; r.rotation.y=Math.PI/4; g.add(r); return g; }
-
-        function toggleViewMode(mode) {
-            if (viewMode === mode && appState !== 'DETAIL') return; viewMode = mode;
-            if (appState === 'DETAIL') exitDetailMode();
-            else { if (mode === '2D') { controls.update(); lastExplorerState.pos.copy(camera.position); animateCamera(new THREE.Vector3(0, 55, 0.001), new THREE.Vector3(0, 0, 0)); } else animateCamera(lastExplorerState.pos.clone(), lastExplorerState.target.clone()); }
-        }
-
-        function filterPOIs(q) { const items = document.getElementById('poiList').children; POI_RAW_DATA.forEach((poi, i) => { const m = poi.name.includes(q); items[i].style.display = m ? 'flex' : 'none'; labels[i].element.style.opacity = m ? '1' : '0.1'; }); }
-
-        function animateCamera(newPos, newTarget, d = 800) {
-            const startP = camera.position.clone(), startT = controls.target.clone(), startTime = performance.now();
+        function animateCamera(newPos, newTarget, customDuration = 700) {
+            const currentTarget = controls ? controls.target.clone() : new THREE.Vector3(0,0,0);
+            if (controls) { controls.dispose(); controls = null; }
+            const startPos = camera.position.clone();
+            const startTime = performance.now();
             function update() {
-                const prog = Math.min((performance.now() - startTime)/d, 1), t = prog<0.5 ? 2*prog*prog : 1-Math.pow(-2*prog+2,2)/2;
-                camera.position.lerpVectors(startP, newPos, t); camera.lookAt(new THREE.Vector3().lerpVectors(startT, newTarget, t));
-                if (prog < 1) requestAnimationFrame(update); else { controls.target.copy(newTarget); }
+                const now = performance.now();
+                const progress = Math.min((now - startTime) / customDuration, 1);
+                const t = progress < 0.5 ?
+                2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                camera.position.lerpVectors(startPos, newPos, t);
+                const tempTarget = new THREE.Vector3().lerpVectors(currentTarget, newTarget, t);
+                camera.lookAt(tempTarget);
+                if (progress < 1) requestAnimationFrame(update); else { 
+                    camera.position.copy(newPos); 
+                    createControls(newTarget);
+                }
             } update();
         }
 
+        function toggleViewMode(mode) {
+            if (viewMode === mode && appState !== 'DETAIL') return;
+            viewMode = mode; document.getElementById('btn2D').classList.toggle('active', mode === '2D'); document.getElementById('btn3D').classList.toggle('active', mode === '3D');
+            if (appState === 'DETAIL') exitDetailMode();
+            else { if (mode === '2D') { controls.update(); lastExplorerState.pos.copy(camera.position); animateCamera(new THREE.Vector3(0, 50, 0.001), new THREE.Vector3(0, 0, 0));
+            } 
+                   else animateCamera(lastExplorerState.pos.clone(), lastExplorerState.target.clone());
+            }
+        }
+
+        function filterPOIs(query) {
+            const items = document.getElementById('poiList').children;
+            POI_RAW_DATA.forEach((poi, i) => { const match = poi.name.includes(query); items[i].style.display = match ? 'flex' : 'none'; labels[i].element.style.opacity = match ? '1' : '0.1'; });
+        }
+
         function animate() {
-            requestAnimationFrame(animate); controls.update(); const elapsed = clock.getElapsedTime();
-            if (routeLineMesh && routeCanvasTexture) routeCanvasTexture.offset.x -= 0.015; // 路线流光
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            const elapsed = clock.getElapsedTime();
             if (appState === 'EXPLORER') {
-                labels.forEach(l => {
-                    const v = l.position.clone(), d = camera.position.distanceTo(v); v.project(camera);
-                    if (v.z < 1) { l.element.style.display = 'flex'; l.element.style.left = `${(v.x*0.5+0.5)*window.innerWidth}px`; l.element.style.top = `${(-v.y*0.5+0.5)*window.innerHeight}px`;
-                        const w = l.element.querySelector('.poi-scale-wrapper'); if(w && !l.element.classList.contains('poi-active')) w.style.transform = `scale(${Math.max(0.6, 1.2 - d/60)})`;
-                    } else l.element.style.display = 'none';
+                labels.forEach(label => {
+                    const vector = label.position.clone(); const distance = camera.position.distanceTo(vector); vector.project(camera);
+                    if (vector.z < 1) { 
+                        label.element.style.display = 'flex'; label.element.style.left = `${(vector.x * 0.5 + 0.5) * window.innerWidth}px`; label.element.style.top = `${(-(vector.y * 0.5) + 0.5) * window.innerHeight}px`; 
+                        const scale = Math.max(0.65, 1.2 - distance / 60); const wrapper = label.element.querySelector('.poi-scale-wrapper');
+                        if(wrapper) wrapper.style.transform = `scale(${scale})`;
+                    } else label.element.style.display = 'none'; 
                 });
-                POI_RAW_DATA.forEach(p => { if (p.ring) { const s = 1 + Math.sin(elapsed*3)*0.15; p.ring.scale.set(s,s,s); p.ring.material.opacity = 0.4-(s-1)*2.5; } });
-            } else if (appState === 'DETAIL' && detailGroup.children[0]) { detailGroup.children[0].rotation.y += 0.005; }
+                POI_RAW_DATA.forEach(poi => { if (poi.ring) { const s = 1 + Math.sin(elapsed * 3) * 0.2; poi.ring.scale.set(s, s, s); poi.ring.material.opacity = 0.5 - (s-1)*2; } });
+            } else if (appState === 'DETAIL' && detailGroup.children[0]) { 
+                detailGroup.children[0].rotation.y += 0.005;
+            }
             renderer.render(scene, camera);
         }
         window.onload = init;
