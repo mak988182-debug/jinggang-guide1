@@ -771,7 +771,7 @@
                 console.log("准备发送数据:", { type, content, contact, location: locStr });
                 
                 const { data, error } = await supabaseClient
-                    .from('feedbacks')
+                    .from('jinggang-suggestion-box')
                     .insert([
                         { 
                             type: type, 
