@@ -62,6 +62,27 @@
         #detailCard.minimized #detailContentBody { opacity: 0; pointer-events: none; height: 0; margin-top: 0; }
         #minimizeIcon { transition: transform 0.4s; }
         #detailCard.minimized #minimizeIcon { transform: rotate(180deg); }
+
+        /* ====== AI 智能导游助手 ====== */
+        #aiBtn { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #aiBtn:hover { transform: scale(1.08); }
+        #aiBtn .ai-pulse { animation: aiPulse 2.4s ease-in-out infinite; }
+        @keyframes aiPulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
+        #aiPanel { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: bottom right; }
+        #aiPanel.ai-hidden { opacity: 0; pointer-events: none; transform: scale(0.92) translateY(12px); }
+        #aiPanel.ai-visible { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+        .ai-msg-user { background: #2563eb; color: white; border-radius: 18px 18px 4px 18px; margin-left: auto; }
+        .ai-msg-ai { background: rgba(255,255,255,0.9); color: #1e293b; border-radius: 18px 18px 18px 4px; border: 1px solid rgba(0,0,0,0.07); }
+        .ai-msg-wrap { display: flex; flex-direction: column; gap: 10px; }
+        #aiMessages { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.1) transparent; }
+        #aiMessages::-webkit-scrollbar { width: 4px; }
+        #aiMessages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
+        .ai-typing span { display: inline-block; width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: aiDot 1.2s ease-in-out infinite; }
+        .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes aiDot { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+        .ai-chip { background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.18); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .ai-chip:hover { background: rgba(37,99,235,0.15); }
     </style>
 </head>
 <body class="mode-explorer">
@@ -284,6 +305,65 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ====== AI 智能导游助手 ====== -->
+    <!-- 悬浮按钮 -->
+    <button id="aiBtn" onclick="toggleAIPanel()" class="fixed bottom-8 left-8 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);" title="AI智能导游">
+        <div class="relative flex items-center justify-center">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+                <circle cx="9" cy="14" r="1" fill="white" stroke="none"/>
+                <circle cx="15" cy="14" r="1" fill="white" stroke="none"/>
+            </svg>
+            <span class="ai-pulse absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
+        </div>
+    </button>
+
+    <!-- AI对话面板 -->
+    <div id="aiPanel" class="ai-hidden fixed bottom-28 left-8 z-50 w-[340px] sm:w-[380px] glass-panel rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="max-height: 520px; border: 1.5px solid rgba(37,99,235,0.15);">
+        <!-- 顶栏 -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100/80" style="background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(124,58,237,0.06) 100%);">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9" cy="14" r="1" fill="white" stroke="none"/><circle cx="15" cy="14" r="1" fill="white" stroke="none"/></svg>
+                </div>
+                <div>
+                    <div class="text-sm font-black text-slate-800">靖靖 · AI导游</div>
+                    <div class="text-[10px] text-emerald-500 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span>在线 · 随时为您服务</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="clearAIChat()" class="text-slate-400 hover:text-slate-600 transition p-1.5 rounded-lg hover:bg-slate-100" title="清空对话">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.76"></path></svg>
+                </button>
+                <button onclick="toggleAIPanel()" class="text-slate-400 hover:text-slate-600 transition p-1.5 rounded-lg hover:bg-slate-100">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 消息区 -->
+        <div id="aiMessages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3" style="min-height: 240px; max-height: 300px;"></div>
+
+        <!-- 快捷提问 -->
+        <div id="aiChips" class="px-4 pb-2 flex gap-2 overflow-x-auto no-scrollbar">
+            <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">今日推荐路线</button>
+            <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">人少的景点</button>
+            <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">非遗体验项目</button>
+            <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">古镇历史</button>
+            <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">美食推荐</button>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="px-4 pb-4 pt-1">
+            <div class="flex gap-2 items-end bg-slate-50/80 border border-slate-200/80 rounded-2xl px-3 py-2">
+                <textarea id="aiInput" rows="1" placeholder="问问靖靖，关于古镇的一切…" class="flex-1 bg-transparent outline-none resize-none text-sm text-slate-700 placeholder-slate-400 max-h-24 leading-relaxed" style="font-family: inherit;" onkeydown="handleAIKey(event)" oninput="autoResizeAI(this)"></textarea>
+                <button id="aiSendBtn" onclick="sendAIMessage()" class="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1036,6 +1116,169 @@
             }
             renderer.render(scene, camera);
         }
+        // ====== AI 智能导游助手 ======
+        let aiPanelOpen = false;
+        let aiChatHistory = [];
+        let aiIsThinking = false;
+
+        const AI_SYSTEM_PROMPT = `你是"靖靖"，靖港古镇3D虚拟导览系统的专属AI导游助手，性格亲切活泼，擅长介绍古镇文化、规划游览路线、回答旅游相关问题。
+
+【古镇核心景点速查】
+- 游客服务中心：古镇入口，魏春雨设计的清水混凝土建筑，网红打卡地
+- 靖港八大碗：官方自营演艺餐厅，三面环水，演出时间12:00/17:00，主推靖港特色菜
+- 红色剧场：红色戏剧《母亲的歌》，演出10:30/14:30，革命故事感人至深
+- 皮影戏体验馆：非遗传承，每小时一场(10:00-18:30)，可互动体验，亲子首选
+- 八元堂：清咸丰年间宁乡会馆，古戏台花鼓戏，演出11:30/14:30/15:30/18:00
+- 花开靖港剧场：大型沉浸式演艺秀，每晚19:00，以1938年长沙文夕大火为背景
+- 芦江阁：纪念诗圣杜甫建造，临水三层楼阁，360度全景，夜景绝美
+- 宏泰坊：清代古建遗址，270余年历史，见证古镇繁华
+- 楚河码头/正义码头：游船登船点，可乘船欣赏水乡风光
+- 杨泗庙：唯一保存完好的古庙，水神信仰，香火旺盛
+- 陶承事迹陈列室：革命母亲陶承故居，演出10:30/14:30
+- 铁器文化馆/锄禾源：非遗铁艺与农耕文化展示
+- 中共湖南省委旧址：1930年地下省委驻地，红色教育基地
+
+【推荐游览路线】
+- 红色经典线(2h)：陶承事迹→红色剧场→刘畴西事迹室→中共湖南省委旧址
+- 文化民俗线(3h)：皮影戏→八元堂→铁器文化馆→锄禾源→杨泗庙
+- 精华打卡线(1.5h)：游客中心→芦江阁→宏泰坊→楚河码头→八大碗
+- 亲子体验线(2.5h)：皮影戏→锄禾源→老电影院→游船体验→八大碗
+- 夜游路线：花开靖港剧场(19:00)→芦江阁夜景→码头夜色
+
+【实用贴士】
+- 景区开放时间：9:00-21:00（夜场到22:00）
+- 建议游览时长：半天到一天
+- 交通：长沙市内地铁+公交可达，景区内步行游览
+- 回答要简洁生动，适当使用emoji增加亲切感
+- 如果问到系统功能，说明可以点击地图上的景点标记进入详情、使用路线规划功能、切换2D/3D视角等
+- 用中文回答，语气亲切自然，像朋友一样`;
+
+        function toggleAIPanel() {
+            aiPanelOpen = !aiPanelOpen;
+            const panel = document.getElementById('aiPanel');
+            if (aiPanelOpen) {
+                panel.classList.remove('ai-hidden');
+                panel.classList.add('ai-visible');
+                if (aiChatHistory.length === 0) {
+                    setTimeout(() => addAIMessage('ai', '你好呀！我是靖靖 🏮，靖港古镇专属AI导游～\n\n我熟悉古镇所有景点、演出时间、非遗项目和游览路线，有什么想问的尽管来！'), 200);
+                }
+                setTimeout(() => document.getElementById('aiInput').focus(), 300);
+            } else {
+                panel.classList.add('ai-hidden');
+                panel.classList.remove('ai-visible');
+            }
+        }
+
+        function addAIMessage(role, text) {
+            const container = document.getElementById('aiMessages');
+            const wrap = document.createElement('div');
+            wrap.className = 'ai-msg-wrap';
+            const bubble = document.createElement('div');
+            bubble.className = `text-sm px-4 py-2.5 leading-relaxed max-w-[85%] ${role === 'user' ? 'ai-msg-user' : 'ai-msg-ai'}`;
+            // 换行符转<br>
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            wrap.appendChild(bubble);
+            container.appendChild(wrap);
+            container.scrollTop = container.scrollHeight;
+            return wrap;
+        }
+
+        function addAITyping() {
+            const container = document.getElementById('aiMessages');
+            const wrap = document.createElement('div');
+            wrap.className = 'ai-msg-wrap';
+            wrap.id = 'ai-typing-indicator';
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-msg-ai text-sm px-4 py-3 max-w-[85%]';
+            bubble.innerHTML = '<div class="ai-typing flex gap-1 items-center h-4"><span></span><span></span><span></span></div>';
+            wrap.appendChild(bubble);
+            container.appendChild(wrap);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeAITyping() {
+            const el = document.getElementById('ai-typing-indicator');
+            if (el) el.remove();
+        }
+
+        function clearAIChat() {
+            aiChatHistory = [];
+            document.getElementById('aiMessages').innerHTML = '';
+            setTimeout(() => addAIMessage('ai', '对话已清空 🔄 有什么新问题尽管问我！'), 100);
+        }
+
+        async function sendAIMessage() {
+            if (aiIsThinking) return;
+            const input = document.getElementById('aiInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            input.style.height = 'auto';
+            addAIMessage('user', text);
+            aiChatHistory.push({ role: 'user', content: text });
+
+            // 隐藏快捷chips
+            document.getElementById('aiChips').style.display = 'none';
+
+            aiIsThinking = true;
+            addAITyping();
+
+            try {
+                const messages = [
+                    { role: 'system', content: AI_SYSTEM_PROMPT },
+                    ...aiChatHistory.map(m => ({ role: m.role, content: m.content }))
+                ];
+
+                const response = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer sk-d630efc1a0d04a80a2bd6f9778dd555e'
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        max_tokens: 1000,
+                        messages: messages
+                    })
+                });
+
+                const data = await response.json();
+                removeAITyping();
+
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    const reply = data.choices[0].message.content;
+                    addAIMessage('ai', reply);
+                    aiChatHistory.push({ role: 'assistant', content: reply });
+                } else {
+                    addAIMessage('ai', '抱歉，我暂时无法回应，请稍后再试 🙏');
+                }
+            } catch (err) {
+                removeAITyping();
+                console.error('AI请求失败:', err);
+                addAIMessage('ai', '网络出了点问题，请稍后再问我 😅');
+            } finally {
+                aiIsThinking = false;
+            }
+        }
+
+        function sendAIChip(btn) {
+            document.getElementById('aiInput').value = btn.textContent;
+            sendAIMessage();
+        }
+
+        function handleAIKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAIMessage();
+            }
+        }
+
+        function autoResizeAI(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 96) + 'px';
+        }
+
         window.onload = init;
     </script>
 </body>
