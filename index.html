@@ -92,34 +92,54 @@
 
         /* ═══════ TOP BAR ═══════ */
         #topBar {
-            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-            z-index: 50; display: flex; align-items: center; gap: 10px;
-            /* 宽度自适应，两侧留给左右面板 */
-            max-width: calc(100vw - 200px);
+            position: fixed; top: 12px;
+            left: 78px; right: 68px;      /* 两侧给左右面板留空间 */
+            z-index: 50;
+            display: flex; align-items: center; gap: 8px;
         }
-        /* 天气胶囊 */
+        /* 天气胶囊 —— 紧凑横向 */
         #weatherCapsule {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 14px; border-radius: 14px; flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 12px; border-radius: 12px; flex-shrink: 0;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
         }
-        /* 演出卡 */
+        /* 演出卡 —— 单行紧凑 */
         #showCard {
             display: flex; align-items: center; gap: 0;
-            border-radius: 14px; overflow: hidden; flex: 1; min-width: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-radius: 12px; overflow: hidden; flex: 1; min-width: 0;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            max-height: 48px;            /* 限高，防止撑开遮挡地图 */
         }
-        .show-main { flex:1; min-width:0; padding: 10px 16px; border-right: 1px solid rgba(0,0,0,0.06); }
-        .show-countdown { padding: 10px 16px; text-align: center; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.06); }
-        .show-meta { padding: 10px 14px; display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
-        /* 视图切换 */
+        .show-main {
+            flex:1; min-width:0; padding: 7px 12px;
+            border-right: 1px solid rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .show-main-text { min-width: 0; }
+        .show-countdown {
+            padding: 7px 12px; text-align: center; flex-shrink: 0;
+            border-right: 1px solid rgba(0,0,0,0.06);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .show-meta { display: none; }   /* 手机端隐藏客流/推荐，避免拥挤 */
+        /* 视图切换 —— 右上角独立小胶囊 */
         #viewSwitch {
-            display: flex; align-items: center; gap: 3px;
-            padding: 4px; border-radius: 12px; flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            position: fixed; top: 12px; right: 68px;
+            display: flex; align-items: center; gap: 2px;
+            padding: 3px; border-radius: 10px; z-index: 51;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
         }
-        .vs-btn { padding: 5px 12px; border-radius: 9px; font-size: 12px; font-weight: 700; color: #64748b; cursor: pointer; transition: all .2s; white-space: nowrap; }
-        .vs-btn.active { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,.35); }
+        .vs-btn { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all .2s; white-space: nowrap; }
+        .vs-btn.active { background: #2563eb; color: white; box-shadow: 0 2px 6px rgba(37,99,235,.35); }
+        /* 手机端专属媒体查询 */
+        @media (max-width: 600px) {
+            #topBar { top: 10px; left: 74px; right: 62px; gap: 6px; }
+            #viewSwitch { top: 10px; right: 8px; }
+            #weatherCapsule { padding: 5px 10px; border-radius: 10px; }
+            #showCard { border-radius: 10px; max-height: 44px; }
+            .show-main { padding: 6px 10px; }
+            .show-countdown { padding: 6px 10px; }
+        }
 
         /* ═══════ LEFT PANEL ═══════ */
         #leftPanel {
@@ -127,14 +147,14 @@
             z-index: 40; display: flex; align-items: center; gap: 6px;
         }
         #leftNav {
-            display: flex; flex-direction: column; gap: 6px;
-            padding: 8px; border-radius: 18px;
+            display: flex; flex-direction: column; gap: 5px;
+            padding: 6px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .nav-btn {
-            width: 52px; height: 52px; border-radius: 13px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-            cursor: pointer; transition: all .2s; font-size: 10px; font-weight: 700; color: #64748b;
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            cursor: pointer; transition: all .2s; font-size: 9px; font-weight: 700; color: #64748b;
         }
         .nav-btn:hover { background: rgba(37,99,235,.08); color: #2563eb; }
         .nav-btn.active { background: #2563eb; color: white; box-shadow: 0 3px 10px rgba(37,99,235,.35); }
@@ -157,12 +177,12 @@
         }
         #rightFoldTab:hover { opacity: 1; }
         #rightTools {
-            display: flex; flex-direction: column; gap: 6px;
-            padding: 8px; border-radius: 18px;
+            display: flex; flex-direction: column; gap: 5px;
+            padding: 6px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .tool-btn {
-            width: 44px; height: 44px; border-radius: 12px;
+            width: 40px; height: 40px; border-radius: 11px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all .2s; color: #475569;
         }
@@ -170,7 +190,7 @@
 
         /* ═══════ SIDE LIST PANEL ═══════ */
         #sideListPanel {
-            position: fixed; right: 76px; top: 72px; bottom: 108px;
+            position: fixed; right: 62px; top: 68px; bottom: 100px;
             z-index: 35; width: 268px;
             transition: opacity .3s, transform .3s cubic-bezier(.4,0,.2,1);
         }
@@ -188,8 +208,8 @@
 
         /* ═══════ BOTTOM BAR ═══════ */
         #bottomBar {
-            position: fixed; bottom: 16px; left: 80px; right: 76px;
-            z-index: 40; display: flex; align-items: stretch; gap: 8px; height: 88px;
+            position: fixed; bottom: 12px; left: 66px; right: 62px;
+            z-index: 40; display: flex; align-items: stretch; gap: 6px; height: 76px;
         }
         #routeSection {
             flex: 1; display: flex; align-items: stretch; gap: 0;
@@ -214,7 +234,7 @@
 
         /* 打卡面板 */
         #checkinSection {
-            flex-shrink:0; width:172px; border-radius:18px; padding:12px 14px;
+            flex-shrink:0; width:156px; border-radius:18px; padding:10px 12px;
             box-shadow: 0 6px 24px rgba(0,0,0,0.1);
             display:flex; flex-direction:column; gap:6px;
             transition: opacity .3s, transform .3s;
@@ -262,10 +282,10 @@
         .ai-chip:hover { background:rgba(37,99,235,.14); }
 
         /* ── Audio ── */
-        #audioCtrl { position:fixed; bottom:116px; right:80px; z-index:55; }
+        #audioCtrl { position:fixed; bottom:100px; right:62px; z-index:55; }
 
         /* ── Status ── */
-        #statusBadge { position:fixed; bottom:116px; left:80px; z-index:35; font-size:11px; background:rgba(255,255,255,.82); backdrop-filter:blur(10px); padding:4px 12px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#64748b; }
+        #statusBadge { position:fixed; bottom:100px; left:66px; z-index:35; font-size:11px; background:rgba(255,255,255,.82); backdrop-filter:blur(10px); padding:4px 12px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#64748b; }
 
         /* ── Search ── */
         #searchBox { position:fixed; top:16px; right:76px; z-index:55; width:220px; transition:all .25s; }
@@ -403,66 +423,57 @@
 
 <!-- ══ TOP BAR ══ -->
 <div id="topBar">
-    <!-- 天气胶囊 -->
+    <!-- 天气胶囊（紧凑单行） -->
     <div id="weatherCapsule" class="g panel">
-        <div>
-            <div class="text-xl font-black text-slate-800 leading-none" id="weatherTemp">--°C</div>
-            <div class="text-[10px] text-slate-400 mt-0.5" id="weatherDesc">加载中</div>
+        <div class="flex items-center gap-1.5">
+            <span class="text-base font-black text-slate-800 leading-none" id="weatherTemp">--°C</span>
+            <span class="text-[10px] text-slate-400" id="weatherDesc">加载中</span>
         </div>
-        <div class="text-[10px] text-slate-400 space-y-0.5 border-l border-slate-100 pl-3">
-            <div id="weatherWind" class="flex items-center gap-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>--
-            </div>
-            <div id="weatherHumidity" class="flex items-center gap-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>--%
-            </div>
+        <div class="text-[10px] text-slate-400 flex items-center gap-2 border-l border-slate-100 pl-2">
+            <span id="weatherWind" class="flex items-center gap-0.5">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>--
+            </span>
+            <span id="weatherHumidity" class="flex items-center gap-0.5">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>--%
+            </span>
         </div>
         <button class="fold-btn" onclick="togglePanel('weatherCapsule','top')" title="收起天气">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
         </button>
     </div>
 
-    <!-- 演出卡 -->
-    <div id="showCard" class="g panel" style="cursor:default;">
+    <!-- 演出卡（单行紧凑，最高48px） -->
+    <div id="showCard" class="g panel">
         <div class="show-main">
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">今日演出</span>
-                <button onclick="openShowPicker()" class="text-[9px] text-blue-500 font-semibold flex items-center gap-0.5 hover:text-blue-700 transition">
-                    切换
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-            </div>
-            <div id="showName" class="text-[15px] font-black text-slate-900 leading-tight">花开靖港剧场</div>
-            <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-3">
-                <span id="showLocation">📍 花开靖港剧场</span>
-                <span id="showTime">🕖 19:00 开始</span>
+            <span class="text-[8px] font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100 flex-shrink-0">演出</span>
+            <div class="show-main-text">
+                <div id="showName" class="text-[13px] font-black text-slate-900 leading-tight truncate">花开靖港剧场</div>
+                <div class="text-[9px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span id="showTime">🕖 19:00</span>
+                    <button onclick="openShowPicker()" class="text-blue-500 font-semibold flex items-center gap-0.5">
+                        切换<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="show-countdown">
-            <div class="text-[9px] text-slate-400 font-semibold mb-0.5">距开始</div>
-            <div class="text-2xl font-black text-amber-500 tabular-nums leading-none" id="countdownTimer">--:--</div>
+            <div class="text-[8px] text-slate-400 leading-none mb-0.5">距开始</div>
+            <div class="text-lg font-black text-amber-500 tabular-nums leading-none" id="countdownTimer">--:--</div>
         </div>
         <div class="show-meta">
-            <div class="text-[10px] text-slate-500 flex items-center gap-1.5">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                客流：<strong id="crowdLevel" class="text-slate-700">适中</strong>
-            </div>
-            <div class="text-[10px] text-slate-500 flex items-center gap-1.5">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
-                推荐：<strong class="text-blue-600">精华打卡线</strong>
-            </div>
+            <span id="crowdLevel" class="text-slate-700 font-bold"></span>
         </div>
-        <button class="fold-btn m-2 self-start" onclick="togglePanel('showCard','top')" title="收起演出信息">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+        <button class="fold-btn mx-1.5 self-center flex-shrink-0" onclick="togglePanel('showCard','top')" title="收起演出">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
         </button>
     </div>
+</div>
 
-    <!-- 视图切换 -->
-    <div id="viewSwitch" class="g">
-        <div class="vs-btn active" id="btn3D" onclick="toggleViewMode('3D')">3D 漫游</div>
-        <div class="vs-btn" id="btn2D" onclick="toggleViewMode('2D')">2D 平面</div>
-        <div id="clearRouteBtn" class="vs-btn hidden text-red-500" onclick="clearRoute()">清除路线</div>
-    </div>
+<!-- 视图切换（固定右上，独立于topBar） -->
+<div id="viewSwitch" class="g">
+    <div class="vs-btn active" id="btn3D" onclick="toggleViewMode('3D')">3D</div>
+    <div class="vs-btn" id="btn2D" onclick="toggleViewMode('2D')">2D</div>
+    <div id="clearRouteBtn" class="vs-btn hidden text-red-500" onclick="clearRoute()">清除</div>
 </div>
 
 <!-- ══ LEFT PANEL ══ -->
@@ -897,7 +908,7 @@
             const show = SHOWS.find(s => s.id === currentShowId) || SHOWS[0];
             const next = getNextShowTime(show);
             document.getElementById('showName').textContent = show.name;
-            document.getElementById('showLocation').textContent = '📍 ' + show.location;
+            const slEl=document.getElementById('showLocation'); if(slEl) slEl.textContent='📍 '+show.location;
             document.getElementById('showTime').textContent = '🕖 ' + next.time + ' 开始';
             updateCountdown();
         }
