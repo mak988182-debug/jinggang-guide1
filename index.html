@@ -321,29 +321,73 @@
         @keyframes chipSlide { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
 
-        /* ── 路线高亮脉冲 ── */
-        @keyframes poiPulse {
-            0%   { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
-            50%  { box-shadow: 0 0 0 6px transparent, 0 0 0 10px transparent; }
-            100% { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
+        /* ══ 路线高亮系统 ══ */
+
+        /* 非路线点位：深度淡出 */
+        .poi-label.route-dim {
+            opacity: 0.12 !important;
+            filter: grayscale(80%) blur(0.4px);
+            pointer-events: none;
         }
-        .poi-label.route-active .poi-pin {
-            animation: poiPulse 1.4s ease-out infinite;
+
+        /* 路线点位外层容器：放大 */
+        .poi-label.route-active .poi-scale-wrapper {
+            transform: scale(1.35) !important;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
         }
+
+        /* 气泡：白底+粗彩色边框+强阴影 */
         .poi-label.route-active .poi-bubble {
-            background: rgba(255,255,255,0.97) !important;
+            background: rgba(255,255,255,0.98) !important;
+            border-width: 2px !important;
+            padding: 4px 6px 4px 12px !important;
         }
+
+        /* 名称：彩色加粗 */
+        .poi-label.route-active .poi-name {
+            font-weight: 900 !important;
+            font-size: 12px !important;
+        }
+
+        /* Pin点：放大+强脉冲 */
+        .poi-label.route-active .poi-pin {
+            width: 13px !important;
+            height: 13px !important;
+            border-width: 2.5px !important;
+            animation: routePinPulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes routePinPulse {
+            0%   { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+            40%  { transform: scale(1.2); box-shadow: 0 0 0 5px color-mix(in srgb, var(--pc,#2563eb) 30%, transparent),
+                                                       0 0 0 9px color-mix(in srgb, var(--pc,#2563eb) 12%, transparent); }
+            100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+        }
+
+        /* 序号徽章 */
         .route-seq-badge {
-            position: absolute; top: -6px; right: -6px;
-            width: 18px; height: 18px; border-radius: 50%;
-            font-size: 9px; font-weight: 900; color: white;
+            position: absolute;
+            top: -9px; left: -9px;       /* 左上角，不挡右侧等待时间文字 */
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            font-size: 10px; font-weight: 900; color: white;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            animation: badgePop .3s cubic-bezier(.175,.885,.32,1.275) both;
-            z-index: 5;
+            border: 2.5px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+            z-index: 10;
+            animation: badgePop .35s cubic-bezier(.175,.885,.32,1.275) both;
         }
-        @keyframes badgePop { from{transform:scale(0)} to{transform:scale(1)} }
+        @keyframes badgePop {
+            0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+            70%  { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+        }
+
+        /* 路线连线（Canvas 2D 叠加层） */
+        #routeLineCanvas {
+            position: fixed; inset: 0; z-index: 8;
+            pointer-events: none;
+        }
 
         /* ── 昼夜切换 ── */
         body.night-mode .g {
@@ -778,6 +822,7 @@
 </div>
 
 <!-- Labels -->
+<canvas id="routeLineCanvas"></canvas>
 <div id="nightOverlay"></div>
 <div id="labels-container" class="fixed inset-0 pointer-events-none z-10"></div>
 <div id="userLocationLabel" class="hidden fixed z-10 poi-label" style="pointer-events:none;">
@@ -1261,83 +1306,207 @@
             highlightRoutePOIs(r);
         }
 
+        // 路线连线 canvas 绘制
+        let _routeLineRAF = null;
+        function drawRouteLines(orderedLabels, color) {
+            const canvas = document.getElementById('routeLineCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (orderedLabels.length < 2) return;
+
+            // 收集屏幕坐标（从 label DOM 位置推算）
+            function getLabelXY(lb) {
+                const el = lb.element;
+                const left = parseFloat(el.style.left);
+                const top  = parseFloat(el.style.top);
+                return { x: left, y: top };
+            }
+
+            const pts = orderedLabels.map(lb => getLabelXY(lb)).filter(p => !isNaN(p.x));
+            if (pts.length < 2) return;
+
+            // 渐变虚线
+            const grad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length-1].x, pts[pts.length-1].y);
+            grad.addColorStop(0, color + 'cc');
+            grad.addColorStop(1, color + '55');
+
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 5]);
+            ctx.lineDashOffset = 0;
+            ctx.stroke();
+
+            // 小箭头
+            for (let i=0; i<pts.length-1; i++) {
+                const mid = { x:(pts[i].x+pts[i+1].x)/2, y:(pts[i].y+pts[i+1].y)/2 };
+                const ang = Math.atan2(pts[i+1].y-pts[i].y, pts[i+1].x-pts[i].x);
+                ctx.save();
+                ctx.translate(mid.x, mid.y);
+                ctx.rotate(ang);
+                ctx.beginPath();
+                ctx.moveTo(-5, -4); ctx.lineTo(5, 0); ctx.lineTo(-5, 4);
+                ctx.strokeStyle = color + 'cc';
+                ctx.lineWidth = 1.8;
+                ctx.setLineDash([]);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 流动动画
+            let offset = 0;
+            function animate() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([8, 5]);
+                ctx.lineDashOffset = -offset;
+                ctx.stroke();
+                // 箭头
+                for (let i=0; i<pts.length-1; i++) {
+                    const mid={x:(pts[i].x+pts[i+1].x)/2,y:(pts[i].y+pts[i+1].y)/2};
+                    const ang=Math.atan2(pts[i+1].y-pts[i].y,pts[i+1].x-pts[i].x);
+                    ctx.save(); ctx.translate(mid.x,mid.y); ctx.rotate(ang);
+                    ctx.beginPath(); ctx.moveTo(-5,-4); ctx.lineTo(5,0); ctx.lineTo(-5,4);
+                    ctx.strokeStyle=color+'cc'; ctx.lineWidth=1.8; ctx.setLineDash([]); ctx.stroke();
+                    ctx.restore();
+                }
+                offset = (offset + 0.5) % 13;
+                _routeLineRAF = requestAnimationFrame(animate);
+            }
+            if (_routeLineRAF) cancelAnimationFrame(_routeLineRAF);
+            animate();
+        }
+        function clearRouteLines() {
+            if (_routeLineRAF) { cancelAnimationFrame(_routeLineRAF); _routeLineRAF=null; }
+            const canvas = document.getElementById('routeLineCanvas');
+            if (canvas) { const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+        }
+
         function highlightRoutePOIs(r){
-            const routePoiIds=new Set(r.pois||[]);
-            // 重置所有
-            labels.forEach(lb=>{
-                lb.element.style.opacity='0.25';
-                lb.element.style.transform='translate(-50%,-100%)';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.transform='scale(1)'; pin.style.boxShadow='0 0 8px rgba(0,0,0,0.35)'; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble) bubble.style.boxShadow='0 4px 14px rgba(0,0,0,0.22)';
-            });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.opacity=0.15; poi.ring.scale.set(1,1,1); } });
+            const routePoiIds = new Set(r.pois||[]);
+            const col = r.color || '#2563eb';
 
-            // 高亮路线内景点
-            labels.forEach(lb=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='20';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){
-                    pin.style.transform='scale(1.5)';
-                    pin.style.boxShadow=`0 0 0 3px white, 0 0 0 5px ${lb.data.color}, 0 0 16px ${lb.data.color}`;
-                    pin.style.background=lb.data.color;
-                }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){
-                    bubble.style.background='rgba(255,255,255,0.95)';
-                    bubble.style.border=`1.5px solid ${lb.data.color}`;
-                    bubble.style.boxShadow=`0 4px 16px ${lb.data.color}55`;
-                }
-                const name=lb.element.querySelector('.poi-name');
-                if(name) name.style.color=lb.data.color;
-                if(lb.data.ring){
-                    lb.data.ring.material.color.set(lb.data.color);
-                    lb.data.ring.material.opacity=0.9;
-                    lb.data.ring.scale.set(1.8,1.8,1.8);
-                }
+            // ── 第一步：所有标注深度淡出 ──
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active');
+                lb.element.classList.add('route-dim');
+                lb.element.style.zIndex = '';
+                lb.element.querySelector('.route-seq-badge')?.remove();
+                // 重置 pin 样式
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) { pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;`; }
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) { bubble.style.cssText = ''; bubble.style.border = ''; }
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
+                // 3D 环淡出
+                if (lb.data.ring) { lb.data.ring.material.opacity=0.05; lb.data.ring.scale.set(0.6,0.6,0.6); }
             });
 
-            // 显示路线序号标注
-            labels.forEach((lb,idx)=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                const seqNum = (r.pois||[]).indexOf(lb.data.id)+1;
-                let badge=lb.element.querySelector('.route-seq');
-                if(!badge){
-                    badge=document.createElement('div');
-                    badge.className='route-seq';
-                    badge.style.cssText=`position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;border:1.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);`;
-                    lb.element.querySelector('.poi-scale-wrapper').style.position='relative';
-                    lb.element.querySelector('.poi-bubble').appendChild(badge);
-                }
-                badge.textContent=seqNum;
-                badge.style.background=lb.data.color;
+            // ── 第二步：路线点位逐个高亮（按顺序延迟弹出）──
+            const orderedLabels = [];
+            ;(r.pois||[]).forEach((poiId, seq) => {
+                const lb = labels.find(l => l.data.id === poiId);
+                if (!lb) return;
+                orderedLabels.push(lb);
+                const delay = seq * 80; // 每个点位延迟80ms弹出，营造逐一亮起的效果
+
+                setTimeout(() => {
+                    // 移除暗化，添加高亮
+                    lb.element.classList.remove('route-dim');
+                    lb.element.classList.add('route-active');
+                    lb.element.style.zIndex = '22';
+
+                    // 气泡：白底+彩色粗边框+彩色文字
+                    const bubble = lb.element.querySelector('.poi-bubble');
+                    if (bubble) {
+                        bubble.style.background = 'rgba(255,255,255,0.98)';
+                        bubble.style.border = `2px solid ${col}`;
+                        bubble.style.boxShadow = `0 0 0 3px ${col}22, 0 6px 20px ${col}44`;
+                    }
+                    const name = lb.element.querySelector('.poi-name');
+                    if (name) {
+                        name.style.color = col;
+                        name.style.fontWeight = '900';
+                        name.style.fontSize = '12px';
+                    }
+                    // Pin：彩色+CSS变量（用于脉冲动画颜色）
+                    const pin = lb.element.querySelector('.poi-pin');
+                    if (pin) {
+                        pin.style.cssText = `
+                            background:${col};
+                            width:13px; height:13px;
+                            border:2.5px solid white;
+                            border-radius:50%;
+                            --pc:${col};
+                            box-shadow:0 0 0 0 ${col};
+                        `;
+                    }
+                    // 等待时间 tag 保持可见
+                    const tag = lb.element.querySelector('.wait-time-tag');
+                    if (tag) tag.style.opacity = '1';
+                    // 3D 环：放大+亮色
+                    if (lb.data.ring) {
+                        lb.data.ring.material.color.set(col);
+                        lb.data.ring.material.opacity = 1.0;
+                        lb.data.ring.scale.set(3.0, 3.0, 3.0);
+                    }
+                    // 序号徽章（左上角）
+                    const wrapper = lb.element.querySelector('.poi-scale-wrapper');
+                    if (wrapper) {
+                        wrapper.style.position = 'relative';
+                        const badge = document.createElement('div');
+                        badge.className = 'route-seq-badge';
+                        badge.style.background = col;
+                        badge.style.animationDelay = (seq * 0.05) + 's';
+                        badge.textContent = seq + 1;
+                        wrapper.appendChild(badge);
+                    }
+                }, delay);
             });
 
-            // 切到2D正交全图
-            if(viewMode!=='2D') toggleViewMode('2D');
+            // ── 第三步：等所有点位出现后画连线 ──
+            setTimeout(() => {
+                drawRouteLines(orderedLabels, col);
+            }, (r.pois||[]).length * 80 + 100);
+
+            // ── 第四步：切到2D全图 ──
+            if (viewMode !== '2D') toggleViewMode('2D');
             else switch2D();
         }
 
         function clearRouteHighlight(){
-            activeRouteId=null;
-            labels.forEach(lb=>{
-                lb.element.classList.remove('route-active');
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='';
-                lb.element.style.filter='';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.cssText=`background:${lb.data.color};`; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){ bubble.style.cssText=''; }
-                const name=lb.element.querySelector('.poi-name');
-                if(name){ name.style.color='#fff'; name.style.fontWeight='600'; }
+            activeRouteId = null;
+            clearRouteLines();
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active','route-dim');
+                lb.element.style.opacity = '1';
+                lb.element.style.zIndex  = '';
+                lb.element.style.filter  = '';
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;border-radius:50%;border:2px solid #fff;`;
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) bubble.style.cssText = '';
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
                 lb.element.querySelector('.route-seq-badge')?.remove();
             });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); } });
-            document.querySelectorAll('.route-card').forEach(c=>{ c.classList.remove('active'); const btn=c.querySelector('.rc-start-btn'); if(btn) btn.style.opacity='0'; });
+            POI_RAW_DATA.forEach(poi => {
+                if (poi.ring) { poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); }
+            });
+            document.querySelectorAll('.route-card').forEach(c => {
+                c.classList.remove('active');
+                const btn = c.querySelector('.rc-start-btn');
+                if (btn) btn.style.opacity = '0';
+            });
         }
 
         /* ── THREE.JS ── */
