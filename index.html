@@ -321,29 +321,73 @@
         @keyframes chipSlide { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
 
-        /* ── 路线高亮脉冲 ── */
-        @keyframes poiPulse {
-            0%   { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
-            50%  { box-shadow: 0 0 0 6px transparent, 0 0 0 10px transparent; }
-            100% { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
+        /* ══ 路线高亮系统 ══ */
+
+        /* 非路线点位：深度淡出 */
+        .poi-label.route-dim {
+            opacity: 0.12 !important;
+            filter: grayscale(80%) blur(0.4px);
+            pointer-events: none;
         }
-        .poi-label.route-active .poi-pin {
-            animation: poiPulse 1.4s ease-out infinite;
+
+        /* 路线点位外层容器：放大 */
+        .poi-label.route-active .poi-scale-wrapper {
+            transform: scale(1.35) !important;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
         }
+
+        /* 气泡：白底+粗彩色边框+强阴影 */
         .poi-label.route-active .poi-bubble {
-            background: rgba(255,255,255,0.97) !important;
+            background: rgba(255,255,255,0.98) !important;
+            border-width: 2px !important;
+            padding: 4px 6px 4px 12px !important;
         }
+
+        /* 名称：彩色加粗 */
+        .poi-label.route-active .poi-name {
+            font-weight: 900 !important;
+            font-size: 12px !important;
+        }
+
+        /* Pin点：放大+强脉冲 */
+        .poi-label.route-active .poi-pin {
+            width: 13px !important;
+            height: 13px !important;
+            border-width: 2.5px !important;
+            animation: routePinPulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes routePinPulse {
+            0%   { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+            40%  { transform: scale(1.2); box-shadow: 0 0 0 5px color-mix(in srgb, var(--pc,#2563eb) 30%, transparent),
+                                                       0 0 0 9px color-mix(in srgb, var(--pc,#2563eb) 12%, transparent); }
+            100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+        }
+
+        /* 序号徽章 */
         .route-seq-badge {
-            position: absolute; top: -6px; right: -6px;
-            width: 18px; height: 18px; border-radius: 50%;
-            font-size: 9px; font-weight: 900; color: white;
+            position: absolute;
+            top: -9px; left: -9px;       /* 左上角，不挡右侧等待时间文字 */
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            font-size: 10px; font-weight: 900; color: white;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            animation: badgePop .3s cubic-bezier(.175,.885,.32,1.275) both;
-            z-index: 5;
+            border: 2.5px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+            z-index: 10;
+            animation: badgePop .35s cubic-bezier(.175,.885,.32,1.275) both;
         }
-        @keyframes badgePop { from{transform:scale(0)} to{transform:scale(1)} }
+        @keyframes badgePop {
+            0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+            70%  { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+        }
+
+        /* 路线连线（Canvas 2D 叠加层） */
+        #routeLineCanvas {
+            position: fixed; inset: 0; z-index: 8;
+            pointer-events: none;
+        }
 
         /* ── 昼夜切换 ── */
         body.night-mode .g {
@@ -372,13 +416,40 @@
         body.night-mode .route-card { background: rgba(10,20,48,0.7) !important; }
         body.night-mode .rc-name, body.night-mode .rc-meta { color: inherit !important; }
         /* 夜晚星空粒子叠加 */
+        /* ── 夜间氛围覆盖层 ── */
         #nightOverlay {
-            position: fixed; inset: 0; z-index: 1;
+            position: fixed; inset: 0; z-index: 2;
             pointer-events: none;
-            background: radial-gradient(ellipse at center, rgba(0,10,40,0.0) 0%, rgba(0,5,25,0.55) 100%);
-            opacity: 0; transition: opacity 1.2s ease;
+            opacity: 0;
+            transition: opacity 1.4s ease;
         }
         body.night-mode #nightOverlay { opacity: 1; }
+
+        /* 夜间底图暗化滤镜：保留纹理、加蓝调 */
+        #canvas-container {
+            transition: filter 1.4s ease;
+        }
+        body.night-mode #canvas-container {
+            filter: brightness(0.72) saturate(0.7) sepia(0.15) hue-rotate(190deg);
+        }
+
+        /* 灯光闪烁粒子 Canvas */
+        #nightLightsCanvas {
+            position: fixed; inset: 0; z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1.8s ease;
+        }
+        body.night-mode #nightLightsCanvas { opacity: 1; }
+
+        /* 星空层 */
+        #starsCanvas {
+            position: fixed; inset: 0; z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        body.night-mode #starsCanvas { opacity: 1; }
         /* ── 演出选择抽屉 ── */
         #showPickerDrawer {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 80;
@@ -778,7 +849,10 @@
 </div>
 
 <!-- Labels -->
+<canvas id="routeLineCanvas"></canvas>
+<canvas id="starsCanvas"></canvas>
 <div id="nightOverlay"></div>
+<canvas id="nightLightsCanvas"></canvas>
 <div id="labels-container" class="fixed inset-0 pointer-events-none z-10"></div>
 <div id="userLocationLabel" class="hidden fixed z-10 poi-label" style="pointer-events:none;">
     <div class="poi-bubble" style="background:#2563eb;border:none;"><span class="poi-name" style="margin:0 6px;">我的位置</span></div>
@@ -1261,83 +1335,207 @@
             highlightRoutePOIs(r);
         }
 
+        // 路线连线 canvas 绘制
+        let _routeLineRAF = null;
+        function drawRouteLines(orderedLabels, color) {
+            const canvas = document.getElementById('routeLineCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (orderedLabels.length < 2) return;
+
+            // 收集屏幕坐标（从 label DOM 位置推算）
+            function getLabelXY(lb) {
+                const el = lb.element;
+                const left = parseFloat(el.style.left);
+                const top  = parseFloat(el.style.top);
+                return { x: left, y: top };
+            }
+
+            const pts = orderedLabels.map(lb => getLabelXY(lb)).filter(p => !isNaN(p.x));
+            if (pts.length < 2) return;
+
+            // 渐变虚线
+            const grad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length-1].x, pts[pts.length-1].y);
+            grad.addColorStop(0, color + 'cc');
+            grad.addColorStop(1, color + '55');
+
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 5]);
+            ctx.lineDashOffset = 0;
+            ctx.stroke();
+
+            // 小箭头
+            for (let i=0; i<pts.length-1; i++) {
+                const mid = { x:(pts[i].x+pts[i+1].x)/2, y:(pts[i].y+pts[i+1].y)/2 };
+                const ang = Math.atan2(pts[i+1].y-pts[i].y, pts[i+1].x-pts[i].x);
+                ctx.save();
+                ctx.translate(mid.x, mid.y);
+                ctx.rotate(ang);
+                ctx.beginPath();
+                ctx.moveTo(-5, -4); ctx.lineTo(5, 0); ctx.lineTo(-5, 4);
+                ctx.strokeStyle = color + 'cc';
+                ctx.lineWidth = 1.8;
+                ctx.setLineDash([]);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 流动动画
+            let offset = 0;
+            function animate() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([8, 5]);
+                ctx.lineDashOffset = -offset;
+                ctx.stroke();
+                // 箭头
+                for (let i=0; i<pts.length-1; i++) {
+                    const mid={x:(pts[i].x+pts[i+1].x)/2,y:(pts[i].y+pts[i+1].y)/2};
+                    const ang=Math.atan2(pts[i+1].y-pts[i].y,pts[i+1].x-pts[i].x);
+                    ctx.save(); ctx.translate(mid.x,mid.y); ctx.rotate(ang);
+                    ctx.beginPath(); ctx.moveTo(-5,-4); ctx.lineTo(5,0); ctx.lineTo(-5,4);
+                    ctx.strokeStyle=color+'cc'; ctx.lineWidth=1.8; ctx.setLineDash([]); ctx.stroke();
+                    ctx.restore();
+                }
+                offset = (offset + 0.5) % 13;
+                _routeLineRAF = requestAnimationFrame(animate);
+            }
+            if (_routeLineRAF) cancelAnimationFrame(_routeLineRAF);
+            animate();
+        }
+        function clearRouteLines() {
+            if (_routeLineRAF) { cancelAnimationFrame(_routeLineRAF); _routeLineRAF=null; }
+            const canvas = document.getElementById('routeLineCanvas');
+            if (canvas) { const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+        }
+
         function highlightRoutePOIs(r){
-            const routePoiIds=new Set(r.pois||[]);
-            // 重置所有
-            labels.forEach(lb=>{
-                lb.element.style.opacity='0.25';
-                lb.element.style.transform='translate(-50%,-100%)';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.transform='scale(1)'; pin.style.boxShadow='0 0 8px rgba(0,0,0,0.35)'; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble) bubble.style.boxShadow='0 4px 14px rgba(0,0,0,0.22)';
-            });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.opacity=0.15; poi.ring.scale.set(1,1,1); } });
+            const routePoiIds = new Set(r.pois||[]);
+            const col = r.color || '#2563eb';
 
-            // 高亮路线内景点
-            labels.forEach(lb=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='20';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){
-                    pin.style.transform='scale(1.5)';
-                    pin.style.boxShadow=`0 0 0 3px white, 0 0 0 5px ${lb.data.color}, 0 0 16px ${lb.data.color}`;
-                    pin.style.background=lb.data.color;
-                }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){
-                    bubble.style.background='rgba(255,255,255,0.95)';
-                    bubble.style.border=`1.5px solid ${lb.data.color}`;
-                    bubble.style.boxShadow=`0 4px 16px ${lb.data.color}55`;
-                }
-                const name=lb.element.querySelector('.poi-name');
-                if(name) name.style.color=lb.data.color;
-                if(lb.data.ring){
-                    lb.data.ring.material.color.set(lb.data.color);
-                    lb.data.ring.material.opacity=0.9;
-                    lb.data.ring.scale.set(1.8,1.8,1.8);
-                }
+            // ── 第一步：所有标注深度淡出 ──
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active');
+                lb.element.classList.add('route-dim');
+                lb.element.style.zIndex = '';
+                lb.element.querySelector('.route-seq-badge')?.remove();
+                // 重置 pin 样式
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) { pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;`; }
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) { bubble.style.cssText = ''; bubble.style.border = ''; }
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
+                // 3D 环淡出
+                if (lb.data.ring) { lb.data.ring.material.opacity=0.05; lb.data.ring.scale.set(0.6,0.6,0.6); }
             });
 
-            // 显示路线序号标注
-            labels.forEach((lb,idx)=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                const seqNum = (r.pois||[]).indexOf(lb.data.id)+1;
-                let badge=lb.element.querySelector('.route-seq');
-                if(!badge){
-                    badge=document.createElement('div');
-                    badge.className='route-seq';
-                    badge.style.cssText=`position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;border:1.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);`;
-                    lb.element.querySelector('.poi-scale-wrapper').style.position='relative';
-                    lb.element.querySelector('.poi-bubble').appendChild(badge);
-                }
-                badge.textContent=seqNum;
-                badge.style.background=lb.data.color;
+            // ── 第二步：路线点位逐个高亮（按顺序延迟弹出）──
+            const orderedLabels = [];
+            ;(r.pois||[]).forEach((poiId, seq) => {
+                const lb = labels.find(l => l.data.id === poiId);
+                if (!lb) return;
+                orderedLabels.push(lb);
+                const delay = seq * 80; // 每个点位延迟80ms弹出，营造逐一亮起的效果
+
+                setTimeout(() => {
+                    // 移除暗化，添加高亮
+                    lb.element.classList.remove('route-dim');
+                    lb.element.classList.add('route-active');
+                    lb.element.style.zIndex = '22';
+
+                    // 气泡：白底+彩色粗边框+彩色文字
+                    const bubble = lb.element.querySelector('.poi-bubble');
+                    if (bubble) {
+                        bubble.style.background = 'rgba(255,255,255,0.98)';
+                        bubble.style.border = `2px solid ${col}`;
+                        bubble.style.boxShadow = `0 0 0 3px ${col}22, 0 6px 20px ${col}44`;
+                    }
+                    const name = lb.element.querySelector('.poi-name');
+                    if (name) {
+                        name.style.color = col;
+                        name.style.fontWeight = '900';
+                        name.style.fontSize = '12px';
+                    }
+                    // Pin：彩色+CSS变量（用于脉冲动画颜色）
+                    const pin = lb.element.querySelector('.poi-pin');
+                    if (pin) {
+                        pin.style.cssText = `
+                            background:${col};
+                            width:13px; height:13px;
+                            border:2.5px solid white;
+                            border-radius:50%;
+                            --pc:${col};
+                            box-shadow:0 0 0 0 ${col};
+                        `;
+                    }
+                    // 等待时间 tag 保持可见
+                    const tag = lb.element.querySelector('.wait-time-tag');
+                    if (tag) tag.style.opacity = '1';
+                    // 3D 环：放大+亮色
+                    if (lb.data.ring) {
+                        lb.data.ring.material.color.set(col);
+                        lb.data.ring.material.opacity = 1.0;
+                        lb.data.ring.scale.set(3.0, 3.0, 3.0);
+                    }
+                    // 序号徽章（左上角）
+                    const wrapper = lb.element.querySelector('.poi-scale-wrapper');
+                    if (wrapper) {
+                        wrapper.style.position = 'relative';
+                        const badge = document.createElement('div');
+                        badge.className = 'route-seq-badge';
+                        badge.style.background = col;
+                        badge.style.animationDelay = (seq * 0.05) + 's';
+                        badge.textContent = seq + 1;
+                        wrapper.appendChild(badge);
+                    }
+                }, delay);
             });
 
-            // 切到2D正交全图
-            if(viewMode!=='2D') toggleViewMode('2D');
+            // ── 第三步：等所有点位出现后画连线 ──
+            setTimeout(() => {
+                drawRouteLines(orderedLabels, col);
+            }, (r.pois||[]).length * 80 + 100);
+
+            // ── 第四步：切到2D全图 ──
+            if (viewMode !== '2D') toggleViewMode('2D');
             else switch2D();
         }
 
         function clearRouteHighlight(){
-            activeRouteId=null;
-            labels.forEach(lb=>{
-                lb.element.classList.remove('route-active');
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='';
-                lb.element.style.filter='';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.cssText=`background:${lb.data.color};`; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){ bubble.style.cssText=''; }
-                const name=lb.element.querySelector('.poi-name');
-                if(name){ name.style.color='#fff'; name.style.fontWeight='600'; }
+            activeRouteId = null;
+            clearRouteLines();
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active','route-dim');
+                lb.element.style.opacity = '1';
+                lb.element.style.zIndex  = '';
+                lb.element.style.filter  = '';
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;border-radius:50%;border:2px solid #fff;`;
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) bubble.style.cssText = '';
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
                 lb.element.querySelector('.route-seq-badge')?.remove();
             });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); } });
-            document.querySelectorAll('.route-card').forEach(c=>{ c.classList.remove('active'); const btn=c.querySelector('.rc-start-btn'); if(btn) btn.style.opacity='0'; });
+            POI_RAW_DATA.forEach(poi => {
+                if (poi.ring) { poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); }
+            });
+            document.querySelectorAll('.route-card').forEach(c => {
+                c.classList.remove('active');
+                const btn = c.querySelector('.rc-start-btn');
+                if (btn) btn.style.opacity = '0';
+            });
         }
 
         /* ── THREE.JS ── */
@@ -1715,21 +1913,157 @@
             }, 300);
         });
 
-        /* ── 昼夜切换 JS ── */
+        /* ══ 昼夜切换系统 ══ */
         let isDayMode = true;
-        let ambientLightRef = null, dirLightRef = null;
+        let _nightRAF = null;
+        let _starsRAF = null;
+
+        // 灯光粒子数据（基于地图上建筑群位置的相对坐标，百分比）
+        const NIGHT_LIGHTS = (() => {
+            const lights = [];
+            // 沿古镇主街和水域随机分布约 120 个灯点
+            // 分为几组：暖黄路灯、橙红灯笼、冷白窗光、蓝绿水面倒影
+            const clusters = [
+                // 主街区（中央偏左，密集）
+                { cx:0.45, cy:0.42, r:0.14, n:40, colors:['#ffe566','#ffcc44','#ff9933','#ffdd88'] },
+                // 水岸码头（下方偏右）
+                { cx:0.58, cy:0.62, r:0.09, n:22, colors:['#66ccff','#aaddff','#55bbee','#88ccff'] },
+                // 芦江沿岸（左侧水边）
+                { cx:0.32, cy:0.55, r:0.10, n:20, colors:['#ffe566','#ffcc44','#88eeff'] },
+                // 古镇北侧（偏上）
+                { cx:0.50, cy:0.28, r:0.08, n:18, colors:['#ffcc44','#ff8844','#ffe599'] },
+                // 东入口
+                { cx:0.74, cy:0.40, r:0.06, n:12, colors:['#ff6644','#ffaa44','#ffe566'] },
+            ];
+            clusters.forEach(cl => {
+                for (let i = 0; i < cl.n; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    const dist = Math.sqrt(Math.random()) * cl.r;
+                    lights.push({
+                        x: cl.cx + Math.cos(ang) * dist,
+                        y: cl.cy + Math.sin(ang) * dist,
+                        r: 0.8 + Math.random() * 2.2,         // 半径 px
+                        color: cl.colors[Math.floor(Math.random() * cl.colors.length)],
+                        phase: Math.random() * Math.PI * 2,   // 闪烁相位偏移
+                        speed: 0.4 + Math.random() * 1.2,     // 闪烁速度
+                        base: 0.55 + Math.random() * 0.3,     // 基础亮度
+                        flicker: 0.15 + Math.random() * 0.3,  // 闪烁幅度
+                        glow: 3 + Math.random() * 8,          // 光晕大小
+                    });
+                }
+            });
+            return lights;
+        })();
+
+        // 星星数据
+        const STARS = (() => {
+            const stars = [];
+            for (let i = 0; i < 180; i++) {
+                stars.push({
+                    x: Math.random(),
+                    y: Math.random() * 0.5,  // 只在屏幕上半部（天空区域）
+                    r: 0.4 + Math.random() * 1.2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.3 + Math.random() * 0.8,
+                });
+            }
+            return stars;
+        })();
+
+        function animateNightLights() {
+            const canvas = document.getElementById('nightLightsCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            let t = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const W = canvas.width, H = canvas.height;
+                t += 0.016;
+
+                NIGHT_LIGHTS.forEach(lt => {
+                    const px = lt.x * W, py = lt.y * H;
+                    // 闪烁亮度：基础 + sin波动
+                    const alpha = lt.base + Math.sin(t * lt.speed + lt.phase) * lt.flicker;
+                    // 光晕
+                    const grd = ctx.createRadialGradient(px, py, 0, px, py, lt.glow);
+                    grd.addColorStop(0, lt.color + Math.round(alpha * 255).toString(16).padStart(2,'0'));
+                    grd.addColorStop(0.4, lt.color + Math.round(alpha * 0.4 * 255).toString(16).padStart(2,'0'));
+                    grd.addColorStop(1, 'transparent');
+                    ctx.beginPath();
+                    ctx.arc(px, py, lt.glow, 0, Math.PI * 2);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    // 核心亮点
+                    ctx.beginPath();
+                    ctx.arc(px, py, lt.r, 0, Math.PI * 2);
+                    ctx.fillStyle = lt.color + Math.round(Math.min(alpha * 1.2, 1) * 255).toString(16).padStart(2,'0');
+                    ctx.fill();
+                });
+
+                _nightRAF = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function animateStars() {
+            const canvas = document.getElementById('starsCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            let t = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const W = canvas.width, H = canvas.height;
+                t += 0.01;
+
+                STARS.forEach(st => {
+                    const px = st.x * W, py = st.y * H;
+                    const alpha = 0.4 + Math.sin(t * st.speed + st.phase) * 0.35;
+                    ctx.beginPath();
+                    ctx.arc(px, py, st.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                    ctx.fill();
+                    // 亮星加十字光芒
+                    if (st.r > 1.0) {
+                        ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.4})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(px - st.r * 3, py); ctx.lineTo(px + st.r * 3, py);
+                        ctx.moveTo(px, py - st.r * 3); ctx.lineTo(px, py + st.r * 3);
+                        ctx.stroke();
+                    }
+                });
+                _starsRAF = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function stopNightEffects() {
+            if (_nightRAF) { cancelAnimationFrame(_nightRAF); _nightRAF = null; }
+            if (_starsRAF) { cancelAnimationFrame(_starsRAF); _starsRAF = null; }
+            const lc = document.getElementById('nightLightsCanvas');
+            const sc = document.getElementById('starsCanvas');
+            if (lc) lc.getContext('2d').clearRect(0,0,lc.width,lc.height);
+            if (sc) sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+        }
 
         function toggleDayNight() {
             isDayMode = !isDayMode;
             document.body.classList.toggle('night-mode', !isDayMode);
             const icon = document.getElementById('dayNightIcon');
-            const label = document.getElementById('navDayNight').querySelector('text, span') || document.getElementById('navDayNight').lastChild;
 
             if (isDayMode) {
+                // ── 切回白天 ──
                 scene.background = new THREE.Color(0x87ceeb);
                 if (ambientLight) { ambientLight.color.set(0xffffff); ambientLight.intensity = 0.8; }
-                if (dirLight)     { dirLight.color.set(0xffffff);     dirLight.intensity = 0.5; }
-                if (mapPlaneMesh && mapPlaneMesh.material.map) mapPlaneMesh.material.color.set(0xffffff);
+                if (dirLight)     { dirLight.color.set(0xfff5e0);     dirLight.intensity = 0.6; }
+                // 底图恢复白色（CSS filter 已通过 class 控制）
+                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0xffffff);
+                // 停止夜间特效
+                stopNightEffects();
                 // 太阳图标
                 if (icon) icon.innerHTML = `<circle cx="12" cy="12" r="5"/>
                     <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -1737,10 +2071,17 @@
                     <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
             } else {
-                scene.background = new THREE.Color(0x020820);
-                if (ambientLight) { ambientLight.color.set(0x1a2a5e); ambientLight.intensity = 0.35; }
-                if (dirLight)     { dirLight.color.set(0x3050a0);     dirLight.intensity = 0.25; }
-                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0x445588);
+                // ── 切入夜晚 ──
+                scene.background = new THREE.Color(0x050d1f);
+                if (ambientLight) { ambientLight.color.set(0x2a3a6e); ambientLight.intensity = 0.55; }
+                if (dirLight)     { dirLight.color.set(0x4060b0);     dirLight.intensity = 0.2; }
+                // 底图颜色保持白色，由 CSS filter 控制暗化（保留纹理细节！）
+                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0xffffff);
+                // 启动夜间特效（延迟400ms等CSS过渡开始）
+                setTimeout(() => {
+                    animateStars();
+                    animateNightLights();
+                }, 400);
                 // 月亮图标
                 if (icon) icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
             }
