@@ -93,7 +93,7 @@
         /* ═══════ TOP BAR ═══════ */
         #topBar {
             position: fixed; top: 12px;
-            left: 78px; right: 68px;      /* 两侧给左右面板留空间 */
+            left: 66px; right: 60px;      /* 两侧给左右面板留空间 */
             z-index: 50;
             display: flex; align-items: center; gap: 8px;
         }
@@ -124,17 +124,15 @@
         .show-meta { display: none; }   /* 手机端隐藏客流/推荐，避免拥挤 */
         /* 视图切换 —— 右上角独立小胶囊 */
         #viewSwitch {
-            position: fixed; top: 12px; right: 68px;
             display: flex; align-items: center; gap: 2px;
-            padding: 3px; border-radius: 10px; z-index: 51;
+            padding: 3px; border-radius: 10px; flex-shrink: 0;
             box-shadow: 0 3px 12px rgba(0,0,0,0.1);
         }
         .vs-btn { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all .2s; white-space: nowrap; }
         .vs-btn.active { background: #2563eb; color: white; box-shadow: 0 2px 6px rgba(37,99,235,.35); }
         /* 手机端专属媒体查询 */
         @media (max-width: 600px) {
-            #topBar { top: 10px; left: 74px; right: 62px; gap: 6px; }
-            #viewSwitch { top: 10px; right: 8px; }
+            #topBar { top: 10px; left: 62px; right: 56px; gap: 5px; }
             #weatherCapsule { padding: 5px 10px; border-radius: 10px; }
             #showCard { border-radius: 10px; max-height: 44px; }
             .show-main { padding: 6px 10px; }
@@ -294,7 +292,7 @@
         /* ── 恢复栏（右侧边缘贴边，不遮挡地图） ── */
         #restoreBar {
             position: fixed;
-            right: 0;
+            right: 56px;   /* 让开右侧工具栏宽度 */
             top: 50%;
             transform: translateY(-50%);
             z-index: 60;
@@ -311,10 +309,9 @@
             display: flex; align-items: center; gap: 5px;
             background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
             border: 1px solid rgba(255,255,255,0.14);
-            border-right: none;
             color: #e2e8f0; font-size: 10px; font-weight: 700;
-            padding: 7px 10px 7px 10px;
-            border-radius: 10px 0 0 10px;
+            padding: 6px 10px;
+            border-radius: 10px;
             cursor: pointer; transition: all .2s; white-space: nowrap;
             box-shadow: -3px 2px 12px rgba(0,0,0,0.28);
             animation: chipSlide .22s cubic-bezier(.175,.885,.32,1.275) both;
@@ -467,14 +464,15 @@
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
         </button>
     </div>
+
+    <!-- 视图切换（topBar 末尾，不遮挡任何内容） -->
+    <div id="viewSwitch" class="g">
+        <div class="vs-btn active" id="btn3D" onclick="toggleViewMode('3D')">3D</div>
+        <div class="vs-btn" id="btn2D" onclick="toggleViewMode('2D')">2D</div>
+        <div id="clearRouteBtn" class="vs-btn hidden text-red-500" onclick="clearRoute()">清除</div>
+    </div>
 </div>
 
-<!-- 视图切换（固定右上，独立于topBar） -->
-<div id="viewSwitch" class="g">
-    <div class="vs-btn active" id="btn3D" onclick="toggleViewMode('3D')">3D</div>
-    <div class="vs-btn" id="btn2D" onclick="toggleViewMode('2D')">2D</div>
-    <div id="clearRouteBtn" class="vs-btn hidden text-red-500" onclick="clearRoute()">清除</div>
-</div>
 
 <!-- ══ LEFT PANEL ══ -->
 <div id="leftPanel">
@@ -1480,17 +1478,24 @@
         function switch2D(){
             if(controls){controls.dispose();controls=null;}
             const {hw,hh}=calc2DOrtho();
-            orthoCamera.left=-hw;orthoCamera.right=hw;
-            orthoCamera.top=hh;orthoCamera.bottom=-hh;
+            orthoCamera.left=-hw; orthoCamera.right=hw;
+            orthoCamera.top=hh;   orthoCamera.bottom=-hh;
             orthoCamera.updateProjectionMatrix();
+            // 每次切换都重置到正上方正中，消除偏移
+            orthoCamera.position.set(0,100,0);
+            orthoCamera.lookAt(0,0,0);
+            orthoCamera.up.set(0,0,-1);   // 保证朝向一致（-Z 朝上）
             camera=orthoCamera;
-            // 2D正交控制器（只允许平移和缩放，不旋转）
+            // 正交控制器：只允许平移和缩放
             controls=new THREE.OrbitControls(camera,renderer.domElement);
-            controls.target.set(0,0,0);
+            controls.target.set(0,0,0);   // 强制居中
             controls.enableRotate=false;
             controls.enableDamping=true;
+            controls.dampingFactor=0.12;
+            controls.screenSpacePanning=true;  // 平移跟随屏幕平面
             controls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.PAN};
             controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
+            controls.minZoom=0.5; controls.maxZoom=4;
             controls.update();
         }
         function switch3D(){
