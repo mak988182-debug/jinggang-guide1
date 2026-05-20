@@ -438,7 +438,8 @@
             position: fixed; inset: 0; z-index: 3;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 1.8s ease;
+            transition: opacity 2.2s ease;
+            mix-blend-mode: screen;   /* 叠加模式：灯光叠加在地图上，黑色透明 */
         }
         body.night-mode #nightLightsCanvas { opacity: 1; }
 
@@ -1919,39 +1920,69 @@
         let _starsRAF = null;
 
         // 灯光粒子数据（基于地图上建筑群位置的相对坐标，百分比）
-        const NIGHT_LIGHTS = (() => {
+        // ══ 夜间灯光系统 ══
+        // 灯光用 Three.js 世界坐标（地图平面 X:-30~30, Z:-20~20）
+        // 通过 camera.project() 实时投影，灯光随地图移动，只在地图内闪烁
+
+        // 参考图分析：古镇右侧（东区）街道密集暖黄灯，水面蓝光倒影，沿街灯笼橙红
+        const NIGHT_LIGHTS_WORLD = (() => {
             const lights = [];
-            // 沿古镇主街和水域随机分布约 120 个灯点
-            // 分为几组：暖黄路灯、橙红灯笼、冷白窗光、蓝绿水面倒影
-            const clusters = [
-                // 主街区（中央偏左，密集）
-                { cx:0.45, cy:0.42, r:0.14, n:40, colors:['#ffe566','#ffcc44','#ff9933','#ffdd88'] },
-                // 水岸码头（下方偏右）
-                { cx:0.58, cy:0.62, r:0.09, n:22, colors:['#66ccff','#aaddff','#55bbee','#88ccff'] },
-                // 芦江沿岸（左侧水边）
-                { cx:0.32, cy:0.55, r:0.10, n:20, colors:['#ffe566','#ffcc44','#88eeff'] },
-                // 古镇北侧（偏上）
-                { cx:0.50, cy:0.28, r:0.08, n:18, colors:['#ffcc44','#ff8844','#ffe599'] },
-                // 东入口
-                { cx:0.74, cy:0.40, r:0.06, n:12, colors:['#ff6644','#ffaa44','#ffe566'] },
-            ];
-            clusters.forEach(cl => {
-                for (let i = 0; i < cl.n; i++) {
-                    const ang = Math.random() * Math.PI * 2;
-                    const dist = Math.sqrt(Math.random()) * cl.r;
+
+            // 辅助：在世界坐标区域内撒点
+            function scatter(wxMin, wxMax, wzMin, wzMax, n, colors, rMin, rMax, glowMin, glowMax) {
+                for (let i=0; i<n; i++) {
                     lights.push({
-                        x: cl.cx + Math.cos(ang) * dist,
-                        y: cl.cy + Math.sin(ang) * dist,
-                        r: 0.8 + Math.random() * 2.2,         // 半径 px
-                        color: cl.colors[Math.floor(Math.random() * cl.colors.length)],
-                        phase: Math.random() * Math.PI * 2,   // 闪烁相位偏移
-                        speed: 0.4 + Math.random() * 1.2,     // 闪烁速度
-                        base: 0.55 + Math.random() * 0.3,     // 基础亮度
-                        flicker: 0.15 + Math.random() * 0.3,  // 闪烁幅度
-                        glow: 3 + Math.random() * 8,          // 光晕大小
+                        wx: wxMin + Math.random()*(wxMax-wxMin),  // 世界X
+                        wz: wzMin + Math.random()*(wzMax-wzMin),  // 世界Z
+                        r:    rMin + Math.random()*(rMax-rMin),
+                        color: colors[Math.floor(Math.random()*colors.length)],
+                        phase: Math.random()*Math.PI*2,
+                        speed: 0.5 + Math.random()*1.5,
+                        base:  0.5 + Math.random()*0.35,
+                        flicker: 0.12 + Math.random()*0.28,
+                        glow:  glowMin + Math.random()*(glowMax-glowMin),
+                        // 水面倒影：垂直拉伸
+                        isReflect: false,
                     });
                 }
-            });
+            }
+
+            const warm   = ['#ffe566','#ffcc44','#ffdd88','#ffbb33'];   // 暖黄路灯
+            const lantern= ['#ff8833','#ff6622','#ffaa44','#ff9922'];   // 灯笼橙红
+            const window_= ['#fffacd','#fff5aa','#ffeecc'];             // 窗户冷暖白
+            const water  = ['#55bbff','#88ddff','#44aaee','#66ccff'];   // 水面蓝光
+            const reflect= ['#ff9944','#ffcc55','#66bbff'];             // 水面倒影
+
+            // ① 古镇核心街区（东侧，参考图灯光最密集区域）
+            scatter( 5, 26, -12,  8, 80, warm,    1.2, 2.8,  8, 18);
+            scatter( 8, 24, -10,  6, 50, lantern, 0.8, 1.8,  6, 14);
+            scatter(10, 22,  -8,  4, 35, window_, 0.6, 1.4,  4, 10);
+
+            // ② 沿主街道（中轴线，东西延伸）
+            scatter(-10, 20,  -4,  2, 45, warm,    1.0, 2.2, 7, 16);
+            scatter( -5, 18,  -6,  0, 30, lantern, 0.7, 1.6, 5, 12);
+
+            // ③ 水岸码头区（河道两侧）
+            scatter( -8, 16,  -2,  4, 40, water,   0.8, 2.0, 10, 22);
+            scatter( -6, 14,   0,  6, 25, reflect, 0.5, 1.2,  8, 18);
+
+            // ④ 芦江阁周围（西南方向，地标建筑）
+            scatter(  2,  9,  -1,  5, 28, lantern, 1.0, 2.5, 10, 20);
+            scatter(  3,  8,   0,  4, 18, warm,    0.8, 1.8,  7, 15);
+
+            // ⑤ 北侧院落区（上方，较稀疏）
+            scatter( -5, 20, -16,-10, 35, warm,    0.7, 1.8,  6, 13);
+            scatter( 5,  18, -14, -8, 20, lantern, 0.6, 1.4,  5, 11);
+
+            // ⑥ 码头水面倒影（蓝色，模拟水中反光）
+            scatter( -6, 18,   2,  8, 30, water,   0.4, 1.0, 12, 24);
+
+            // ⑦ 西牌坊入口（零星路灯）
+            scatter(-24,-16,  -8,  0, 15, warm,    0.8, 1.6,  6, 12);
+
+            // ⑧ 东牌坊（东侧）
+            scatter( 22, 28,  -8,  0, 12, lantern, 0.9, 1.8,  7, 14);
+
             return lights;
         })();
 
@@ -1970,36 +2001,69 @@
             return stars;
         })();
 
+        // 世界坐标 → 屏幕坐标（复用 Three.js camera）
+        function worldToScreen(wx, wz) {
+            const vec = new THREE.Vector3(wx, 0, wz);
+            vec.project(camera);
+            if (Math.abs(vec.z) > 1) return null; // 在相机背后
+            return {
+                x: (vec.x * 0.5 + 0.5) * innerWidth,
+                y: (-vec.y * 0.5 + 0.5) * innerHeight,
+            };
+        }
+
+        // 十六进制 alpha 辅助
+        function hexAlpha(a) {
+            return Math.round(Math.min(Math.max(a, 0), 1) * 255).toString(16).padStart(2,'0');
+        }
+
         function animateNightLights() {
             const canvas = document.getElementById('nightLightsCanvas');
             if (!canvas) return;
-            canvas.width = innerWidth; canvas.height = innerHeight;
             const ctx = canvas.getContext('2d');
             let t = 0;
 
             function draw() {
+                canvas.width = innerWidth; canvas.height = innerHeight;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const W = canvas.width, H = canvas.height;
                 t += 0.016;
 
-                NIGHT_LIGHTS.forEach(lt => {
-                    const px = lt.x * W, py = lt.y * H;
-                    // 闪烁亮度：基础 + sin波动
-                    const alpha = lt.base + Math.sin(t * lt.speed + lt.phase) * lt.flicker;
-                    // 光晕
-                    const grd = ctx.createRadialGradient(px, py, 0, px, py, lt.glow);
-                    grd.addColorStop(0, lt.color + Math.round(alpha * 255).toString(16).padStart(2,'0'));
-                    grd.addColorStop(0.4, lt.color + Math.round(alpha * 0.4 * 255).toString(16).padStart(2,'0'));
-                    grd.addColorStop(1, 'transparent');
+                NIGHT_LIGHTS_WORLD.forEach(lt => {
+                    // 世界坐标投影到屏幕
+                    const sc = worldToScreen(lt.wx, lt.wz);
+                    if (!sc) return; // 不在视野内跳过
+
+                    const alpha = Math.max(0, lt.base + Math.sin(t * lt.speed + lt.phase) * lt.flicker);
+                    const alphaCore = Math.min(alpha * 1.3, 1);
+
+                    // 光晕（径向渐变）
+                    const grd = ctx.createRadialGradient(sc.x, sc.y, 0, sc.x, sc.y, lt.glow);
+                    grd.addColorStop(0,   lt.color + hexAlpha(alpha * 0.95));
+                    grd.addColorStop(0.3, lt.color + hexAlpha(alpha * 0.5));
+                    grd.addColorStop(0.7, lt.color + hexAlpha(alpha * 0.18));
+                    grd.addColorStop(1,   lt.color + '00');
                     ctx.beginPath();
-                    ctx.arc(px, py, lt.glow, 0, Math.PI * 2);
+                    ctx.arc(sc.x, sc.y, lt.glow, 0, Math.PI*2);
                     ctx.fillStyle = grd;
                     ctx.fill();
+
                     // 核心亮点
                     ctx.beginPath();
-                    ctx.arc(px, py, lt.r, 0, Math.PI * 2);
-                    ctx.fillStyle = lt.color + Math.round(Math.min(alpha * 1.2, 1) * 255).toString(16).padStart(2,'0');
+                    ctx.arc(sc.x, sc.y, lt.r, 0, Math.PI*2);
+                    ctx.fillStyle = lt.color + hexAlpha(alphaCore);
                     ctx.fill();
+
+                    // 水面倒影：向下拉伸椭圆
+                    if (lt.wz > 0) {
+                        ctx.save();
+                        ctx.globalAlpha = alpha * 0.22;
+                        ctx.scale(1, 2.5);
+                        ctx.beginPath();
+                        ctx.arc(sc.x, (sc.y) / 2.5 + 6, lt.r * 0.8, 0, Math.PI*2);
+                        ctx.fillStyle = lt.color;
+                        ctx.fill();
+                        ctx.restore();
+                    }
                 });
 
                 _nightRAF = requestAnimationFrame(draw);
@@ -2048,6 +2112,129 @@
             const sc = document.getElementById('starsCanvas');
             if (lc) lc.getContext('2d').clearRect(0,0,lc.width,lc.height);
             if (sc) sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+            stopNightAudio();
+        }
+
+        // ══ 夜间背景音系统（Web Audio API 合成，无需外部文件）══
+        let _audioCtx = null;
+        let _nightAudioNodes = [];
+
+        function getNightAudioCtx() {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return _audioCtx;
+        }
+
+        // 合成蛙鸣（短促调频振荡）
+        function synthFrogCalls(ctx, masterGain) {
+            function oneFrog() {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const freq = 380 + Math.random() * 120;  // 蛙鸣频率范围
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.linearRampToValueAtTime(freq * 1.15, now + 0.04);
+                osc.frequency.linearRampToValueAtTime(freq * 0.9, now + 0.1);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.06 + Math.random()*0.04, now + 0.02);
+                gain.gain.linearRampToValueAtTime(0, now + 0.14);
+                osc.connect(gain); gain.connect(masterGain);
+                osc.start(now); osc.stop(now + 0.18);
+                // 随机间隔触发下一只蛙
+                const next = setTimeout(oneFrog, 600 + Math.random() * 2400);
+                _nightAudioNodes.push({ clear: () => clearTimeout(next) });
+            }
+            // 启动多只蛙，相互错开
+            for (let i = 0; i < 8; i++) {
+                const t = setTimeout(oneFrog, Math.random() * 2000);
+                _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+            }
+        }
+
+        // 合成流水声（带通噪声）
+        function synthWater(ctx, masterGain) {
+            const bufSize = ctx.sampleRate * 3;
+            const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) data[i] = (Math.random()*2-1);
+            const src = ctx.createBufferSource();
+            src.buffer = buf; src.loop = true;
+            const bpf = ctx.createBiquadFilter();
+            bpf.type = 'bandpass'; bpf.frequency.value = 800; bpf.Q.value = 0.4;
+            const bpf2 = ctx.createBiquadFilter();
+            bpf2.type = 'bandpass'; bpf2.frequency.value = 1400; bpf2.Q.value = 0.3;
+            const g = ctx.createGain(); g.gain.value = 0.06;
+            src.connect(bpf); bpf.connect(bpf2); bpf2.connect(g); g.connect(masterGain);
+            src.start();
+            _nightAudioNodes.push({ node: src, stop: () => { try{ src.stop(); }catch(e){} } });
+        }
+
+        // 合成远处烟花爆炸声（低频冲击）
+        function synthFireworks(ctx, masterGain) {
+            function boom() {
+                if (!isDayMode) {  // 只在夜间触发
+                    const now = ctx.currentTime;
+                    const noise = ctx.createBuffer(1, ctx.sampleRate*0.8, ctx.sampleRate);
+                    const d = noise.getChannelData(0);
+                    for (let i=0; i<d.length; i++) d[i]=(Math.random()*2-1);
+                    const src = ctx.createBufferSource(); src.buffer=noise;
+                    const lpf = ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=180;
+                    const g = ctx.createGain();
+                    g.gain.setValueAtTime(0.15, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now+0.7);
+                    src.connect(lpf); lpf.connect(g); g.connect(masterGain);
+                    src.start(now); src.stop(now+0.8);
+                }
+                // 每 20~50 秒一次烟花
+                const t = setTimeout(boom, 20000 + Math.random()*30000);
+                _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+            }
+            const t = setTimeout(boom, 8000 + Math.random()*12000);
+            _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+        }
+
+        // 合成虫鸣（高频正弦持续）
+        function synthCrickets(ctx, masterGain) {
+            const osc = ctx.createOscillator();
+            const lfo = ctx.createOscillator();
+            const lfoGain = ctx.createGain();
+            const g = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = 4200;
+            lfo.type = 'sine'; lfo.frequency.value = 18;
+            lfoGain.gain.value = 0.018;
+            g.gain.value = 0.028;
+            lfo.connect(lfoGain); lfoGain.connect(g.gain);
+            osc.connect(g); g.connect(masterGain);
+            osc.start(); lfo.start();
+            _nightAudioNodes.push({ node: osc, stop: () => { try{osc.stop();lfo.stop();}catch(e){} } });
+        }
+
+        function startNightAudio() {
+            try {
+                const ctx = getNightAudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                // 主音量（夜间氛围音量适中，不打扰游览）
+                const master = ctx.createGain();
+                master.gain.setValueAtTime(0, ctx.currentTime);
+                master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2.5);
+                master.connect(ctx.destination);
+                _nightAudioNodes.push({ node: master });
+                synthWater(ctx, master);
+                synthFrogCalls(ctx, master);
+                synthCrickets(ctx, master);
+                synthFireworks(ctx, master);
+            } catch(e) { console.warn('Night audio not supported:', e); }
+        }
+
+        function stopNightAudio() {
+            _nightAudioNodes.forEach(n => {
+                if (n.stop) try { n.stop(); } catch(e) {}
+                if (n.clear) n.clear();
+            });
+            _nightAudioNodes = [];
+            if (_audioCtx) {
+                _audioCtx.suspend();
+            }
         }
 
         function toggleDayNight() {
@@ -2081,6 +2268,7 @@
                 setTimeout(() => {
                     animateStars();
                     animateNightLights();
+                    startNightAudio();
                 }, 400);
                 // 月亮图标
                 if (icon) icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
