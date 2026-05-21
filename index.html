@@ -819,6 +819,289 @@
         }
         .ach-icon { font-size: 22px; flex-shrink:0; }
         .ach-locked { filter: grayscale(1) opacity(.4); }
+
+        /* ① AI打卡帧 */
+        #checkinFrameModal{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(14px);padding:16px;}
+        #checkinFrameModal.open{display:flex;}
+        #checkinFrameInner{width:100%;max-width:480px;border-radius:28px;overflow:hidden;background:#0f172a;border:1px solid rgba(255,255,255,0.14);box-shadow:0 32px 80px rgba(0,0,0,0.7);animation:sheetUp .4s cubic-bezier(.175,.885,.32,1.275) both;}
+        #frameCanvas{width:100%;aspect-ratio:4/3;display:block;background:#0a0a14;}
+        .frame-btn{padding:10px 20px;border-radius:14px;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;border:none;}
+        .frame-btn:active{transform:scale(.95);}
+        /* ② 游览报告卡 */
+        #reportPage{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);}
+        #reportPage.open{display:flex;}
+        .rp-header{padding:16px 20px 12px;display:flex;align-items:center;gap:14px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);}
+        .rp-back{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;flex-shrink:0;transition:all .2s;}
+        .rp-back:hover{background:rgba(255,255,255,0.2);}
+        .rp-body{flex:1;overflow-y:auto;padding:20px;}
+        .rp-body::-webkit-scrollbar{width:3px;}
+        .rp-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px;}
+        .rp-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:18px;margin-bottom:14px;}
+        .rp-stat{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+        .rp-stat:last-child{border-bottom:none;padding-bottom:0;}
+        .rp-stat-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+        .rp-poi-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;margin:3px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;}
+        /* ③ 演出震动提醒 */
+        #showAlertBar{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-90px);z-index:80;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:20px;padding:12px 18px;box-shadow:0 12px 40px rgba(124,58,237,0.5);min-width:280px;max-width:380px;transition:transform .45s cubic-bezier(.175,.885,.32,1.275),opacity .45s;opacity:0;pointer-events:none;}
+        #showAlertBar.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto;}
+        .sa-pulse{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;animation:saPulse 1s ease-in-out infinite;}
+        @keyframes saPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.4)}50%{box-shadow:0 0 0 10px rgba(255,255,255,0);}}
+        /* ④ 行程规划器 */
+        #plannerPage{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;overflow:hidden;background:#f8fafc;}
+        #plannerPage.open{display:flex;}
+        .planner-header{padding:16px 20px 12px;display:flex;align-items:center;gap:14px;flex-shrink:0;background:white;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
+        .planner-back{width:36px;height:36px;border-radius:12px;background:#f1f5f9;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#475569;flex-shrink:0;transition:all .2s;}
+        .planner-back:hover{background:#e2e8f0;}
+        .planner-body{flex:1;display:flex;overflow:hidden;}
+        .planner-left{width:220px;flex-shrink:0;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;background:white;}
+        .planner-right{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f8fafc;}
+        .planner-pool{flex:1;overflow-y:auto;padding:8px;}
+        .planner-pool::-webkit-scrollbar{width:3px;}
+        .pool-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:12px;background:#f8fafc;border:1.5px solid #e2e8f0;margin-bottom:6px;cursor:pointer;transition:all .18s;user-select:none;font-size:11px;font-weight:700;color:#334155;}
+        .pool-item:hover{border-color:#2563eb;background:#eff6ff;color:#2563eb;}
+        .pool-item.in-plan{opacity:.3;pointer-events:none;}
+        .pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+        .plan-timeline{flex:1;overflow-y:auto;padding:14px;}
+        .plan-slot{display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;}
+        .plan-slot-time{width:46px;font-size:10px;font-weight:800;color:#94a3b8;padding-top:12px;flex-shrink:0;text-align:right;}
+        .plan-slot-card{flex:1;background:white;border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 12px;position:relative;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+        .plan-del{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:#fee2e2;border:none;color:#ef4444;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+        .plan-del:hover{background:#ef4444;color:white;}
+        .plan-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#94a3b8;font-size:12px;font-weight:600;padding:40px;}
+        .planner-footer{padding:12px 16px;background:white;border-top:1px solid #e2e8f0;display:flex;gap:8px;align-items:center;flex-shrink:0;}
+        .pf-btn{padding:9px 18px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;border:none;}
+        .pf-btn:active{transform:scale(.96);}
+        /* ⑤ 排行榜 */
+        #leaderboardPage{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#0f172a,#1e1b4b);}
+        #leaderboardPage.open{display:flex;}
+        .lb-header{padding:20px 24px 14px;flex-shrink:0;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);}
+        .lb-back{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;flex-shrink:0;transition:all .2s;}
+        .lb-back:hover{background:rgba(255,255,255,0.2);}
+        .lb-scroll{flex:1;overflow-y:auto;padding:16px 20px 24px;}
+        .lb-scroll::-webkit-scrollbar{width:3px;}
+        .lb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px;}
+        .lb-podium{display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:24px;padding:0 10px;}
+        .lb-pod{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:110px;}
+        .lb-pod-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;border:3px solid;}
+        .lb-pod-bar{width:100%;border-radius:12px 12px 0 0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;position:relative;min-height:40px;}
+        .lb-pod-rank{position:absolute;top:-14px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;}
+        .lb-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;margin-bottom:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);transition:all .2s;}
+        .lb-row.me{background:rgba(37,99,235,0.2);border-color:rgba(37,99,235,0.4);}
+        .lb-row-rank{width:28px;font-size:13px;font-weight:900;color:rgba(255,255,255,0.5);text-align:center;flex-shrink:0;}
+        .lb-row-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,255,255,0.1);}
+        /* ⑥ 留言墙 */
+        #messageWallModal{position:fixed;inset:0;z-index:210;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);}
+        #messageWallModal.open{display:flex;}
+        #messageWallInner{width:100%;max-width:520px;border-radius:28px 28px 0 0;background:white;max-height:82vh;display:flex;flex-direction:column;animation:sheetUp .4s cubic-bezier(.4,0,.2,1) both;overflow:hidden;}
+        .mw-header{padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-shrink:0;}
+        .mw-list{flex:1;overflow-y:auto;padding:10px 16px;}
+        .mw-list::-webkit-scrollbar{width:3px;}
+        .mw-list::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:3px;}
+        .mw-msg{display:flex;gap:10px;margin-bottom:14px;animation:msgIn .35s ease both;}
+        @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .mw-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;background:#f1f5f9;}
+        .mw-bubble{flex:1;background:#f8fafc;border-radius:0 16px 16px 16px;padding:10px 14px;border:1px solid #e2e8f0;}
+        .mw-bubble.mine{background:#eff6ff;border-color:#bfdbfe;border-radius:16px 0 16px 16px;}
+        .mw-emoji-bar{display:flex;gap:5px;padding:6px 16px;overflow-x:auto;flex-shrink:0;}
+        .mw-emoji-bar::-webkit-scrollbar{display:none;}
+        .mw-emoji{width:32px;height:32px;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;}
+        .mw-emoji:hover{border-color:#2563eb;background:#eff6ff;transform:scale(1.1);}
+        .mw-compose{padding:10px 14px 20px;border-top:1px solid #f1f5f9;flex-shrink:0;display:flex;gap:8px;align-items:flex-end;}
+        .mw-input{flex:1;border:1.5px solid #e2e8f0;border-radius:16px;padding:9px 14px;font-size:13px;resize:none;outline:none;font-family:inherit;max-height:80px;transition:border-color .2s;}
+        .mw-input:focus{border-color:#2563eb;}
+        .mw-send{width:38px;height:38px;border-radius:12px;background:#2563eb;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;color:white;}
+        .mw-send:hover{background:#1d4ed8;}
+        .mw-send:active{transform:scale(.9);}
+        .mw-like{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px;font-size:10px;color:#94a3b8;padding:3px 6px;border-radius:8px;transition:all .18s;}
+        .mw-like:hover{background:#fef3c7;color:#d97706;}
+        .mw-like.liked{color:#ef4444;}
+        .mw-wall-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:12px;background:#f8fafc;border:1.5px solid #e2e8f0;font-size:11px;font-weight:700;color:#475569;cursor:pointer;transition:all .2s;flex:1;justify-content:center;}
+        .mw-wall-btn:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff;}
+
+        /* ══ 相册墙 ══ */
+        #photoGallery {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 70;
+            height: 220px;
+            transform: translateY(100%);
+            transition: transform .45s cubic-bezier(.4,0,.2,1);
+            background: linear-gradient(to top, rgba(0,0,0,.95) 0%, rgba(0,0,0,.7) 100%);
+            backdrop-filter: blur(20px);
+        }
+        #photoGallery.open { transform: translateY(0); }
+        .gallery-handle {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 18px 6px;
+        }
+        .gallery-title { font-size: 12px; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; }
+        .gallery-strip { display: flex; gap: 10px; overflow-x: auto; padding: 0 18px 14px;
+            scrollbar-width: none; }
+        .gallery-strip::-webkit-scrollbar { display: none; }
+        .gallery-photo {
+            flex-shrink: 0; width: 140px; height: 140px; border-radius: 16px;
+            overflow: hidden; cursor: pointer; position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: transform .25s cubic-bezier(.175,.885,.32,1.275), border-color .25s;
+        }
+        .gallery-photo:hover { transform: translateY(-6px) scale(1.04); border-color: rgba(255,255,255,0.5); }
+        .gallery-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-photo .gp-label {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 6px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,.85), transparent);
+            font-size: 10px; font-weight: 700; color: white;
+        }
+        .gallery-photo .gp-type {
+            position: absolute; top: 8px; left: 8px;
+            background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+            font-size: 8px; font-weight: 800; color: white;
+            padding: 2px 7px; border-radius: 10px;
+        }
+
+        /* 全屏预览 */
+        #photoViewer {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.96); display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        #photoViewer.open { display: flex; }
+        #pvImg {
+            max-width: 90vw; max-height: 75vh; border-radius: 16px;
+            object-fit: contain; box-shadow: 0 20px 60px rgba(0,0,0,.8);
+            transition: opacity .3s;
+        }
+        .pv-nav {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+            color: white; font-size: 18px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; transition: background .2s; flex-shrink: 0;
+        }
+        .pv-nav:hover { background: rgba(255,255,255,.25); }
+
+        /* ══════════════════════════════════════
+           ② 古镇时光机 — 历史时间轴
+        ══════════════════════════════════════ */
+        #timelinePage {
+            position: fixed; inset: 0; z-index: 200;
+            background: #0a0a14;
+            display: none; flex-direction: column; overflow: hidden;
+        }
+        #timelinePage.open { display: flex; }
+        .tl-header {
+            padding: 20px 24px 14px; flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex; align-items: center; gap: 14px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(37,99,235,0.08));
+        }
+        .tl-scroll { flex: 1; overflow-y: auto; padding: 28px 24px; position: relative; }
+        .tl-scroll::-webkit-scrollbar { width: 2px; }
+        .tl-scroll::-webkit-scrollbar-thumb { background: rgba(124,58,237,.4); border-radius:2px; }
+        /* 竖线 */
+        .tl-scroll::before {
+            content: ''; position: absolute; left: 44px; top: 0; bottom: 0; width: 2px;
+            background: linear-gradient(to bottom, transparent, rgba(124,58,237,.5) 10%, rgba(37,99,235,.5) 90%, transparent);
+        }
+        .tl-item {
+            display: flex; gap: 18px; margin-bottom: 32px; align-items: flex-start;
+            opacity: 0; transform: translateX(-20px);
+            animation: tlSlide .5s ease both;
+        }
+        @keyframes tlSlide { to { opacity:1; transform:translateX(0); } }
+        .tl-dot {
+            width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+            border: 3px solid; margin-left: -9px; position: relative; z-index: 1;
+            box-shadow: 0 0 0 4px #0a0a14;
+        }
+        .tl-year {
+            font-size: 11px; font-weight: 900; margin-bottom: 4px; letter-spacing: .5px;
+        }
+        .tl-content {
+            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 14px 16px;
+        }
+        .tl-event { font-size: 13px; font-weight: 800; color: white; margin-bottom: 4px; line-height: 1.4; }
+        .tl-desc  { font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.6; }
+        .tl-tag   { display: inline-block; font-size: 9px; font-weight: 800; padding: 2px 8px;
+            border-radius: 20px; margin-top: 8px; }
+
+        /* ══════════════════════════════════════
+           ③ 足迹回放 — 打卡路径动画
+        ══════════════════════════════════════ */
+        #footprintBtn {
+            position: fixed; bottom: 100px; left: 66px; z-index: 45;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: 20px;
+            background: rgba(15,23,42,0.88); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15); color: white;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            transition: all .25s; box-shadow: 0 4px 16px rgba(0,0,0,.35);
+            opacity: 0; pointer-events: none;
+        }
+        #footprintBtn.visible { opacity: 1; pointer-events: auto; }
+        #footprintBtn:hover { background: rgba(37,99,235,0.9); transform: translateY(-2px); }
+        #footprintCanvas {
+            position: fixed; inset: 0; z-index: 12; pointer-events: none;
+            opacity: 0; transition: opacity .5s;
+        }
+        #footprintCanvas.visible { opacity: 1; }
+
+        /* ══════════════════════════════════════
+           ④ 悬浮指南针 + 海拔仪
+        ══════════════════════════════════════ */
+        #compassWidget {
+            position: fixed; right: 62px; bottom: 102px; z-index: 45;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,.4); cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+        }
+        #compassWidget:hover { transform: scale(1.08); box-shadow: 0 10px 28px rgba(0,0,0,.5); }
+        #compassNeedle { transition: transform .6s cubic-bezier(.4,0,.2,1); }
+
+        /* ══════════════════════════════════════
+           ⑤ 天气心情主题皮肤
+        ══════════════════════════════════════ */
+        body.weather-rain .g {
+            background: rgba(220,235,255,0.88);
+            border-color: rgba(147,197,253,0.4);
+        }
+        body.weather-sunny .poi-bubble {
+            border-color: rgba(251,191,36,0.4) !important;
+        }
+
+        /* ══════════════════════════════════════
+           ⑥ 景点收藏夹 / 心愿单
+        ══════════════════════════════════════ */
+        #wishlistPanel {
+            position: fixed; right: 62px; top: 68px; bottom: 100px;
+            z-index: 35; width: 268px;
+            transition: opacity .3s, transform .3s cubic-bezier(.4,0,.2,1);
+        }
+        #wishlistPanel.hide-right { opacity:0; pointer-events:none; transform: translateX(16px); }
+
+        /* ══════════════════════════════════════
+           全局升级闪光
+        ══════════════════════════════════════ */
+        #levelUpFlash {
+            position: fixed; inset: 0; z-index: 300; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            opacity: 0;
+        }
+        #levelUpFlash.show {
+            animation: flashIn .6s ease both, flashOut .5s ease 2s both;
+        }
+        @keyframes flashIn  { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+        @keyframes flashOut { from{opacity:1} to{opacity:0;transform:scale(1.1)} }
+        .luf-ring {
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,58,237,.3), transparent);
+            border: 3px solid rgba(124,58,237,.6);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            box-shadow: 0 0 60px rgba(124,58,237,.5), 0 0 0 20px rgba(124,58,237,.05);
+            animation: lufPulse 1s ease-in-out infinite;
+        }
+        @keyframes lufPulse { 0%,100%{box-shadow:0 0 40px rgba(124,58,237,.4)} 50%{box-shadow:0 0 80px rgba(124,58,237,.7)} }
         </style>
 </head>
 <body class="mode-explorer">
@@ -902,6 +1185,15 @@
         <div class="nav-btn" id="navActivity" onclick="openActivityPage()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>活动
         </div>
+        <div class="nav-btn" id="navTimeline" onclick="openTimeline()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>历史
+        </div>
+        <div class="nav-btn" id="navLeaderboard" onclick="openLeaderboard()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>榜单
+        </div>
+        <div class="nav-btn" id="navPlanner" onclick="openPlanner()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>规划
+        </div>
         <div class="nav-btn" id="navDayNight" onclick="toggleDayNight()" title="切换昼夜模式">
             <svg id="dayNightIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -933,6 +1225,9 @@
         </div>
         <div class="tool-btn" onclick="showQRModal()" title="二维码">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
+        </div>
+        <div class="tool-btn" onclick="openReport()" title="游览报告">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         </div>
 
     </div>
@@ -1124,8 +1419,22 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
                         规划路线
                     </button>
+                    <button onclick="currentDetailPOI && openPhotoGallery(currentDetailPOI)" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-blue-200 hover:text-blue-500 transition-all" title="景点相册">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </button>
                     <button id="bookmarkBtn" onclick="toggleBookmark()" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-slate-200 transition-all">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                </div>
+                <!-- 留言墙 + 打卡帧 -->
+                <div class="flex gap-2 mt-2">
+                    <button class="mw-wall-btn" onclick="currentDetailPOI && openMessageWall(currentDetailPOI)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        留言墙
+                    </button>
+                    <button class="mw-wall-btn" onclick="currentDetailPOI && openCheckinFrame(currentDetailPOI)" style="border-color:#7c3aed22;color:#7c3aed;background:#f5f3ff;" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        生成打卡帧
                     </button>
                 </div>
             </div>
@@ -1269,6 +1578,75 @@
     </div>
 </div>
 
+<!-- ══ ① 沉浸式相册墙 ══ -->
+<div id="photoGallery">
+    <div class="gallery-handle">
+        <div class="gallery-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span id="galleryPoiName">景点相册</span>
+            <span id="galleryCount" style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;"></span>
+        </div>
+        <button onclick="closePhotoGallery()" style="background:rgba(255,255,255,.12);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div class="gallery-strip" id="galleryStrip"></div>
+</div>
+
+<!-- ══ 全屏照片预览 ══ -->
+<div id="photoViewer">
+    <div style="position:absolute;top:16px;right:16px;">
+        <button onclick="closePhotoViewer()" style="background:rgba(255,255,255,.12);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;padding:0 20px;">
+        <button class="pv-nav" onclick="pvNav(-1)">‹</button>
+        <img id="pvImg" src="" alt="">
+        <button class="pv-nav" onclick="pvNav(1)">›</button>
+    </div>
+    <div id="pvCaption" style="margin-top:14px;font-size:12px;color:rgba(255,255,255,.6);font-weight:600;text-align:center;"></div>
+    <div id="pvDots" style="display:flex;gap:6px;margin-top:12px;justify-content:center;"></div>
+</div>
+
+<!-- ══ ② 古镇时光机 ══ -->
+<div id="timelinePage">
+    <div class="tl-header">
+        <button onclick="closeTimeline()" style="width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div>
+            <div style="font-size:18px;font-weight:900;color:white;">⏳ 靖港时光机</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px;">千年古镇 · 岁月长河</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.4);">上下滚动探索历史</div>
+    </div>
+    <div class="tl-scroll" id="tlScroll"></div>
+</div>
+
+<!-- ══ ③ 足迹回放按钮 + 画布 ══ -->
+<canvas id="footprintCanvas"></canvas>
+<button id="footprintBtn" onclick="toggleFootprint()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    🗺️ 我的足迹回放
+</button>
+
+<!-- ══ ④ 指南针 ══ -->
+<div id="compassWidget" onclick="resetMapNorth()" title="重置视角朝北">
+    <svg id="compassNeedle" width="32" height="32" viewBox="0 0 32 32">
+        <polygon points="16,4 20,16 16,14 12,16" fill="#ef4444"/>
+        <polygon points="16,28 20,16 16,18 12,16" fill="rgba(255,255,255,0.4)"/>
+        <circle cx="16" cy="16" r="2.5" fill="white"/>
+        <text x="16" y="8" text-anchor="middle" font-size="5" fill="white" font-weight="900" dy="-1">N</text>
+    </svg>
+</div>
+
+<!-- ══ 升级闪光特效 ══ -->
+<div id="levelUpFlash">
+    <div class="luf-ring">
+        <div id="lufEmoji" style="font-size:40px;margin-bottom:4px;">🏮</div>
+        <div id="lufTitle" style="font-size:16px;font-weight:900;color:white;">称号升级！</div>
+        <div id="lufSub" style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;">古镇探寻者</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px;">✨ 继续探索更多景点</div>
+</div>
+
 <!-- ══ 活动页面 ══ -->
 <div id="activityPage">
     <div class="act-header">
@@ -1333,6 +1711,125 @@
 
         <button onclick="closeCheckinDetail()" style="width:100%;margin-top:18px;padding:12px;border-radius:14px;background:#2563eb;color:white;font-weight:800;font-size:13px;border:none;cursor:pointer;">继续探索 →</button>
     </div>
+</div>
+
+<!-- ══ ① AI打卡帧生成 ══ -->
+<div id="checkinFrameModal" onclick="if(event.target===this)closeCheckinFrame()">
+  <div id="checkinFrameInner">
+    <canvas id="frameCanvas"></canvas>
+    <div style="padding:14px 18px 18px;display:flex;flex-direction:column;gap:10px;">
+      <div id="frameGenStatus" style="font-size:11px;color:rgba(255,255,255,.5);text-align:center;min-height:18px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="frame-btn" onclick="regenerateFrame()" style="flex:1;background:rgba(255,255,255,0.1);color:white;">🎲 换一张</button>
+        <button class="frame-btn" onclick="downloadFrame()" style="flex:1;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;">⬇ 保存图片</button>
+        <button class="frame-btn" onclick="closeCheckinFrame()" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,.6);">✕</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ② 游览报告卡 ══ -->
+<div id="reportPage">
+  <div class="rp-header">
+    <button class="rp-back" onclick="closeReport()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <div>
+      <div style="font-size:18px;font-weight:900;color:white;">📊 我的游览报告</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px;">基于您的实际游览数据生成</div>
+    </div>
+    <button onclick="shareReport()" style="margin-left:auto;padding:7px 16px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-size:11px;font-weight:700;cursor:pointer;">分享</button>
+  </div>
+  <div class="rp-body" id="reportBody"></div>
+</div>
+
+<!-- ══ ③ 演出震动提醒 ══ -->
+<div id="showAlertBar">
+  <div class="sa-pulse" id="saIcon">🎭</div>
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:9px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:2px;">⏰ 演出即将开始</div>
+    <div id="saTitle" style="font-size:13px;font-weight:900;color:white;line-height:1.3;">花开靖港剧场</div>
+    <div id="saTime"  style="font-size:10px;color:rgba(255,255,255,.7);">19:00 · 还有 3 分钟</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:4px;">
+    <button onclick="hideShowAlert()" style="padding:5px 12px;border-radius:10px;background:rgba(255,255,255,0.2);border:none;color:white;font-size:10px;font-weight:700;cursor:pointer;">关闭</button>
+    <button onclick="goToShowPOI()" style="padding:5px 12px;border-radius:10px;background:white;border:none;color:#7c3aed;font-size:10px;font-weight:800;cursor:pointer;">前往 →</button>
+  </div>
+</div>
+
+<!-- ══ ④ 行程自定义规划器 ══ -->
+<div id="plannerPage">
+  <div class="planner-header">
+    <button class="planner-back" onclick="closePlanner()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <div>
+      <div style="font-size:16px;font-weight:900;color:#1e293b;">🗓 行程规划器</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:1px;">点击景点加入行程，拖拽调整顺序</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+      <div id="plannerTotalTime" style="font-size:11px;font-weight:700;color:#2563eb;background:#eff6ff;padding:4px 10px;border-radius:10px;"></div>
+    </div>
+  </div>
+  <div class="planner-body">
+    <!-- 左：景点池 -->
+    <div class="planner-left">
+      <div style="padding:10px 10px 6px;font-size:10px;font-weight:800;color:#94a3b8;letter-spacing:.5px;">选择景点</div>
+      <div class="planner-pool" id="plannerPool"></div>
+    </div>
+    <!-- 右：时间线 -->
+    <div class="planner-right">
+      <div style="padding:10px 14px 6px;font-size:10px;font-weight:800;color:#94a3b8;letter-spacing:.5px;flex-shrink:0;">我的行程</div>
+      <div class="plan-timeline" id="planTimeline">
+        <div class="plan-empty" id="planEmpty">
+          <div style="font-size:32px;">🗺️</div>
+          <div>从左侧选择景点开始规划</div>
+        </div>
+      </div>
+      <div class="planner-footer">
+        <button class="pf-btn" onclick="clearPlan()" style="background:#fee2e2;color:#ef4444;">清空</button>
+        <button class="pf-btn" onclick="exportPlan()" style="flex:1;background:#2563eb;color:white;">导出行程单</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ⑤ 打卡排行榜 ══ -->
+<div id="leaderboardPage">
+  <div class="lb-header">
+    <button class="lb-back" onclick="closeLeaderboard()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <div>
+      <div style="font-size:18px;font-weight:900;color:white;">🏆 打卡排行榜</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:1px;">今日最强探索者</div>
+    </div>
+    <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,.35);font-weight:600;">每小时更新</div>
+  </div>
+  <div class="lb-scroll" id="lbScroll"></div>
+</div>
+
+<!-- ══ ⑥ 景点留言墙 ══ -->
+<div id="messageWallModal" onclick="if(event.target===this)closeMessageWall()">
+  <div id="messageWallInner">
+    <div class="mw-header">
+      <div>
+        <div id="mwPoiName" style="font-size:15px;font-weight:900;color:#1e293b;"></div>
+        <div id="mwMsgCount" style="font-size:10px;color:#94a3b8;margin-top:1px;"></div>
+      </div>
+      <button onclick="closeMessageWall()" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mw-list" id="mwList"></div>
+    <div class="mw-emoji-bar" id="mwEmojiBar"></div>
+    <div class="mw-compose">
+      <textarea class="mw-input" id="mwInput" rows="1" placeholder="留下你的感受…" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+      <button class="mw-send" onclick="sendMessage()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ FEEDBACK ══ -->
@@ -1537,9 +2034,15 @@
         function toggleBookmark(){
             if(!currentDetailPOI)return;
             const btn=document.getElementById('bookmarkBtn'),id=currentDetailPOI.id;
+            const prevCount = checkinSet.size;
             if(checkinSet.has(id)){checkinSet.delete(id);btn.classList.remove('bookmarked');}
             else{checkinSet.add(id);btn.classList.add('bookmarked','pop');setTimeout(()=>btn.classList.remove('pop'),400);}
-            saveCheckin();updateCheckinUI();
+            saveCheckin();
+            checkLevelUp(prevCount, checkinSet.size);
+            updateCheckinUI();
+            // 打卡2+个景点后显示足迹按钮
+            const fb = document.getElementById('footprintBtn');
+            if (fb) fb.classList.toggle('visible', checkinSet.size >= 2);
         }
         function syncBookmark(poi){
             const btn=document.getElementById('bookmarkBtn');
@@ -1955,6 +2458,360 @@
             document.getElementById(navId)?.classList.add('active');
             if (fn) fn();
         }
+
+        /* ══════════════════════════════════════════════
+           ① 沉浸式相册墙
+        ══════════════════════════════════════════════ */
+        // 每个景点的相册图集（多图）
+        const POI_GALLERY = {
+            'vc':   [{ src:'./youkefuwuzhongxin.png', cap:'游客服务中心 — 清水混凝土建筑', type:'建筑' }],
+            'bdw':  [{ src:'./badawan.jpg',   cap:'靖港八大碗 — 三面环水的演艺餐厅', type:'美食' }],
+            'hsjc': [{ src:'./hongsejuchang.jpg', cap:'红色剧场 — 革命母亲的故事', type:'演艺' }],
+            'lcx':  [{ src:'./liuchouxichenlieshi.jpg', cap:'刘畴西事迹室 — 黄埔一期生', type:'红色' }],
+            'pyx':  [{ src:'./piyingyishuguan.jpg', cap:'皮影戏体验馆 — 千年民间绝艺', type:'非遗' }],
+            'dpf':  [{ src:'./dongpaifang.jpg', cap:'东牌坊 — 古镇东面标志入口', type:'古建' }],
+            'xpf':  [{ src:'./xipaifang.jpg',  cap:'西牌坊 — 古镇西侧主入口', type:'古建' }],
+            'ljg':  [{ src:'./lujiangge.jpg',  cap:'芦江阁 — 360°全景观景台', type:'景观' }],
+            'byt':  [{ src:'./bayuantang.jpg', cap:'八元堂 — 清咸丰年间古戏台', type:'古建' }],
+            'hkjc': [{ src:'./huakaijinggangjuchang.jpg', cap:'花开靖港剧场 — 沉浸式演艺秀', type:'演艺' }],
+            'ldy':  [{ src:'./laodianyingyuan.jpg', cap:'老电影院 — 光影中的历史温度', type:'休闲' }],
+            'ms馆': [{ src:'./liangdianminsushoucangguan.jpg', cap:'民俗收藏馆 — 黄金年代奇妙夜', type:'展馆' }],
+            'tcs':  [{ src:'./taochengguju.jpg', cap:'陶承故居 — 革命母亲的居所', type:'红色' }],
+            'chmd': [{ src:'./chuhematou.JPG', cap:'楚河码头 — 水乡登船体验', type:'水运' }],
+            'zymd': [{ src:'./zhengyimatou.jpg', cap:'正义码头 — 千年漕运遗迹', type:'水运' }],
+            'hnsy': [{ src:'./zhonggonghunanshengweijiuzhi.jpg', cap:'省委旧址 — 红色历史见证', type:'红色' }],
+            'htf':  [{ src:'./hongtaifang.jpg', cap:'宏泰坊 — 270年清代遗址', type:'古建' }],
+            'ysm':  [{ src:'./yangsimiao.jpg', cap:'杨泗庙 — 香火旺盛的千年古庙', type:'民俗' }],
+            'tqg':  [{ src:'./tieqiwenhuaguan.jpg', cap:'铁器文化馆 — 叮当作响的铁艺', type:'非遗' }],
+            'edj':  [{ src:'./erdangjiashangshe.JPG', cap:'二当家商社 — 古镇商贸复原', type:'商贸' }],
+            'chy':  [{ src:'./chuheyuan.png', cap:'锄禾源 — 江南农耕文化展', type:'科普' }],
+        };
+
+        let currentGalleryPhotos = [], pvIndex = 0;
+
+        function openPhotoGallery(poi) {
+            const photos = POI_GALLERY[poi.id] || [{ src: poi.img, cap: poi.name, type: poi.type }];
+            currentGalleryPhotos = photos;
+
+            document.getElementById('galleryPoiName').textContent = poi.name;
+            document.getElementById('galleryCount').textContent = `${photos.length} 张`;
+
+            const strip = document.getElementById('galleryStrip');
+            strip.innerHTML = '';
+            photos.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-photo';
+                div.onclick = () => openPhotoViewer(i);
+                div.innerHTML = `
+                    <img src="${p.src}" alt="${p.cap}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><rect fill=%22%23334155%22 width=%22140%22 height=%22140%22/><text x=%2270%22 y=%2275%22 font-size=%2228%22 text-anchor=%22middle%22 fill=%22%2294a3b8%22>🏛️</text></svg>'">
+                    <div class="gp-type">${p.type}</div>
+                    <div class="gp-label">${p.cap}</div>`;
+                strip.appendChild(div);
+                // 随机添加更多同类景点的缩略图充实相册
+                const sameType = POI_RAW_DATA.filter(x => x.type === poi.type && x.id !== poi.id).slice(0, 3);
+                if (i === photos.length - 1) {
+                    sameType.forEach(sp => {
+                        const d2 = document.createElement('div');
+                        d2.className = 'gallery-photo';
+                        d2.style.opacity = '.6';
+                        d2.onclick = () => enterDetailMode(sp);
+                        d2.innerHTML = `
+                            <img src="${sp.img}" alt="${sp.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><rect fill=%22%23334155%22 width=%22140%22 height=%22140%22/><text x=%2270%22 y=%2275%22 font-size=%2228%22 text-anchor=%22middle%22 fill=%22%2294a3b8%22>🏛️</text></svg>'">
+                            <div class="gp-type" style="background:rgba(37,99,235,.6)">同类推荐</div>
+                            <div class="gp-label">${sp.name}</div>`;
+                        strip.appendChild(d2);
+                    });
+                }
+            });
+
+            document.getElementById('photoGallery').classList.add('open');
+        }
+
+        function closePhotoGallery() {
+            document.getElementById('photoGallery').classList.remove('open');
+        }
+
+        function openPhotoViewer(idx) {
+            pvIndex = idx;
+            const viewer = document.getElementById('photoViewer');
+            viewer.classList.add('open');
+            renderPhotoViewer();
+        }
+
+        function renderPhotoViewer() {
+            const p = currentGalleryPhotos[pvIndex] || currentGalleryPhotos[0];
+            if (!p) return;
+            const img = document.getElementById('pvImg');
+            img.style.opacity = '0';
+            img.src = p.src;
+            img.onload = () => { img.style.opacity = '1'; };
+            img.onerror = () => { img.style.opacity = '1'; };
+            document.getElementById('pvCaption').textContent = p.cap;
+            // 点位指示器
+            const dots = document.getElementById('pvDots');
+            dots.innerHTML = currentGalleryPhotos.map((_, i) =>
+                `<div style="width:6px;height:6px;border-radius:50%;background:${i===pvIndex?'white':'rgba(255,255,255,.3)'};transition:background .2s;"></div>`
+            ).join('');
+        }
+
+        function pvNav(dir) {
+            pvIndex = (pvIndex + dir + currentGalleryPhotos.length) % currentGalleryPhotos.length;
+            renderPhotoViewer();
+        }
+
+        function closePhotoViewer() {
+            document.getElementById('photoViewer').classList.remove('open');
+        }
+
+        // 键盘方向键控制相册
+        document.addEventListener('keydown', e => {
+            const viewer = document.getElementById('photoViewer');
+            if (!viewer.classList.contains('open')) return;
+            if (e.key === 'ArrowLeft')  pvNav(-1);
+            if (e.key === 'ArrowRight') pvNav(1);
+            if (e.key === 'Escape')     closePhotoViewer();
+        });
+
+        /* ══════════════════════════════════════════════
+           ② 古镇时光机 — 历史时间轴
+        ══════════════════════════════════════════════ */
+        const TIMELINE_EVENTS = [
+            { year:'西汉·文帝年间', color:'#f59e0b', tag:'建城之始', tagBg:'#78350f',
+              event:'靖港古镇初建', desc:'靖港因港得名，地处湘江与芦江交汇处，天然良港吸引商贾云集，古镇雏形初现。' },
+            { year:'唐·大历年间', color:'#8b5cf6', tag:'文人足迹', tagBg:'#4c1d95',
+              event:'诗圣杜甫途经靖港', desc:'杜甫自潭州（今长沙）顺湘江而下，途经靖港港口，与故友李龟年相逢，留下千古佳话，后人建芦江阁以纪念。' },
+            { year:'宋·绍兴年间', color:'#06b6d4', tag:'水运鼎盛', tagBg:'#164e63',
+              event:'漕运中转重镇形成', desc:'靖港成为洞庭湖区最重要的漕运节点，米粮、布匹、山货汇聚，商行林立，有"小汉口"之称。' },
+            { year:'清·雍正七年(1729)', color:'#d97706', tag:'古建留存', tagBg:'#78350f',
+              event:'宏泰坊落成', desc:'长沙地区清代代表性建筑宏泰坊建成，距今近三百年，是靖港历史文化的重要物质载体，现保存完好。' },
+            { year:'清·咸丰十一年(1861)', color:'#7c3aed', tag:'会馆文化', tagBg:'#3b0764',
+              event:'八元堂（宁乡会馆）建成', desc:'宁邑商人八家联合捐建，砖木结构，建筑面积1200平方米，内设古戏台，是湖南会馆文化的典范之作。' },
+            { year:'清·同治年间', color:'#475569', tag:'繁华顶峰', tagBg:'#1e293b',
+              event:'"小汉口"盛名远播', desc:'靖港商贾云集，米行、油坊、铁铺、绸缎庄达数百家，湘江两岸尽是船帆，成为湖南内河贸易最繁盛的集镇。' },
+            { year:'民国·1911年', color:'#dc2626', tag:'历史转折', tagBg:'#7f1d1d',
+              event:'辛亥革命中的靖港', desc:'靖港义军响应武昌起义，成为湖南最早宣布独立的地区之一，古镇见证了时代巨变。' },
+            { year:'民国·1930年11月', color:'#dc2626', tag:'红色印记', tagBg:'#7f1d1d',
+              event:'中共湖南省委秘密迁驻', desc:'地下省委以碓坊作掩护，在靖港秘密设立临时办事处，留下珍贵革命历史遗址，现为爱国主义教育基地。' },
+            { year:'民国·1936年', color:'#16a34a', tag:'人物传奇', tagBg:'#14532d',
+              event:'革命母亲陶承在此生活', desc:'被誉为"革命母亲"的陶承，在靖港抚育子女、秘密从事革命工作，其故居现完整保存，感动无数来访者。' },
+            { year:'民国·1938年', color:'#111827', tag:'文夕大火', tagBg:'#111827',
+              event:'长沙文夕大火与靖港', desc:'长沙文夕大火后，靖港成为大批难民的庇护之所。花开靖港剧场以此为背景，再现老长沙人的家国情怀与不屈精神。' },
+            { year:'当代·2008年', color:'#2563eb', tag:'保护修缮', tagBg:'#1e3a8a',
+              event:'靖港古镇整体保护修缮启动', desc:'望城区政府启动靖港历史街区系统性保护修缮工程，秉承"修旧如旧"原则，累计投入数亿元，恢复古镇历史风貌。' },
+            { year:'当代·2012年', color:'#16a34a', tag:'对外开放', tagBg:'#14532d',
+              event:'靖港古镇正式对外开放', desc:'保护修缮完成后正式向社会开放，迅速成为长沙文化旅游新名片，获评国家4A级景区，年接待游客逾百万人次。' },
+            { year:'当代·2023年', color:'#ec4899', tag:'演艺升级', tagBg:'#831843',
+              event:'花开靖港沉浸式演艺秀首演', desc:'投资千万级的大型沉浸式演艺秀"花开靖港"在全新建成的剧场首演，以先进声光技术再现靖港千年繁华，成为文旅融合标杆项目。' },
+        ];
+
+        function openTimeline() {
+            const page = document.getElementById('timelinePage');
+            page.classList.add('open');
+            const scroll = document.getElementById('tlScroll');
+            scroll.innerHTML = '';
+            TIMELINE_EVENTS.forEach((ev, i) => {
+                const item = document.createElement('div');
+                item.className = 'tl-item';
+                item.style.animationDelay = (i * 60) + 'ms';
+                item.innerHTML = `
+                    <div style="width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:4px;">
+                        <div class="tl-dot" style="background:${ev.color};border-color:${ev.color};"></div>
+                    </div>
+                    <div class="tl-content">
+                        <div class="tl-year" style="color:${ev.color};">${ev.year}</div>
+                        <div class="tl-event">${ev.event}</div>
+                        <div class="tl-desc">${ev.desc}</div>
+                        <span class="tl-tag" style="background:${ev.tagBg}22;color:${ev.color};border:1px solid ${ev.color}44;">${ev.tag}</span>
+                    </div>`;
+                scroll.appendChild(item);
+            });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navTimeline')?.classList.add('active');
+        }
+
+        function closeTimeline() {
+            document.getElementById('timelinePage').classList.remove('open');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navSpots')?.classList.add('active');
+        }
+
+        /* ══════════════════════════════════════════════
+           ③ 足迹回放动画
+        ══════════════════════════════════════════════ */
+        let footprintActive = false, fpAnimRAF = null;
+
+        function toggleFootprint() {
+            footprintActive ? stopFootprint() : startFootprint();
+        }
+
+        function startFootprint() {
+            const visited = [...checkinSet].map(id => POI_RAW_DATA.find(p => p.id === id)).filter(Boolean);
+            if (visited.length < 2) {
+                showSmartTip('🗺️ 至少需要打卡 2 个景点才能回放足迹哦！');
+                return;
+            }
+            footprintActive = true;
+            const canvas = document.getElementById('footprintCanvas');
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            canvas.classList.add('visible');
+            document.getElementById('footprintBtn').textContent = '⏹ 停止回放';
+
+            const ctx = canvas.getContext('2d');
+            let progress = 0;
+            const totalDuration = visited.length * 60; // frames
+
+            function getScreenXY(poi) {
+                if (!perspCamera || !renderer) return null;
+                const pos3d = new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0, 0.5, 0));
+                const projected = pos3d.project(camera);
+                return {
+                    x: (projected.x * 0.5 + 0.5) * innerWidth,
+                    y: (-projected.y * 0.5 + 0.5) * innerHeight
+                };
+            }
+
+            function drawFrame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const frameIdx = Math.floor(progress / 60);
+                const frameFrac = (progress % 60) / 60;
+
+                // 画历史路径
+                for (let i = 0; i < Math.min(frameIdx, visited.length - 1); i++) {
+                    const a = getScreenXY(visited[i]);
+                    const b = getScreenXY(visited[i + 1]);
+                    if (!a || !b) continue;
+                    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+                    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+                    grad.addColorStop(0, '#7c3aed99'); grad.addColorStop(1, '#2563eb99');
+                    ctx.strokeStyle = grad; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.stroke();
+                }
+
+                // 画当前正在行进的段
+                if (frameIdx < visited.length - 1) {
+                    const a = getScreenXY(visited[frameIdx]);
+                    const b = getScreenXY(visited[frameIdx + 1]);
+                    if (a && b) {
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(a.x + (b.x - a.x) * frameFrac, a.y + (b.y - a.y) * frameFrac);
+                        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 4; ctx.setLineDash([]); ctx.stroke();
+                    }
+                }
+
+                // 画景点圆点
+                visited.slice(0, frameIdx + 1).forEach((poi, i) => {
+                    const pt = getScreenXY(poi);
+                    if (!pt) return;
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = i === frameIdx ? '#f59e0b' : '#7c3aedcc'; ctx.fill();
+                    ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
+                    // 编号
+                    ctx.fillStyle = 'white'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+                    ctx.fillText(i + 1, pt.x, pt.y + 3.5);
+                    // 名称
+                    if (i === frameIdx) {
+                        ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = 'white';
+                        ctx.fillText(poi.name, pt.x, pt.y - 18);
+                    }
+                });
+
+                progress++;
+                if (progress <= totalDuration) {
+                    fpAnimRAF = requestAnimationFrame(drawFrame);
+                } else {
+                    // 回放完成 — 保持最终状态3秒后渐隐
+                    setTimeout(stopFootprint, 3000);
+                }
+            }
+            if (fpAnimRAF) cancelAnimationFrame(fpAnimRAF);
+            drawFrame();
+        }
+
+        function stopFootprint() {
+            footprintActive = false;
+            if (fpAnimRAF) { cancelAnimationFrame(fpAnimRAF); fpAnimRAF = null; }
+            const canvas = document.getElementById('footprintCanvas');
+            canvas.classList.remove('visible');
+            setTimeout(() => { canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }, 500);
+            document.getElementById('footprintBtn').innerHTML = '🗺️ 我的足迹回放';
+        }
+
+        /* ══════════════════════════════════════════════
+           ④ 指南针 & 视角重置
+        ══════════════════════════════════════════════ */
+        let compassAngle = 0;
+
+        function updateCompass() {
+            if (!controls || !perspCamera) return;
+            // 根据相机朝向计算偏北角
+            const dir = new THREE.Vector3();
+            perspCamera.getWorldDirection(dir);
+            const angle = Math.atan2(dir.x, dir.z) * 180 / Math.PI;
+            compassAngle = angle;
+            const needle = document.getElementById('compassNeedle');
+            if (needle) needle.style.transform = `rotate(${angle}deg)`;
+        }
+
+        function resetMapNorth() {
+            if (!controls) return;
+            // 平滑回到正北视角
+            const target = controls.target.clone();
+            animateCamera(
+                new THREE.Vector3(target.x, perspCamera.position.y, target.z + 50),
+                target, 600
+            );
+            setTimeout(updateCompass, 650);
+        }
+
+        /* ══════════════════════════════════════════════
+           ⑤ 称号升级闪光特效（打卡时触发）
+        ══════════════════════════════════════════════ */
+        let lastRankMin = 0;
+
+        function checkLevelUp(prevCount, newCount) {
+            const prevRank = getRank(prevCount);
+            const newRank  = getRank(newCount);
+            if (newRank.min !== prevRank.min) {
+                triggerLevelUpFlash(newRank);
+            }
+        }
+
+        function triggerLevelUpFlash(rank) {
+            const flash = document.getElementById('levelUpFlash');
+            document.getElementById('lufEmoji').textContent  = rank.emoji;
+            document.getElementById('lufTitle').textContent  = '称号升级！';
+            document.getElementById('lufSub').textContent    = rank.title;
+            flash.classList.remove('show');
+            void flash.offsetWidth; // reflow
+            flash.classList.add('show');
+            // 同时在指南针附近撒粒子
+            spawnConfetti();
+        }
+
+        function spawnConfetti() {
+            const colors = ['#7c3aed','#2563eb','#f59e0b','#ec4899','#22c55e'];
+            for (let i = 0; i < 30; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    position:fixed; pointer-events:none; z-index:301;
+                    width:8px; height:8px; border-radius:2px;
+                    background:${colors[i%colors.length]};
+                    left:${30+Math.random()*40}%;
+                    top:${20+Math.random()*60}%;
+                    animation: confettiFall ${.8+Math.random()*.8}s ease ${Math.random()*.4}s both;
+                `;
+                document.body.appendChild(dot);
+                setTimeout(() => dot.remove(), 1600);
+            }
+        }
+
+        // 在 <style> 里补注 confetti 动画（动态注入）
+        const confettiStyle = document.createElement('style');
+        confettiStyle.textContent = `
+            @keyframes confettiFall {
+                from { opacity:1; transform: translateY(0) rotate(0deg); }
+                to   { opacity:0; transform: translateY(120px) rotate(360deg); }
+            }`;
+        document.head.appendChild(confettiStyle);
 
         /* ── 演出选择器 ── */
         function buildShowPicker() {
@@ -2726,6 +3583,9 @@
             updateShowCard();
             fetchWeather();initLocation();
             setInterval(updateWaitTimes,30000);
+            // 初始化足迹按钮可见性
+            const fb = document.getElementById('footprintBtn');
+            if (fb) fb.classList.toggle('visible', checkinSet.size >= 2);
             animate();
             window.addEventListener('resize',()=>{
                 renderer.setSize(innerWidth,innerHeight);
@@ -2741,17 +3601,21 @@
         function animate(){
             requestAnimationFrame(animate);
             if(controls)controls.update();
+            updateCompass();
             const el=clock.getElapsedTime();
             if(appState==='EXPLORER'){
                 labels.forEach(lb=>{
+                    // 路线筛选时跳过被隐藏的景点
+                    if(activeFilterRouteId && lb.element.style.display==='none') return;
                     const v=lb.position.clone(),dist=camera.position.distanceTo(v);v.project(camera);
                     if(v.z<1){
-                        lb.element.style.display='flex';
+                        if(!activeFilterRouteId || lb.element.style.display!=='none')
+                            lb.element.style.display='flex';
                         lb.element.style.left=`${(v.x*.5+.5)*innerWidth}px`;
                         lb.element.style.top=`${(-v.y*.5+.5)*innerHeight}px`;
                         const sc=Math.max(.65,1.2-dist/60);
                         const w=lb.element.querySelector('.poi-scale-wrapper');if(w)w.style.transform=`scale(${sc})`;
-                    }else lb.element.style.display='none';
+                    }else if(!activeFilterRouteId) lb.element.style.display='none';
                 });
                 POI_RAW_DATA.forEach(poi=>{if(poi.ring){const s=1+Math.sin(el*3)*.2;poi.ring.scale.set(s,s,s);poi.ring.material.opacity=.5-(s-1)*2;}});
             }else if(appState==='DETAIL'&&detailGroup.children[0]){detailGroup.children[0].rotation.y+=.005;}
@@ -3353,6 +4217,598 @@
             setTimeout(hideLocationModal, 600);
         }
 
+        /* ══════════════════════════════════════════════════════════
+           ① AI打卡帧生成
+        ══════════════════════════════════════════════════════════ */
+        const FRAME_THEMES = [
+            { name:'水墨古风', bg:['#1a1a2e','#16213e'], accent:'#c9a84c', textColor:'#f5e6c8', border:'#c9a84c55', stamp:'印' },
+            { name:'国潮红', bg:['#2d0a0a','#1a0505'],  accent:'#e63946', textColor:'#ffe8e8', border:'#e6394655', stamp:'章' },
+            { name:'青瓷蓝', bg:['#0a1628','#0d2137'],  accent:'#67c5e0', textColor:'#d4eef7', border:'#67c5e055', stamp:'记' },
+            { name:'松绿', bg:['#0a1f0a','#0d2610'],    accent:'#4ade80', textColor:'#d1fae5', border:'#4ade8055', stamp:'游' },
+        ];
+        let currentFramePoi = null, currentFrameTheme = 0;
+
+        function openCheckinFrame(poi) {
+            currentFramePoi = poi;
+            currentFrameTheme = Math.floor(Math.random() * FRAME_THEMES.length);
+            document.getElementById('checkinFrameModal').classList.add('open');
+            setTimeout(() => renderFrame(), 80);
+        }
+
+        function closeCheckinFrame() {
+            document.getElementById('checkinFrameModal').classList.remove('open');
+        }
+
+        function regenerateFrame() {
+            currentFrameTheme = (currentFrameTheme + 1) % FRAME_THEMES.length;
+            renderFrame();
+        }
+
+        function renderFrame() {
+            const poi = currentFramePoi;
+            if (!poi) return;
+            const canvas = document.getElementById('frameCanvas');
+            const dpr = window.devicePixelRatio || 1;
+            const W = canvas.offsetWidth * dpr;
+            const H = W * 0.75;
+            canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d');
+            const t = FRAME_THEMES[currentFrameTheme];
+            const s = W / 480; // scale factor
+
+            // 背景渐变
+            const grad = ctx.createLinearGradient(0, 0, W, H);
+            grad.addColorStop(0, t.bg[0]); grad.addColorStop(1, t.bg[1]);
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+            // 装饰边框
+            ctx.strokeStyle = t.border; ctx.lineWidth = 2 * s;
+            ctx.strokeRect(16*s, 16*s, W-32*s, H-32*s);
+            ctx.strokeStyle = t.accent + '33'; ctx.lineWidth = 1 * s;
+            ctx.strokeRect(22*s, 22*s, W-44*s, H-44*s);
+
+            // 角花纹
+            const corners = [[24*s,24*s],[W-24*s,24*s],[24*s,H-24*s],[W-24*s,H-24*s]];
+            corners.forEach(([cx,cy]) => {
+                ctx.strokeStyle = t.accent; ctx.lineWidth = 1.5*s;
+                ctx.beginPath(); ctx.arc(cx, cy, 6*s, 0, Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx, cy, 10*s, 0, Math.PI*2);
+                ctx.strokeStyle = t.accent+'55'; ctx.stroke();
+            });
+
+            // 顶部标题区
+            ctx.fillStyle = t.accent + '18';
+            ctx.fillRect(32*s, 32*s, W-64*s, 60*s);
+
+            // 景点名称
+            ctx.fillStyle = t.accent;
+            ctx.font = `900 ${28*s}px "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(poi.name, W/2, 72*s);
+
+            // 副标题：类型
+            ctx.fillStyle = t.textColor + 'aa';
+            ctx.font = `600 ${12*s}px "PingFang SC", sans-serif`;
+            ctx.fillText(`· ${poi.type} · 靖港古镇 ·`, W/2, 90*s);
+
+            // 景点图片区（模拟圆角矩形）
+            const imgX = 36*s, imgY = 104*s, imgW = W-72*s, imgH = 180*s;
+            ctx.save();
+            ctx.beginPath();
+            const r = 12*s;
+            ctx.moveTo(imgX+r,imgY); ctx.lineTo(imgX+imgW-r,imgY);
+            ctx.quadraticCurveTo(imgX+imgW,imgY,imgX+imgW,imgY+r);
+            ctx.lineTo(imgX+imgW,imgY+imgH-r);
+            ctx.quadraticCurveTo(imgX+imgW,imgY+imgH,imgX+imgW-r,imgY+imgH);
+            ctx.lineTo(imgX+r,imgY+imgH);
+            ctx.quadraticCurveTo(imgX,imgY+imgH,imgX,imgY+imgH-r);
+            ctx.lineTo(imgX,imgY+r);
+            ctx.quadraticCurveTo(imgX,imgY,imgX+r,imgY);
+            ctx.closePath(); ctx.clip();
+
+            // 图片背景色
+            ctx.fillStyle = '#334155'; ctx.fillRect(imgX, imgY, imgW, imgH);
+
+            // 尝试加载图片
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                ctx.drawImage(img, imgX, imgY, imgW, imgH);
+                ctx.restore();
+                // 图片渐变叠加
+                const imgGrad = ctx.createLinearGradient(0, imgY, 0, imgY+imgH);
+                imgGrad.addColorStop(0, 'rgba(0,0,0,0)');
+                imgGrad.addColorStop(1, t.bg[1]+'cc');
+                ctx.fillStyle = imgGrad; ctx.fillRect(imgX, imgY, imgW, imgH);
+                finishFrame(ctx, W, H, s, t, poi);
+            };
+            img.onerror = () => { ctx.restore(); finishFrame(ctx, W, H, s, t, poi); };
+            img.src = poi.img;
+
+            // 先绘制剩余部分
+            finishFrame(ctx, W, H, s, t, poi);
+        }
+
+        function finishFrame(ctx, W, H, s, t, poi) {
+            // 打卡信息行
+            const infoY = 300*s;
+            ctx.fillStyle = t.textColor + 'cc';
+            ctx.font = `700 ${11*s}px "PingFang SC", sans-serif`;
+            ctx.textAlign = 'left';
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+            const rank = getRank(checkinSet.size);
+            ctx.fillText(`📅 ${dateStr}`, 40*s, infoY);
+            ctx.textAlign = 'right';
+            ctx.fillText(`${rank.emoji} ${rank.title}`, W-40*s, infoY);
+
+            // 描述文字（截断）
+            const desc = poi.desc ? poi.desc.slice(0, 60) + '…' : '';
+            ctx.fillStyle = t.textColor + '66';
+            ctx.font = `400 ${10*s}px "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center';
+            wrapText(ctx, desc, W/2, 318*s, W-80*s, 15*s);
+
+            // 底部品牌
+            ctx.fillStyle = t.accent;
+            ctx.font = `900 ${13*s}px "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('靖港古镇 · 3D智能导览', W/2, H-38*s);
+            ctx.fillStyle = t.textColor + '44';
+            ctx.font = `400 ${9*s}px "PingFang SC", sans-serif`;
+            ctx.fillText('JINGGANG ANCIENT TOWN', W/2, H-24*s);
+
+            // 印章
+            ctx.save();
+            ctx.translate(W-52*s, H-64*s);
+            ctx.rotate(-0.2);
+            ctx.strokeStyle = '#e63946'; ctx.lineWidth = 2*s;
+            ctx.strokeRect(0,0,32*s,32*s);
+            ctx.fillStyle = '#e63946';
+            ctx.font = `900 ${16*s}px "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(t.stamp, 16*s, 16*s);
+            ctx.restore();
+
+            document.getElementById('frameGenStatus').textContent = `主题：${t.name} · 点击"换一张"尝试其他风格`;
+        }
+
+        function wrapText(ctx, text, x, y, maxW, lineH) {
+            const words = text.split('');
+            let line = '', lineY = y;
+            for (let w of words) {
+                const test = line + w;
+                if (ctx.measureText(test).width > maxW && line) {
+                    ctx.fillText(line, x, lineY);
+                    line = w; lineY += lineH;
+                } else line = test;
+            }
+            if (line) ctx.fillText(line, x, lineY);
+        }
+
+        function downloadFrame() {
+            const canvas = document.getElementById('frameCanvas');
+            const a = document.createElement('a');
+            a.download = `靖港打卡-${currentFramePoi?.name||'景点'}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           ② 游览报告卡
+        ══════════════════════════════════════════════════════════ */
+        function openReport() {
+            document.getElementById('reportPage').classList.add('open');
+            renderReport();
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function closeReport() { document.getElementById('reportPage').classList.remove('open'); }
+
+        function renderReport() {
+            const body = document.getElementById('reportBody');
+            const n = checkinSet.size, total = POI_RAW_DATA.length;
+            const rank = getRank(n);
+            const now = new Date();
+            const visitedPOIs = [...checkinSet].map(id => POI_RAW_DATA.find(p => p.id === id)).filter(Boolean);
+            const typeCount = {};
+            visitedPOIs.forEach(p => { typeCount[p.type] = (typeCount[p.type]||0)+1; });
+            const topType = Object.entries(typeCount).sort((a,b)=>b[1]-a[1])[0];
+
+            // 估算游览时长（每个景点25分钟）
+            const mins = n * 25;
+            const durStr = mins >= 60 ? `${Math.floor(mins/60)}小时${mins%60?mins%60+'分钟':''}` : `${mins}分钟`;
+
+            // 步数估算（景点间平均200步）
+            const steps = n * 200 + Math.floor(Math.random()*500+200);
+
+            body.innerHTML = `
+            <!-- 个人战绩横幅 -->
+            <div style="background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(37,99,235,0.2));border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:22px 20px;margin-bottom:14px;text-align:center;">
+                <div style="font-size:48px;margin-bottom:8px;">${rank.emoji}</div>
+                <div style="font-size:22px;font-weight:900;color:white;margin-bottom:4px;">${rank.title}</div>
+                <div style="font-size:12px;color:rgba(255,255,255,.5);">${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 靖港古镇游览报告</div>
+                <div style="margin-top:14px;display:flex;justify-content:center;gap:20px;">
+                    <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:#7c3aed;">${n}</div><div style="font-size:10px;color:rgba(255,255,255,.4);">打卡景点</div></div>
+                    <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                    <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:#2563eb;">${Math.round(n/total*100)}%</div><div style="font-size:10px;color:rgba(255,255,255,.4);">完成度</div></div>
+                    <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                    <div style="text-align:center;"><div style="font-size:28px;font-weight:900;color:#f59e0b;">${durStr}</div><div style="font-size:10px;color:rgba(255,255,255,.4);">游览时长</div></div>
+                </div>
+            </div>
+
+            <!-- 数据统计 -->
+            <div class="rp-card">
+                <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:10px;">📈 游览数据</div>
+                <div class="rp-stat">
+                    <div class="rp-stat-icon" style="background:rgba(124,58,237,.2);">🦶</div>
+                    <div style="flex:1;"><div style="font-size:12px;color:white;font-weight:700;">预计步行</div><div style="font-size:10px;color:rgba(255,255,255,.4);">基于景点间距估算</div></div>
+                    <div style="font-size:16px;font-weight:900;color:#a78bfa;">${steps.toLocaleString()} 步</div>
+                </div>
+                <div class="rp-stat">
+                    <div class="rp-stat-icon" style="background:rgba(37,99,235,.2);">📍</div>
+                    <div style="flex:1;"><div style="font-size:12px;color:white;font-weight:700;">打卡景点</div><div style="font-size:10px;color:rgba(255,255,255,.4);">共 ${total} 处待探索</div></div>
+                    <div style="font-size:16px;font-weight:900;color:#60a5fa;">${n} / ${total}</div>
+                </div>
+                <div class="rp-stat">
+                    <div class="rp-stat-icon" style="background:rgba(245,158,11,.2);">⭐</div>
+                    <div style="flex:1;"><div style="font-size:12px;color:white;font-weight:700;">最爱类型</div><div style="font-size:10px;color:rgba(255,255,255,.4);">您最多访问的景点分类</div></div>
+                    <div style="font-size:14px;font-weight:900;color:#fbbf24;">${topType ? topType[0] + ' ×' + topType[1] : '尚无'}</div>
+                </div>
+            </div>
+
+            <!-- 已打卡景点 -->
+            ${n > 0 ? `<div class="rp-card">
+                <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:10px;">🗺️ 已探索景点</div>
+                <div style="display:flex;flex-wrap:wrap;">${visitedPOIs.map(p=>`<span class="rp-poi-chip" style="border-color:${p.color}44;background:${p.color}22;">${p.name}</span>`).join('')}</div>
+            </div>` : ''}
+
+            <!-- 未打卡推荐 -->
+            ${n < total ? `<div class="rp-card">
+                <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:10px;">💡 还没去过（推荐）</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                ${POI_RAW_DATA.filter(p=>!checkinSet.has(p.id)).slice(0,4).map(p=>`
+                    <div style="display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="closeReport();enterDetailMode(POI_RAW_DATA.find(x=>x.id==='${p.id}'))">
+                        <div style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
+                        <div style="flex:1;font-size:12px;font-weight:700;color:white;">${p.name}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.4);">${p.type}</div>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>`).join('')}
+                </div>
+            </div>` : '<div class="rp-card" style="text-align:center;"><div style="font-size:40px;margin-bottom:8px;">🏆</div><div style="font-size:14px;font-weight:800;color:white;">恭喜！您已探索全部景点！</div></div>'}
+
+            <!-- 生成打卡帧入口 -->
+            <button onclick="closeReport();checkinSet.size>0&&openCheckinFrame(POI_RAW_DATA.find(p=>checkinSet.has(p.id)))" style="width:100%;padding:14px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;font-size:13px;font-weight:800;border:none;cursor:pointer;margin-top:4px;">
+                ✨ 生成专属打卡帧 →
+            </button>`;
+        }
+
+        function shareReport() {
+            if (navigator.share) {
+                navigator.share({ title:'靖港古镇游览报告', text:`我在靖港古镇打卡了${checkinSet.size}个景点，荣获"${getRank(checkinSet.size).title}"称号！`, url: location.href });
+            } else {
+                navigator.clipboard?.writeText(`我在靖港古镇打卡了${checkinSet.size}个景点！`).then(()=>alert('已复制到剪贴板'));
+            }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           ③ 演出震动提醒
+        ══════════════════════════════════════════════════════════ */
+        let alertedShows = new Set();
+        let currentAlertPOI = null;
+
+        function checkShowAlerts() {
+            const now = new Date();
+            const cur = now.getHours()*60 + now.getMinutes();
+            SHOWS.forEach(show => {
+                show.times.forEach(t => {
+                    const [h,m] = t.split(':').map(Number);
+                    const showMin = h*60+m;
+                    const diff = showMin - cur;
+                    const key = show.id + '_' + t;
+                    if (diff >= 1 && diff <= 5 && !alertedShows.has(key)) {
+                        alertedShows.add(key);
+                        fireShowAlert(show, t, diff);
+                    }
+                });
+            });
+        }
+
+        function fireShowAlert(show, time, minsLeft) {
+            // 振动（支持的设备）
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+            document.getElementById('saIcon').textContent = show.icon;
+            document.getElementById('saTitle').textContent = show.name;
+            document.getElementById('saTime').textContent  = `${time} · 还有 ${minsLeft} 分钟`;
+            currentAlertPOI = POI_RAW_DATA.find(p => p.id === show.id) ||
+                              POI_RAW_DATA.find(p => p.name.includes(show.location.slice(0,4)));
+
+            const bar = document.getElementById('showAlertBar');
+            bar.classList.add('visible');
+            // 15秒后自动消失
+            setTimeout(hideShowAlert, 15000);
+        }
+
+        function hideShowAlert() { document.getElementById('showAlertBar').classList.remove('visible'); }
+
+        function goToShowPOI() {
+            hideShowAlert();
+            if (currentAlertPOI) enterDetailMode(currentAlertPOI);
+        }
+
+        // 每分钟检查一次 (移至 window.onload 中执行，确保DOM就绪)
+
+        /* ══════════════════════════════════════════════════════════
+           ④ 行程自定义规划器
+        ══════════════════════════════════════════════════════════ */
+        let planItems = []; // [{poi, startTime}]
+
+        function openPlanner() {
+            document.getElementById('plannerPage').classList.add('open');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navPlanner')?.classList.add('active');
+            buildPlannerPool();
+            renderPlanTimeline();
+        }
+
+        function closePlanner() {
+            document.getElementById('plannerPage').classList.remove('open');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navSpots')?.classList.add('active');
+        }
+
+        function buildPlannerPool() {
+            const pool = document.getElementById('plannerPool');
+            pool.innerHTML = '';
+            POI_RAW_DATA.forEach(poi => {
+                const inPlan = planItems.some(x => x.poi.id === poi.id);
+                const div = document.createElement('div');
+                div.className = 'pool-item' + (inPlan ? ' in-plan' : '');
+                div.id = 'pool_' + poi.id;
+                div.onclick = () => addToPlan(poi);
+                div.innerHTML = `<div class="pi-dot" style="background:${poi.color};"></div><span>${poi.name}</span><span style="margin-left:auto;font-size:9px;color:#94a3b8;font-weight:600;">${poi.type}</span>`;
+                pool.appendChild(div);
+            });
+        }
+
+        function addToPlan(poi) {
+            if (planItems.some(x => x.poi.id === poi.id)) return;
+            // 计算开始时间（从9:00起，每个景点35分钟）
+            const baseMin = 9*60 + planItems.length * 35;
+            planItems.push({ poi, startMin: baseMin });
+            document.getElementById('pool_'+poi.id)?.classList.add('in-plan');
+            renderPlanTimeline();
+        }
+
+        function removeFromPlan(idx) {
+            planItems.splice(idx, 1);
+            // 重新计算时间
+            planItems.forEach((item, i) => { item.startMin = 9*60 + i*35; });
+            buildPlannerPool();
+            renderPlanTimeline();
+        }
+
+        function renderPlanTimeline() {
+            const tl = document.getElementById('planTimeline');
+            const empty = document.getElementById('planEmpty');
+            const totalEl = document.getElementById('plannerTotalTime');
+
+            if (planItems.length === 0) {
+                tl.innerHTML = '';
+                tl.appendChild(empty);
+                totalEl.textContent = '';
+                return;
+            }
+            tl.innerHTML = '';
+            planItems.forEach((item, i) => {
+                const h = Math.floor(item.startMin/60), m = item.startMin%60;
+                const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+                const slot = document.createElement('div');
+                slot.className = 'plan-slot';
+                slot.innerHTML = `
+                    <div class="plan-slot-time">${timeStr}</div>
+                    <div class="plan-slot-card" style="border-left:3px solid ${item.poi.color};">
+                        <button class="plan-del" onclick="removeFromPlan(${i})">✕</button>
+                        <div style="font-size:12px;font-weight:800;color:#1e293b;margin-right:24px;">${item.poi.name}</div>
+                        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${item.poi.type} · 约35分钟</div>
+                        ${item.poi.schedules?.length ? `<div style="font-size:9px;color:${item.poi.color};margin-top:4px;font-weight:700;">演出时间：${item.poi.schedules.slice(0,3).join(' / ')}</div>` : ''}
+                    </div>`;
+                tl.appendChild(slot);
+            });
+
+            const totalMins = planItems.length * 35;
+            const tH = Math.floor(totalMins/60), tM = totalMins%60;
+            totalEl.textContent = `共 ${tH>0?tH+'小时':''}${tM?tM+'分':''}`;
+        }
+
+        function clearPlan() {
+            planItems = [];
+            buildPlannerPool();
+            renderPlanTimeline();
+        }
+
+        function exportPlan() {
+            if (planItems.length === 0) { alert('请先添加景点到行程'); return; }
+            let text = '📍 靖港古镇 · 我的行程单\n\n';
+            planItems.forEach(item => {
+                const h = Math.floor(item.startMin/60), m = item.startMin%60;
+                text += `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${item.poi.name}（${item.poi.type}）\n`;
+            });
+            text += `\n共 ${planItems.length} 个景点 · 预计 ${Math.floor(planItems.length*35/60)}小时${planItems.length*35%60}分钟`;
+            if (navigator.share) {
+                navigator.share({ title:'靖港行程单', text });
+            } else {
+                navigator.clipboard?.writeText(text).then(() => alert('行程已复制到剪贴板！'));
+            }
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           ⑤ 打卡排行榜
+        ══════════════════════════════════════════════════════════ */
+        // 模拟排行数据 + 实际用户数据
+        const MOCK_USERS = [
+            { name:'橘子味的风', avatar:'🦊', count:18, rank_title:'非遗守护者' },
+            { name:'山水行者',   avatar:'🐼', count:15, rank_title:'非遗守护者' },
+            { name:'长沙仔',     avatar:'🐉', count:14, rank_title:'水乡达人' },
+            { name:'探古寻幽',   avatar:'🦅', count:12, rank_title:'水乡达人' },
+            { name:'芦江渔火',   avatar:'🐟', count:11, rank_title:'水乡达人' },
+            { name:'古镇漫步',   avatar:'🌸', count:9,  rank_title:'古镇探寻者' },
+            { name:'皮影迷',     avatar:'🎭', count:7,  rank_title:'古镇探寻者' },
+            { name:'花鼓听戏人', avatar:'🥁', count:6,  rank_title:'古镇探寻者' },
+        ];
+
+        function openLeaderboard() {
+            document.getElementById('leaderboardPage').classList.add('open');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navLeaderboard')?.classList.add('active');
+            renderLeaderboard();
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboardPage').classList.remove('open');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navSpots')?.classList.add('active');
+        }
+
+        function renderLeaderboard() {
+            const scroll = document.getElementById('lbScroll');
+            const myCount = checkinSet.size;
+            const myRank = getRank(myCount);
+
+            // 合并真实用户和我的数据
+            const me = { name:'我', avatar: myRank.emoji, count: myCount, rank_title: myRank.title, isMe: true };
+            const allUsers = [...MOCK_USERS, me].sort((a,b)=>b.count-a.count);
+
+            // 领奖台（前三）
+            const podColors = ['#f59e0b','#94a3b8','#d97706'];
+            const podH = [80, 56, 48];
+            const podOrder = [allUsers[1], allUsers[0], allUsers[2]].filter(Boolean);
+
+            scroll.innerHTML = `
+            <div class="lb-podium">
+                ${podOrder.map((u, pi) => {
+                    const actualRank = pi === 1 ? 1 : pi === 0 ? 2 : 3;
+                    const c = podColors[actualRank-1];
+                    const h = podH[actualRank-1];
+                    return `<div class="lb-pod">
+                        <div class="lb-pod-avatar" style="border-color:${c};${u.isMe?'box-shadow:0 0 0 3px '+c+'44;':''}">
+                            ${u.avatar}
+                        </div>
+                        <div style="font-size:11px;font-weight:800;color:white;text-align:center;">${u.name.slice(0,5)}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.4);">${u.count}个景点</div>
+                        <div class="lb-pod-bar" style="background:${c}33;height:${h}px;">
+                            <div class="lb-pod-rank" style="background:${c};color:white;">${actualRank === 1 ? '🥇' : actualRank === 2 ? '🥈' : '🥉'}</div>
+                            <div style="font-size:18px;padding-top:16px;">${actualRank}</div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+            ${allUsers.map((u, i) => `
+                <div class="lb-row${u.isMe ? ' me' : ''}" style="animation:tlSlide .3s ease ${i*40}ms both;">
+                    <div class="lb-row-rank">${i+1}</div>
+                    <div class="lb-row-avatar">${u.avatar}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:800;color:white;display:flex;align-items:center;gap:6px;">
+                            ${u.name}${u.isMe?'<span style="font-size:9px;background:rgba(37,99,235,.3);color:#93c5fd;padding:1px 6px;border-radius:8px;font-weight:700;">我</span>':''}
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.35);">${u.rank_title}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:16px;font-weight:900;color:${i<3?podColors[i]:'rgba(255,255,255,.6)'};">${u.count}</div>
+                        <div style="font-size:9px;color:rgba(255,255,255,.3);">景点</div>
+                    </div>
+                </div>`).join('')}
+            <div style="text-align:center;margin-top:16px;font-size:10px;color:rgba(255,255,255,.25);">排行榜每小时刷新 · 数据仅供参考</div>`;
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           ⑥ 景点留言墙
+        ══════════════════════════════════════════════════════════ */
+        let currentWallPOI = null;
+        let wallMessages = {}; // { poiId: [{id,avatar,name,text,likes,liked,time}] }
+        let myWallName = '游客' + Math.floor(Math.random()*9000+1000);
+        const WALL_AVATARS = ['😊','🥰','😎','🤩','🥳','😄','🤗','🙂','🐼','🦊','🐉','🌸'];
+        const WALL_EMOJIS  = ['❤️','👍','😍','🎉','✨','🏮','🎭','⛵','🌺','🤩','👏','💫'];
+        const MOCK_MSGS = {
+            'ljg':  [{name:'山水行者',avatar:'🦅',text:'登高望远，芦江夜景美极了！站在三楼看到整个古镇，太震撼了。',likes:23,liked:false,time:'2小时前'},{name:'古镇漫步',avatar:'🌸',text:'傍晚的芦江阁有夕阳映水，拍出来的照片超好看 📸',likes:11,liked:false,time:'4小时前'}],
+            'byt':  [{name:'花鼓听戏人',avatar:'🥁',text:'坐在古戏台下听花鼓戏，配着一壶茶，完全忘了时间～',likes:18,liked:false,time:'1小时前'},{name:'橘子味的风',avatar:'🦊',text:'八元堂的建筑太精美了，木雕花纹保存得这么好！',likes:9,liked:false,time:'3小时前'}],
+            'pyx':  [{name:'皮影迷',avatar:'🎭',text:'孩子上台操控皮影，开心得不行！每小时都有一场，强推！',likes:31,liked:false,time:'30分钟前'},{name:'长沙仔',avatar:'🐼',text:'本地人都来这里，真正的非遗不是摆设，是活着的文化！',likes:14,liked:false,time:'2小时前'}],
+            'hkjc': [{name:'芦江渔火',avatar:'🐟',text:'花开靖港夜场震撼！灯光、音乐、故事融合得太好了，看哭了！',likes:52,liked:false,time:'昨晚'},{name:'探古寻幽',avatar:'🐉',text:'强烈推荐晚上来，白天和晚上完全不同的感觉，超值！',likes:29,liked:false,time:'昨晚'}],
+        };
+
+        function openMessageWall(poi) {
+            currentWallPOI = poi;
+            if (!wallMessages[poi.id]) {
+                wallMessages[poi.id] = [...(MOCK_MSGS[poi.id] || [])];
+            }
+            document.getElementById('mwPoiName').textContent = '💬 ' + poi.name + ' · 留言墙';
+            document.getElementById('messageWallModal').classList.add('open');
+            renderMessages();
+            // emoji bar
+            const bar = document.getElementById('mwEmojiBar');
+            bar.innerHTML = WALL_EMOJIS.map(e => `<div class="mw-emoji" onclick="insertEmoji('${e}')">${e}</div>`).join('');
+        }
+
+        function closeMessageWall() { document.getElementById('messageWallModal').classList.remove('open'); }
+
+        function renderMessages() {
+            const poi = currentWallPOI;
+            const msgs = wallMessages[poi.id] || [];
+            const list = document.getElementById('mwList');
+            document.getElementById('mwMsgCount').textContent = `${msgs.length} 条留言 · 实时更新`;
+            list.innerHTML = msgs.length === 0
+                ? '<div style="text-align:center;padding:30px;color:#94a3b8;font-size:12px;">还没有留言，成为第一个吧 ✨</div>'
+                : msgs.map((msg, i) => {
+                    const isMe = msg.isMe;
+                    return `<div class="mw-msg" style="${isMe?'flex-direction:row-reverse;':''}" style="animation-delay:${i*30}ms">
+                        <div class="mw-avatar" style="${isMe?'background:#eff6ff;':''}">${msg.avatar}</div>
+                        <div style="flex:1;min-width:0;display:flex;flex-direction:column;${isMe?'align-items:flex-end;':''}">
+                            <div style="font-size:10px;color:#94a3b8;font-weight:600;margin-bottom:3px;">${msg.name} · ${msg.time}</div>
+                            <div class="mw-bubble${isMe?' mine':''}">${msg.text}</div>
+                            <button class="mw-like${msg.liked?' liked':''}" onclick="likeMessage(${i})">
+                                ${msg.liked?'❤️':'🤍'} ${msg.likes}
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function likeMessage(idx) {
+            const msgs = wallMessages[currentWallPOI.id];
+            if (!msgs[idx]) return;
+            msgs[idx].liked = !msgs[idx].liked;
+            msgs[idx].likes += msgs[idx].liked ? 1 : -1;
+            renderMessages();
+        }
+
+        function insertEmoji(e) {
+            const inp = document.getElementById('mwInput');
+            inp.value += e; inp.focus();
+        }
+
+        async function sendMessage() {
+            const inp = document.getElementById('mwInput');
+            const text = inp.value.trim();
+            if (!text) return;
+            inp.value = '';
+            const msg = {
+                name: myWallName, avatar: WALL_AVATARS[Math.floor(Math.random()*WALL_AVATARS.length)],
+                text, likes: 0, liked: false, time: '刚刚', isMe: true,
+            };
+            if (!wallMessages[currentWallPOI.id]) wallMessages[currentWallPOI.id] = [];
+            wallMessages[currentWallPOI.id].unshift(msg);
+            renderMessages();
+            // 保存到 Supabase
+            try {
+                await supabaseClient.from('jinggang-messages').insert([{
+                    poi_id: currentWallPOI.id, poi_name: currentWallPOI.name,
+                    content: text, author: myWallName
+                }]);
+            } catch(e) { /* 静默失败 */ }
+        }
+
         window.onload = () => {
             init();
             // 启动趣味功能
@@ -3361,6 +4817,9 @@
                 triggerSmartTips();
                 showTodayPick();
             }, 1500);
+            // 演出提醒（需要DOM就绪后才能运行）
+            setInterval(checkShowAlerts, 60000);
+            setTimeout(checkShowAlerts, 2000);
         };
     </script>
 </body>
