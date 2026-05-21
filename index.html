@@ -321,29 +321,73 @@
         @keyframes chipSlide { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
 
-        /* ── 路线高亮脉冲 ── */
-        @keyframes poiPulse {
-            0%   { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
-            50%  { box-shadow: 0 0 0 6px transparent, 0 0 0 10px transparent; }
-            100% { box-shadow: 0 0 0 0 var(--poi-color), 0 0 0 0 var(--poi-color); }
+        /* ══ 路线高亮系统 ══ */
+
+        /* 非路线点位：深度淡出 */
+        .poi-label.route-dim {
+            opacity: 0.12 !important;
+            filter: grayscale(80%) blur(0.4px);
+            pointer-events: none;
         }
-        .poi-label.route-active .poi-pin {
-            animation: poiPulse 1.4s ease-out infinite;
+
+        /* 路线点位外层容器：放大 */
+        .poi-label.route-active .poi-scale-wrapper {
+            transform: scale(1.35) !important;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
         }
+
+        /* 气泡：白底+粗彩色边框+强阴影 */
         .poi-label.route-active .poi-bubble {
-            background: rgba(255,255,255,0.97) !important;
+            background: rgba(255,255,255,0.98) !important;
+            border-width: 2px !important;
+            padding: 4px 6px 4px 12px !important;
         }
+
+        /* 名称：彩色加粗 */
+        .poi-label.route-active .poi-name {
+            font-weight: 900 !important;
+            font-size: 12px !important;
+        }
+
+        /* Pin点：放大+强脉冲 */
+        .poi-label.route-active .poi-pin {
+            width: 13px !important;
+            height: 13px !important;
+            border-width: 2.5px !important;
+            animation: routePinPulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes routePinPulse {
+            0%   { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+            40%  { transform: scale(1.2); box-shadow: 0 0 0 5px color-mix(in srgb, var(--pc,#2563eb) 30%, transparent),
+                                                       0 0 0 9px color-mix(in srgb, var(--pc,#2563eb) 12%, transparent); }
+            100% { transform: scale(1);   box-shadow: 0 0 0 0 var(--pc,#2563eb), 0 0 0 0 var(--pc,#2563eb); }
+        }
+
+        /* 序号徽章 */
         .route-seq-badge {
-            position: absolute; top: -6px; right: -6px;
-            width: 18px; height: 18px; border-radius: 50%;
-            font-size: 9px; font-weight: 900; color: white;
+            position: absolute;
+            top: -9px; left: -9px;       /* 左上角，不挡右侧等待时间文字 */
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            font-size: 10px; font-weight: 900; color: white;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            animation: badgePop .3s cubic-bezier(.175,.885,.32,1.275) both;
-            z-index: 5;
+            border: 2.5px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+            z-index: 10;
+            animation: badgePop .35s cubic-bezier(.175,.885,.32,1.275) both;
         }
-        @keyframes badgePop { from{transform:scale(0)} to{transform:scale(1)} }
+        @keyframes badgePop {
+            0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+            70%  { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+        }
+
+        /* 路线连线（Canvas 2D 叠加层） */
+        #routeLineCanvas {
+            position: fixed; inset: 0; z-index: 8;
+            pointer-events: none;
+        }
 
         /* ── 昼夜切换 ── */
         body.night-mode .g {
@@ -372,13 +416,41 @@
         body.night-mode .route-card { background: rgba(10,20,48,0.7) !important; }
         body.night-mode .rc-name, body.night-mode .rc-meta { color: inherit !important; }
         /* 夜晚星空粒子叠加 */
+        /* ── 夜间氛围覆盖层 ── */
         #nightOverlay {
-            position: fixed; inset: 0; z-index: 1;
+            position: fixed; inset: 0; z-index: 2;
             pointer-events: none;
-            background: radial-gradient(ellipse at center, rgba(0,10,40,0.0) 0%, rgba(0,5,25,0.55) 100%);
-            opacity: 0; transition: opacity 1.2s ease;
+            opacity: 0;
+            transition: opacity 1.4s ease;
         }
         body.night-mode #nightOverlay { opacity: 1; }
+
+        /* 夜间底图暗化滤镜：保留纹理、加蓝调 */
+        #canvas-container {
+            transition: filter 1.4s ease;
+        }
+        body.night-mode #canvas-container {
+            filter: brightness(0.72) saturate(0.7) sepia(0.15) hue-rotate(190deg);
+        }
+
+        /* 灯光闪烁粒子 Canvas */
+        #nightLightsCanvas {
+            position: fixed; inset: 0; z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2.2s ease;
+            mix-blend-mode: screen;   /* 叠加模式：灯光叠加在地图上，黑色透明 */
+        }
+        body.night-mode #nightLightsCanvas { opacity: 1; }
+
+        /* 星空层 */
+        #starsCanvas {
+            position: fixed; inset: 0; z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        body.night-mode #starsCanvas { opacity: 1; }
         /* ── 演出选择抽屉 ── */
         #showPickerDrawer {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 80;
@@ -403,7 +475,14 @@
         .show-item .si-icon { width: 36px; height: 36px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
         .show-item .si-check { width:18px; height:18px; border-radius:50%; border:2px solid #cbd5e1; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:auto; transition:all .2s; }
         .show-item.selected .si-check { background:#2563eb; border-color:#2563eb; }
-    </style>
+    
+        /* ── 位置输入弹窗 ── */
+        .quick-loc-btn.selected,
+        .quick-loc-btn:has(.font-bold) {
+            border-color: #93c5fd;
+            background: #eff6ff;
+        }
+        </style>
 </head>
 <body class="mode-explorer">
 
@@ -645,11 +724,32 @@
             <svg id="minIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="flex items-start gap-3 pr-10">
-            <div>
+            <div class="flex-1 min-w-0">
                 <h3 id="detailTitle" class="text-xl font-black text-slate-900 leading-tight">景点名称</h3>
-                <div class="flex items-center gap-2 mt-1.5">
+                <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span id="detailBadge" class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full">文化地标</span>
                     <span id="detailWaitTime" class="bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full">无需等待</span>
+                </div>
+                <!-- 距离/时间行 -->
+                <div id="distanceBar" class="hidden mt-2 flex items-center gap-3 text-[11px]">
+                    <span class="flex items-center gap-1 text-blue-600 font-bold">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span id="distanceText">--</span>
+                    </span>
+                    <span class="flex items-center gap-1 text-slate-500 font-semibold">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        步行约 <span id="walkTimeText">--</span>
+                    </span>
+                    <button onclick="showLocationInput()" class="ml-auto flex items-center gap-1 text-[10px] text-slate-400 hover:text-blue-500 transition font-semibold">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        修改位置
+                    </button>
+                </div>
+                <!-- 未获取位置时的提示 -->
+                <div id="noLocationHint" class="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <button onclick="showLocationInput()" class="text-blue-500 font-semibold hover:underline">设置当前位置</button>
+                    <span>以显示距离和步行时间</span>
                 </div>
             </div>
         </div>
@@ -749,6 +849,68 @@
     </div>
 </div>
 
+
+<!-- ══ 位置输入弹窗 ══ -->
+<div id="locationModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="g rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                设置当前位置
+            </h3>
+            <button onclick="hideLocationModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 transition">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">输入您当前所在位置，系统将计算与各景点的距离和步行时间。</p>
+
+        <!-- GPS 自动定位 -->
+        <button onclick="useGPSLocation()" id="gpsLocBtn" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition active:scale-95 mb-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+            使用 GPS 自动定位
+        </button>
+
+        <div class="flex items-center gap-2 mb-3">
+            <div class="flex-1 h-px bg-slate-100"></div>
+            <span class="text-[10px] text-slate-400 font-semibold">或手动选择</span>
+            <div class="flex-1 h-px bg-slate-100"></div>
+        </div>
+
+        <!-- 快捷位置：景区主要入口 -->
+        <div class="space-y-1.5 mb-4">
+            <p class="text-[10px] text-slate-400 font-semibold mb-2">📍 景区入口 / 停车场</p>
+            <div class="grid grid-cols-2 gap-1.5" id="quickLocGrid">
+                <button onclick="setQuickLocation('east')" class="quick-loc-btn text-left px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition text-[11px]">
+                    <div class="font-bold text-slate-700">东入口</div>
+                    <div class="text-slate-400 text-[9px]">东牌坊附近</div>
+                </button>
+                <button onclick="setQuickLocation('west')" class="quick-loc-btn text-left px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition text-[11px]">
+                    <div class="font-bold text-slate-700">西入口</div>
+                    <div class="text-slate-400 text-[9px]">西牌坊附近</div>
+                </button>
+                <button onclick="setQuickLocation('parking_east')" class="quick-loc-btn text-left px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition text-[11px]">
+                    <div class="font-bold text-slate-700">东侧停车场</div>
+                    <div class="text-slate-400 text-[9px]">P 东区</div>
+                </button>
+                <button onclick="setQuickLocation('parking_west')" class="quick-loc-btn text-left px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition text-[11px]">
+                    <div class="font-bold text-slate-700">西侧停车场</div>
+                    <div class="text-slate-400 text-[9px]">P 西区</div>
+                </button>
+                <button onclick="setQuickLocation('vc')" class="quick-loc-btn text-left px-3 py-2 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition col-span-2 text-[11px]">
+                    <div class="font-bold text-slate-700">游客服务中心</div>
+                    <div class="text-slate-400 text-[9px]">古镇中心区域</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 当前位置状态 -->
+        <div id="currentLocStatus" class="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="currentLocText">尚未设置位置</span>
+        </div>
+    </div>
+</div>
+
 <!-- ══ FEEDBACK ══ -->
 <div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
     <div class="g rounded-3xl p-6 max-w-sm w-full relative shadow-2xl">
@@ -778,7 +940,10 @@
 </div>
 
 <!-- Labels -->
+<canvas id="routeLineCanvas"></canvas>
+<canvas id="starsCanvas"></canvas>
 <div id="nightOverlay"></div>
+<canvas id="nightLightsCanvas"></canvas>
 <div id="labels-container" class="fixed inset-0 pointer-events-none z-10"></div>
 <div id="userLocationLabel" class="hidden fixed z-10 poi-label" style="pointer-events:none;">
     <div class="poi-bubble" style="background:#2563eb;border:none;"><span class="poi-name" style="margin:0 6px;">我的位置</span></div>
@@ -1261,83 +1426,207 @@
             highlightRoutePOIs(r);
         }
 
+        // 路线连线 canvas 绘制
+        let _routeLineRAF = null;
+        function drawRouteLines(orderedLabels, color) {
+            const canvas = document.getElementById('routeLineCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (orderedLabels.length < 2) return;
+
+            // 收集屏幕坐标（从 label DOM 位置推算）
+            function getLabelXY(lb) {
+                const el = lb.element;
+                const left = parseFloat(el.style.left);
+                const top  = parseFloat(el.style.top);
+                return { x: left, y: top };
+            }
+
+            const pts = orderedLabels.map(lb => getLabelXY(lb)).filter(p => !isNaN(p.x));
+            if (pts.length < 2) return;
+
+            // 渐变虚线
+            const grad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length-1].x, pts[pts.length-1].y);
+            grad.addColorStop(0, color + 'cc');
+            grad.addColorStop(1, color + '55');
+
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 5]);
+            ctx.lineDashOffset = 0;
+            ctx.stroke();
+
+            // 小箭头
+            for (let i=0; i<pts.length-1; i++) {
+                const mid = { x:(pts[i].x+pts[i+1].x)/2, y:(pts[i].y+pts[i+1].y)/2 };
+                const ang = Math.atan2(pts[i+1].y-pts[i].y, pts[i+1].x-pts[i].x);
+                ctx.save();
+                ctx.translate(mid.x, mid.y);
+                ctx.rotate(ang);
+                ctx.beginPath();
+                ctx.moveTo(-5, -4); ctx.lineTo(5, 0); ctx.lineTo(-5, 4);
+                ctx.strokeStyle = color + 'cc';
+                ctx.lineWidth = 1.8;
+                ctx.setLineDash([]);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 流动动画
+            let offset = 0;
+            function animate() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([8, 5]);
+                ctx.lineDashOffset = -offset;
+                ctx.stroke();
+                // 箭头
+                for (let i=0; i<pts.length-1; i++) {
+                    const mid={x:(pts[i].x+pts[i+1].x)/2,y:(pts[i].y+pts[i+1].y)/2};
+                    const ang=Math.atan2(pts[i+1].y-pts[i].y,pts[i+1].x-pts[i].x);
+                    ctx.save(); ctx.translate(mid.x,mid.y); ctx.rotate(ang);
+                    ctx.beginPath(); ctx.moveTo(-5,-4); ctx.lineTo(5,0); ctx.lineTo(-5,4);
+                    ctx.strokeStyle=color+'cc'; ctx.lineWidth=1.8; ctx.setLineDash([]); ctx.stroke();
+                    ctx.restore();
+                }
+                offset = (offset + 0.5) % 13;
+                _routeLineRAF = requestAnimationFrame(animate);
+            }
+            if (_routeLineRAF) cancelAnimationFrame(_routeLineRAF);
+            animate();
+        }
+        function clearRouteLines() {
+            if (_routeLineRAF) { cancelAnimationFrame(_routeLineRAF); _routeLineRAF=null; }
+            const canvas = document.getElementById('routeLineCanvas');
+            if (canvas) { const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+        }
+
         function highlightRoutePOIs(r){
-            const routePoiIds=new Set(r.pois||[]);
-            // 重置所有
-            labels.forEach(lb=>{
-                lb.element.style.opacity='0.25';
-                lb.element.style.transform='translate(-50%,-100%)';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.transform='scale(1)'; pin.style.boxShadow='0 0 8px rgba(0,0,0,0.35)'; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble) bubble.style.boxShadow='0 4px 14px rgba(0,0,0,0.22)';
-            });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.opacity=0.15; poi.ring.scale.set(1,1,1); } });
+            const routePoiIds = new Set(r.pois||[]);
+            const col = r.color || '#2563eb';
 
-            // 高亮路线内景点
-            labels.forEach(lb=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='20';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){
-                    pin.style.transform='scale(1.5)';
-                    pin.style.boxShadow=`0 0 0 3px white, 0 0 0 5px ${lb.data.color}, 0 0 16px ${lb.data.color}`;
-                    pin.style.background=lb.data.color;
-                }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){
-                    bubble.style.background='rgba(255,255,255,0.95)';
-                    bubble.style.border=`1.5px solid ${lb.data.color}`;
-                    bubble.style.boxShadow=`0 4px 16px ${lb.data.color}55`;
-                }
-                const name=lb.element.querySelector('.poi-name');
-                if(name) name.style.color=lb.data.color;
-                if(lb.data.ring){
-                    lb.data.ring.material.color.set(lb.data.color);
-                    lb.data.ring.material.opacity=0.9;
-                    lb.data.ring.scale.set(1.8,1.8,1.8);
-                }
+            // ── 第一步：所有标注深度淡出 ──
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active');
+                lb.element.classList.add('route-dim');
+                lb.element.style.zIndex = '';
+                lb.element.querySelector('.route-seq-badge')?.remove();
+                // 重置 pin 样式
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) { pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;`; }
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) { bubble.style.cssText = ''; bubble.style.border = ''; }
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
+                // 3D 环淡出
+                if (lb.data.ring) { lb.data.ring.material.opacity=0.05; lb.data.ring.scale.set(0.6,0.6,0.6); }
             });
 
-            // 显示路线序号标注
-            labels.forEach((lb,idx)=>{
-                if(!routePoiIds.has(lb.data.id)) return;
-                const seqNum = (r.pois||[]).indexOf(lb.data.id)+1;
-                let badge=lb.element.querySelector('.route-seq');
-                if(!badge){
-                    badge=document.createElement('div');
-                    badge.className='route-seq';
-                    badge.style.cssText=`position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;border:1.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);`;
-                    lb.element.querySelector('.poi-scale-wrapper').style.position='relative';
-                    lb.element.querySelector('.poi-bubble').appendChild(badge);
-                }
-                badge.textContent=seqNum;
-                badge.style.background=lb.data.color;
+            // ── 第二步：路线点位逐个高亮（按顺序延迟弹出）──
+            const orderedLabels = [];
+            ;(r.pois||[]).forEach((poiId, seq) => {
+                const lb = labels.find(l => l.data.id === poiId);
+                if (!lb) return;
+                orderedLabels.push(lb);
+                const delay = seq * 80; // 每个点位延迟80ms弹出，营造逐一亮起的效果
+
+                setTimeout(() => {
+                    // 移除暗化，添加高亮
+                    lb.element.classList.remove('route-dim');
+                    lb.element.classList.add('route-active');
+                    lb.element.style.zIndex = '22';
+
+                    // 气泡：白底+彩色粗边框+彩色文字
+                    const bubble = lb.element.querySelector('.poi-bubble');
+                    if (bubble) {
+                        bubble.style.background = 'rgba(255,255,255,0.98)';
+                        bubble.style.border = `2px solid ${col}`;
+                        bubble.style.boxShadow = `0 0 0 3px ${col}22, 0 6px 20px ${col}44`;
+                    }
+                    const name = lb.element.querySelector('.poi-name');
+                    if (name) {
+                        name.style.color = col;
+                        name.style.fontWeight = '900';
+                        name.style.fontSize = '12px';
+                    }
+                    // Pin：彩色+CSS变量（用于脉冲动画颜色）
+                    const pin = lb.element.querySelector('.poi-pin');
+                    if (pin) {
+                        pin.style.cssText = `
+                            background:${col};
+                            width:13px; height:13px;
+                            border:2.5px solid white;
+                            border-radius:50%;
+                            --pc:${col};
+                            box-shadow:0 0 0 0 ${col};
+                        `;
+                    }
+                    // 等待时间 tag 保持可见
+                    const tag = lb.element.querySelector('.wait-time-tag');
+                    if (tag) tag.style.opacity = '1';
+                    // 3D 环：放大+亮色
+                    if (lb.data.ring) {
+                        lb.data.ring.material.color.set(col);
+                        lb.data.ring.material.opacity = 1.0;
+                        lb.data.ring.scale.set(3.0, 3.0, 3.0);
+                    }
+                    // 序号徽章（左上角）
+                    const wrapper = lb.element.querySelector('.poi-scale-wrapper');
+                    if (wrapper) {
+                        wrapper.style.position = 'relative';
+                        const badge = document.createElement('div');
+                        badge.className = 'route-seq-badge';
+                        badge.style.background = col;
+                        badge.style.animationDelay = (seq * 0.05) + 's';
+                        badge.textContent = seq + 1;
+                        wrapper.appendChild(badge);
+                    }
+                }, delay);
             });
 
-            // 切到2D正交全图
-            if(viewMode!=='2D') toggleViewMode('2D');
+            // ── 第三步：等所有点位出现后画连线 ──
+            setTimeout(() => {
+                drawRouteLines(orderedLabels, col);
+            }, (r.pois||[]).length * 80 + 100);
+
+            // ── 第四步：切到2D全图 ──
+            if (viewMode !== '2D') toggleViewMode('2D');
             else switch2D();
         }
 
         function clearRouteHighlight(){
-            activeRouteId=null;
-            labels.forEach(lb=>{
-                lb.element.classList.remove('route-active');
-                lb.element.style.opacity='1';
-                lb.element.style.zIndex='';
-                lb.element.style.filter='';
-                const pin=lb.element.querySelector('.poi-pin');
-                if(pin){ pin.style.cssText=`background:${lb.data.color};`; }
-                const bubble=lb.element.querySelector('.poi-bubble');
-                if(bubble){ bubble.style.cssText=''; }
-                const name=lb.element.querySelector('.poi-name');
-                if(name){ name.style.color='#fff'; name.style.fontWeight='600'; }
+            activeRouteId = null;
+            clearRouteLines();
+            labels.forEach(lb => {
+                lb.element.classList.remove('route-active','route-dim');
+                lb.element.style.opacity = '1';
+                lb.element.style.zIndex  = '';
+                lb.element.style.filter  = '';
+                const pin = lb.element.querySelector('.poi-pin');
+                if (pin) pin.style.cssText = `background:${lb.data.color};width:9px;height:9px;border-radius:50%;border:2px solid #fff;`;
+                const bubble = lb.element.querySelector('.poi-bubble');
+                if (bubble) bubble.style.cssText = '';
+                const name = lb.element.querySelector('.poi-name');
+                if (name) { name.style.color='#fff'; name.style.fontWeight='600'; name.style.fontSize=''; }
                 lb.element.querySelector('.route-seq-badge')?.remove();
             });
-            POI_RAW_DATA.forEach(poi=>{ if(poi.ring){ poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); } });
-            document.querySelectorAll('.route-card').forEach(c=>{ c.classList.remove('active'); const btn=c.querySelector('.rc-start-btn'); if(btn) btn.style.opacity='0'; });
+            POI_RAW_DATA.forEach(poi => {
+                if (poi.ring) { poi.ring.material.color.set(poi.color); poi.ring.material.opacity=0.5; poi.ring.scale.set(1,1,1); }
+            });
+            document.querySelectorAll('.route-card').forEach(c => {
+                c.classList.remove('active');
+                const btn = c.querySelector('.rc-start-btn');
+                if (btn) btn.style.opacity = '0';
+            });
         }
 
         /* ── THREE.JS ── */
@@ -1430,6 +1719,8 @@
             card.style.transform='translate(-50%,0)';card.style.opacity='1';
             syncBookmark(poi);
             updateAIContext(poi);
+            // 距离/时间
+            updateDetailDistance(poi);
         }
         function exitDetailMode(){
             stopAudio();
@@ -1715,21 +2006,343 @@
             }, 300);
         });
 
-        /* ── 昼夜切换 JS ── */
+        /* ══ 昼夜切换系统 ══ */
         let isDayMode = true;
-        let ambientLightRef = null, dirLightRef = null;
+        let _nightRAF = null;
+        let _starsRAF = null;
+
+        // 灯光粒子数据（基于地图上建筑群位置的相对坐标，百分比）
+        // ══ 夜间灯光系统 ══
+        // 灯光用 Three.js 世界坐标（地图平面 X:-30~30, Z:-20~20）
+        // 通过 camera.project() 实时投影，灯光随地图移动，只在地图内闪烁
+
+        // 参考图分析：古镇右侧（东区）街道密集暖黄灯，水面蓝光倒影，沿街灯笼橙红
+        const NIGHT_LIGHTS_WORLD = (() => {
+            const lights = [];
+
+            // 辅助：在世界坐标区域内撒点
+            function scatter(wxMin, wxMax, wzMin, wzMax, n, colors, rMin, rMax, glowMin, glowMax) {
+                for (let i=0; i<n; i++) {
+                    lights.push({
+                        wx: wxMin + Math.random()*(wxMax-wxMin),  // 世界X
+                        wz: wzMin + Math.random()*(wzMax-wzMin),  // 世界Z
+                        r:    rMin + Math.random()*(rMax-rMin),
+                        color: colors[Math.floor(Math.random()*colors.length)],
+                        phase: Math.random()*Math.PI*2,
+                        speed: 0.5 + Math.random()*1.5,
+                        base:  0.5 + Math.random()*0.35,
+                        flicker: 0.12 + Math.random()*0.28,
+                        glow:  glowMin + Math.random()*(glowMax-glowMin),
+                        // 水面倒影：垂直拉伸
+                        isReflect: false,
+                    });
+                }
+            }
+
+            const warm   = ['#ffe566','#ffcc44','#ffdd88','#ffbb33'];   // 暖黄路灯
+            const lantern= ['#ff8833','#ff6622','#ffaa44','#ff9922'];   // 灯笼橙红
+            const window_= ['#fffacd','#fff5aa','#ffeecc'];             // 窗户冷暖白
+            const water  = ['#55bbff','#88ddff','#44aaee','#66ccff'];   // 水面蓝光
+            const reflect= ['#ff9944','#ffcc55','#66bbff'];             // 水面倒影
+
+            // ① 古镇核心街区（东侧，减量+柔化光晕）
+            scatter( 5, 26, -12,  8, 32, warm,    0.8, 1.6,  5, 10);
+            scatter( 8, 24, -10,  6, 18, lantern, 0.5, 1.2,  4,  8);
+            scatter(10, 22,  -8,  4, 12, window_, 0.4, 0.9,  3,  6);
+
+            // ② 沿主街道（中轴线）
+            scatter(-10, 20,  -4,  2, 18, warm,    0.6, 1.4,  4,  9);
+            scatter( -5, 18,  -6,  0, 12, lantern, 0.4, 1.0,  3,  7);
+
+            // ③ 水岸码头区（点到为止）
+            scatter( -8, 16,  -2,  4, 15, water,   0.4, 1.2,  6, 12);
+            scatter( -6, 14,   0,  6,  8, reflect, 0.3, 0.8,  5, 10);
+
+            // ④ 芦江阁周围（地标几盏）
+            scatter(  2,  9,  -1,  5, 10, lantern, 0.6, 1.4,  6, 12);
+            scatter(  3,  8,   0,  4,  7, warm,    0.5, 1.1,  4,  9);
+
+            // ⑤ 北侧院落（最稀疏）
+            scatter( -5, 20, -16,-10, 12, warm,    0.4, 1.0,  4,  8);
+            scatter(  5, 18, -14, -8,  7, lantern, 0.3, 0.9,  3,  7);
+
+            // ⑥ 水面倒影（极淡）
+            scatter( -6, 18,   2,  8, 10, water,   0.2, 0.6,  7, 14);
+
+            // ⑦ 西牌坊（几盏路灯）
+            scatter(-24,-16,  -8,  0,  6, warm,    0.5, 1.0,  4,  8);
+
+            // ⑧ 东牌坊
+            scatter( 22, 28,  -8,  0,  5, lantern, 0.5, 1.1,  4,  8);
+
+            return lights;
+        })();
+
+        // 星星数据
+        const STARS = (() => {
+            const stars = [];
+            for (let i = 0; i < 180; i++) {
+                stars.push({
+                    x: Math.random(),
+                    y: Math.random() * 0.5,  // 只在屏幕上半部（天空区域）
+                    r: 0.4 + Math.random() * 1.2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.3 + Math.random() * 0.8,
+                });
+            }
+            return stars;
+        })();
+
+        // 世界坐标 → 屏幕坐标（复用 Three.js camera）
+        function worldToScreen(wx, wz) {
+            const vec = new THREE.Vector3(wx, 0, wz);
+            vec.project(camera);
+            if (Math.abs(vec.z) > 1) return null; // 在相机背后
+            return {
+                x: (vec.x * 0.5 + 0.5) * innerWidth,
+                y: (-vec.y * 0.5 + 0.5) * innerHeight,
+            };
+        }
+
+        // 十六进制 alpha 辅助
+        function hexAlpha(a) {
+            return Math.round(Math.min(Math.max(a, 0), 1) * 255).toString(16).padStart(2,'0');
+        }
+
+        function animateNightLights() {
+            const canvas = document.getElementById('nightLightsCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let t = 0;
+
+            function draw() {
+                canvas.width = innerWidth; canvas.height = innerHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                t += 0.016;
+
+                NIGHT_LIGHTS_WORLD.forEach(lt => {
+                    // 世界坐标投影到屏幕
+                    const sc = worldToScreen(lt.wx, lt.wz);
+                    if (!sc) return; // 不在视野内跳过
+
+                    const alpha = Math.max(0, lt.base + Math.sin(t * lt.speed + lt.phase) * lt.flicker);
+                    const alphaCore = Math.min(alpha * 1.3, 1);
+
+                    // 光晕（径向渐变）
+                    const grd = ctx.createRadialGradient(sc.x, sc.y, 0, sc.x, sc.y, lt.glow);
+                    grd.addColorStop(0,   lt.color + hexAlpha(alpha * 0.72));
+                    grd.addColorStop(0.3, lt.color + hexAlpha(alpha * 0.28));
+                    grd.addColorStop(0.7, lt.color + hexAlpha(alpha * 0.07));
+                    grd.addColorStop(1,   lt.color + '00');
+                    ctx.beginPath();
+                    ctx.arc(sc.x, sc.y, lt.glow, 0, Math.PI*2);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+
+                    // 核心亮点
+                    ctx.beginPath();
+                    ctx.arc(sc.x, sc.y, lt.r, 0, Math.PI*2);
+                    ctx.fillStyle = lt.color + hexAlpha(alphaCore * 0.75);
+                    ctx.fill();
+
+                    // 水面倒影：向下拉伸椭圆
+                    if (lt.wz > 0) {
+                        ctx.save();
+                        ctx.globalAlpha = alpha * 0.22;
+                        ctx.scale(1, 2.5);
+                        ctx.beginPath();
+                        ctx.arc(sc.x, (sc.y) / 2.5 + 6, lt.r * 0.8, 0, Math.PI*2);
+                        ctx.fillStyle = lt.color;
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                });
+
+                _nightRAF = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function animateStars() {
+            const canvas = document.getElementById('starsCanvas');
+            if (!canvas) return;
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            const ctx = canvas.getContext('2d');
+            let t = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const W = canvas.width, H = canvas.height;
+                t += 0.01;
+
+                STARS.forEach(st => {
+                    const px = st.x * W, py = st.y * H;
+                    const alpha = 0.4 + Math.sin(t * st.speed + st.phase) * 0.35;
+                    ctx.beginPath();
+                    ctx.arc(px, py, st.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                    ctx.fill();
+                    // 亮星加十字光芒
+                    if (st.r > 1.0) {
+                        ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.4})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(px - st.r * 3, py); ctx.lineTo(px + st.r * 3, py);
+                        ctx.moveTo(px, py - st.r * 3); ctx.lineTo(px, py + st.r * 3);
+                        ctx.stroke();
+                    }
+                });
+                _starsRAF = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function stopNightEffects() {
+            if (_nightRAF) { cancelAnimationFrame(_nightRAF); _nightRAF = null; }
+            if (_starsRAF) { cancelAnimationFrame(_starsRAF); _starsRAF = null; }
+            const lc = document.getElementById('nightLightsCanvas');
+            const sc = document.getElementById('starsCanvas');
+            if (lc) lc.getContext('2d').clearRect(0,0,lc.width,lc.height);
+            if (sc) sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+            stopNightAudio();
+        }
+
+        // ══ 夜间背景音系统（Web Audio API 合成，无需外部文件）══
+        let _audioCtx = null;
+        let _nightAudioNodes = [];
+
+        function getNightAudioCtx() {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return _audioCtx;
+        }
+
+        // 合成蛙鸣（短促调频振荡）
+        function synthFrogCalls(ctx, masterGain) {
+            function oneFrog() {
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const freq = 380 + Math.random() * 120;  // 蛙鸣频率范围
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.linearRampToValueAtTime(freq * 1.15, now + 0.04);
+                osc.frequency.linearRampToValueAtTime(freq * 0.9, now + 0.1);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.06 + Math.random()*0.04, now + 0.02);
+                gain.gain.linearRampToValueAtTime(0, now + 0.14);
+                osc.connect(gain); gain.connect(masterGain);
+                osc.start(now); osc.stop(now + 0.18);
+                // 随机间隔触发下一只蛙
+                const next = setTimeout(oneFrog, 600 + Math.random() * 2400);
+                _nightAudioNodes.push({ clear: () => clearTimeout(next) });
+            }
+            // 启动多只蛙，相互错开
+            for (let i = 0; i < 8; i++) {
+                const t = setTimeout(oneFrog, Math.random() * 2000);
+                _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+            }
+        }
+
+        // 合成流水声（带通噪声）
+        function synthWater(ctx, masterGain) {
+            const bufSize = ctx.sampleRate * 3;
+            const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) data[i] = (Math.random()*2-1);
+            const src = ctx.createBufferSource();
+            src.buffer = buf; src.loop = true;
+            const bpf = ctx.createBiquadFilter();
+            bpf.type = 'bandpass'; bpf.frequency.value = 800; bpf.Q.value = 0.4;
+            const bpf2 = ctx.createBiquadFilter();
+            bpf2.type = 'bandpass'; bpf2.frequency.value = 1400; bpf2.Q.value = 0.3;
+            const g = ctx.createGain(); g.gain.value = 0.06;
+            src.connect(bpf); bpf.connect(bpf2); bpf2.connect(g); g.connect(masterGain);
+            src.start();
+            _nightAudioNodes.push({ node: src, stop: () => { try{ src.stop(); }catch(e){} } });
+        }
+
+        // 合成远处烟花爆炸声（低频冲击）
+        function synthFireworks(ctx, masterGain) {
+            function boom() {
+                if (!isDayMode) {  // 只在夜间触发
+                    const now = ctx.currentTime;
+                    const noise = ctx.createBuffer(1, ctx.sampleRate*0.8, ctx.sampleRate);
+                    const d = noise.getChannelData(0);
+                    for (let i=0; i<d.length; i++) d[i]=(Math.random()*2-1);
+                    const src = ctx.createBufferSource(); src.buffer=noise;
+                    const lpf = ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=180;
+                    const g = ctx.createGain();
+                    g.gain.setValueAtTime(0.15, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now+0.7);
+                    src.connect(lpf); lpf.connect(g); g.connect(masterGain);
+                    src.start(now); src.stop(now+0.8);
+                }
+                // 每 20~50 秒一次烟花
+                const t = setTimeout(boom, 20000 + Math.random()*30000);
+                _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+            }
+            const t = setTimeout(boom, 8000 + Math.random()*12000);
+            _nightAudioNodes.push({ clear: () => clearTimeout(t) });
+        }
+
+        // 合成虫鸣（高频正弦持续）
+        function synthCrickets(ctx, masterGain) {
+            const osc = ctx.createOscillator();
+            const lfo = ctx.createOscillator();
+            const lfoGain = ctx.createGain();
+            const g = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.value = 4200;
+            lfo.type = 'sine'; lfo.frequency.value = 18;
+            lfoGain.gain.value = 0.018;
+            g.gain.value = 0.028;
+            lfo.connect(lfoGain); lfoGain.connect(g.gain);
+            osc.connect(g); g.connect(masterGain);
+            osc.start(); lfo.start();
+            _nightAudioNodes.push({ node: osc, stop: () => { try{osc.stop();lfo.stop();}catch(e){} } });
+        }
+
+        function startNightAudio() {
+            try {
+                const ctx = getNightAudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                // 主音量（夜间氛围音量适中，不打扰游览）
+                const master = ctx.createGain();
+                master.gain.setValueAtTime(0, ctx.currentTime);
+                master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2.5);
+                master.connect(ctx.destination);
+                _nightAudioNodes.push({ node: master });
+                synthWater(ctx, master);
+                synthFrogCalls(ctx, master);
+                synthCrickets(ctx, master);
+                synthFireworks(ctx, master);
+            } catch(e) { console.warn('Night audio not supported:', e); }
+        }
+
+        function stopNightAudio() {
+            _nightAudioNodes.forEach(n => {
+                if (n.stop) try { n.stop(); } catch(e) {}
+                if (n.clear) n.clear();
+            });
+            _nightAudioNodes = [];
+            if (_audioCtx) {
+                _audioCtx.suspend();
+            }
+        }
 
         function toggleDayNight() {
             isDayMode = !isDayMode;
             document.body.classList.toggle('night-mode', !isDayMode);
             const icon = document.getElementById('dayNightIcon');
-            const label = document.getElementById('navDayNight').querySelector('text, span') || document.getElementById('navDayNight').lastChild;
 
             if (isDayMode) {
+                // ── 切回白天 ──
                 scene.background = new THREE.Color(0x87ceeb);
                 if (ambientLight) { ambientLight.color.set(0xffffff); ambientLight.intensity = 0.8; }
-                if (dirLight)     { dirLight.color.set(0xffffff);     dirLight.intensity = 0.5; }
-                if (mapPlaneMesh && mapPlaneMesh.material.map) mapPlaneMesh.material.color.set(0xffffff);
+                if (dirLight)     { dirLight.color.set(0xfff5e0);     dirLight.intensity = 0.6; }
+                // 底图恢复白色（CSS filter 已通过 class 控制）
+                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0xffffff);
+                // 停止夜间特效
+                stopNightEffects();
                 // 太阳图标
                 if (icon) icon.innerHTML = `<circle cx="12" cy="12" r="5"/>
                     <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
@@ -1737,13 +2350,154 @@
                     <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
             } else {
-                scene.background = new THREE.Color(0x020820);
-                if (ambientLight) { ambientLight.color.set(0x1a2a5e); ambientLight.intensity = 0.35; }
-                if (dirLight)     { dirLight.color.set(0x3050a0);     dirLight.intensity = 0.25; }
-                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0x445588);
+                // ── 切入夜晚 ──
+                scene.background = new THREE.Color(0x050d1f);
+                if (ambientLight) { ambientLight.color.set(0x2a3a6e); ambientLight.intensity = 0.55; }
+                if (dirLight)     { dirLight.color.set(0x4060b0);     dirLight.intensity = 0.2; }
+                // 底图颜色保持白色，由 CSS filter 控制暗化（保留纹理细节！）
+                if (mapPlaneMesh && mapPlaneMesh.material) mapPlaneMesh.material.color.set(0xffffff);
+                // 启动夜间特效（延迟400ms等CSS过渡开始）
+                setTimeout(() => {
+                    animateStars();
+                    animateNightLights();
+                    startNightAudio();
+                }, 400);
                 // 月亮图标
                 if (icon) icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
             }
+        }
+
+
+        /* ══ 位置输入与距离计算系统 ══ */
+
+        // 预设快捷位置（景区主要入口/停车场）
+        const QUICK_LOCATIONS = {
+            east:         { lng: 112.7848, lat: 28.4524, label: '东入口（东牌坊）' },
+            west:         { lng: 112.7955, lat: 28.4569, label: '西入口（西牌坊）' },
+            parking_east: { lng: 112.7835, lat: 28.4510, label: '东侧停车场' },
+            parking_west: { lng: 112.7968, lat: 28.4580, label: '西侧停车场' },
+            vc:           { lng: 112.7910, lat: 28.4545, label: '游客服务中心' },
+        };
+
+        // Haversine 公式计算两点距离（米）
+        function haversineDistance(lng1, lat1, lng2, lat2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 +
+                      Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        // 格式化距离
+        function formatDistance(meters) {
+            if (meters < 50)  return '就在附近';
+            if (meters < 1000) return Math.round(meters) + ' 米';
+            return (meters / 1000).toFixed(1) + ' 公里';
+        }
+
+        // 格式化步行时间（步行速度约 4.5km/h = 75m/min）
+        function formatWalkTime(meters) {
+            const mins = Math.round(meters / 75);
+            if (mins < 1) return '不到1分钟';
+            if (mins < 60) return mins + ' 分钟';
+            return Math.floor(mins/60) + '小时' + (mins%60 ? (mins%60)+'分钟' : '');
+        }
+
+        // 更新详情卡的距离显示
+        function updateDetailDistance(poi) {
+            const bar  = document.getElementById('distanceBar');
+            const hint = document.getElementById('noLocationHint');
+            if (!userLocation) {
+                if (bar)  bar.classList.add('hidden');
+                if (hint) hint.classList.remove('hidden');
+                return;
+            }
+            const dist = haversineDistance(
+                userLocation.lng, userLocation.lat,
+                poi.lngLat[0], poi.lngLat[1]
+            );
+            if (bar)  { bar.classList.remove('hidden'); }
+            if (hint) { hint.classList.add('hidden'); }
+            const dt = document.getElementById('distanceText');
+            const wt = document.getElementById('walkTimeText');
+            if (dt) dt.textContent = formatDistance(dist);
+            if (wt) wt.textContent = formatWalkTime(dist);
+        }
+
+        // 弹出位置设置
+        function showLocationInput() {
+            const modal = document.getElementById('locationModal');
+            if (!modal) return;
+            modal.classList.replace('hidden','flex');
+            // 更新当前位置状态显示
+            updateLocStatus();
+            // 高亮已选中的快捷位置
+            document.querySelectorAll('.quick-loc-btn').forEach(btn => {
+                btn.classList.remove('border-blue-400','bg-blue-50');
+            });
+        }
+        function hideLocationModal() {
+            document.getElementById('locationModal')?.classList.replace('flex','hidden');
+        }
+
+        function updateLocStatus() {
+            const el = document.getElementById('currentLocText');
+            if (!el) return;
+            if (userLocation && userLocation._label) {
+                el.textContent = '📍 ' + userLocation._label;
+            } else if (userLocation && userLocation._isGPS) {
+                el.textContent = '📡 GPS 定位中…';
+            } else {
+                el.textContent = '尚未设置位置';
+            }
+        }
+
+        // GPS 定位
+        function useGPSLocation() {
+            const btn = document.getElementById('gpsLocBtn');
+            if (btn) { btn.textContent = '定位中…'; btn.disabled = true; }
+            if (!navigator.geolocation) {
+                alert('您的浏览器不支持 GPS 定位');
+                if (btn) { btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>使用 GPS 自动定位'; btn.disabled=false; }
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(pos => {
+                userLocation = {
+                    lng: pos.coords.longitude,
+                    lat: pos.coords.latitude,
+                    _isGPS: true,
+                    _label: 'GPS 定位'
+                };
+                updateLocStatus();
+                updateUserMarker();
+                if (currentDetailPOI) updateDetailDistance(currentDetailPOI);
+                if (btn) { btn.innerHTML = '✅ 定位成功'; btn.disabled=false; }
+                setTimeout(hideLocationModal, 800);
+            }, err => {
+                alert('GPS 定位失败，请手动选择位置');
+                if (btn) { btn.innerHTML = '使用 GPS 自动定位'; btn.disabled=false; }
+            }, { enableHighAccuracy: true, timeout: 8000 });
+        }
+
+        // 快捷位置选择
+        function setQuickLocation(key) {
+            const loc = QUICK_LOCATIONS[key];
+            if (!loc) return;
+            userLocation = { lng: loc.lng, lat: loc.lat, _label: loc.label };
+            // 更新地图标记
+            updateUserMarker();
+            // 更新当前详情卡距离
+            if (currentDetailPOI) updateDetailDistance(currentDetailPOI);
+            // 高亮选中按钮
+            document.querySelectorAll('.quick-loc-btn').forEach(btn => btn.classList.remove('border-blue-400','bg-blue-50','font-bold'));
+            event.currentTarget.classList.add('border-blue-400','bg-blue-50');
+            // 更新状态
+            updateLocStatus();
+            // 更新状态栏
+            const sb = document.getElementById('statusBadge');
+            if (sb) { sb.textContent = '📍 ' + loc.label; sb.style.color = '#16a34a'; }
+            setTimeout(hideLocationModal, 600);
         }
 
         window.onload = init;
