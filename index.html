@@ -75,6 +75,7 @@
         .poi-label:hover .poi-scale-wrapper { transform: scale(1.15) !important; }
         .poi-bubble { background: rgba(8,16,36,0.88); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.18); border-radius: 30px; padding: 3px 4px 3px 10px; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
         .poi-name { color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
+        .wait-time-tag { font-size: 9px; padding: 2px 7px; border-radius: 20px; font-weight: 800; }
         .time-low    { background: #22c55e; color:#fff; }
         .time-med    { background: #f59e0b; color:#fff; }
         .time-high   { background: #ef4444; color:#fff; }
@@ -481,146 +482,7 @@
             border-color: #93c5fd;
             background: #eff6ff;
         }
-    
-        /* ══ 新功能通用模态背景 ══ */
-        .jg-modal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); backdrop-filter:blur(14px); padding:10px; }
-        .jg-modal.open { display:flex; }
-        @keyframes jgIn { from{transform:scale(.88) translateY(16px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-        .jg-card { animation:jgIn .35s cubic-bezier(.4,0,.2,1) both; }
-
-        /* ══ 打卡纪念邮票 ══ */
-        #stampModal .stamp-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
-        #stampCard { background:#fffdf5; border-radius:16px; padding:16px 14px 12px; width:230px; text-align:center; position:relative; box-shadow:0 20px 50px rgba(0,0,0,.45); flex-shrink:0; }
-        .sp-perf { position:absolute; left:0; right:0; height:8px; display:flex; }
-        .sp-perf.top { top:-5px; } .sp-perf.bot { bottom:-5px; }
-        .sp-hole { flex:1; height:8px; background:#fffdf5; border-radius:50%; box-shadow:0 0 0 1.5px rgba(0,0,0,.12); }
-        .stamp-img-wrap { width:120px; height:78px; border-radius:8px; border:2px solid #e8dfc8; overflow:hidden; margin:0 auto 8px; }
-        .stamp-img-wrap img { width:100%; height:100%; object-fit:cover; }
-        .stamp-title { font-size:13px; font-weight:900; color:#1e293b; }
-        .stamp-sub { font-size:9px; color:#94a3b8; margin:2px 0 5px; }
-        .stamp-quote { font-size:9.5px; color:#475569; line-height:1.5; font-style:italic; padding:5px 7px; background:#f1efe8; border-radius:7px; margin-bottom:7px; }
-        .stamp-foot { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #e2d9c8; padding-top:6px; }
-        .stamp-date { font-size:8px; color:#94a3b8; font-weight:700; }
-        .stamp-badge { background:#2563eb; color:#fff; font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; }
-        .stamp-btns { display:flex; gap:8px; width:230px; }
-        .stamp-btns button { flex:1; padding:8px 0; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer; border:none; }
-        @keyframes confFall { 0%{transform:translateY(-10px) rotate(0deg);opacity:1} 100%{transform:translateY(90vh) rotate(720deg);opacity:0} }
-
-        /* ══ 游览报告 ══ */
-        #reportCard { background:#fff; border-radius:18px; width:100%; max-width:310px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.4); max-height:calc(100dvh - 20px); display:flex; flex-direction:column; }
-        .rpt-hdr { padding:13px 15px 10px; background:linear-gradient(135deg,#1e3a5f,#2563eb,#7c3aed); color:#fff; flex-shrink:0; }
-        .rpt-stat { background:#f8fafc; border-radius:10px; padding:8px 6px; flex:1; text-align:center; }
-        .rpt-stat-v { font-size:17px; font-weight:900; color:#1e293b; line-height:1; }
-        .rpt-stat-l { font-size:9px; color:#94a3b8; margin-top:2px; font-weight:600; }
-        .rpt-chip { background:#eff6ff; color:#2563eb; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px; border:1px solid #bfdbfe; }
-        .rpt-body { padding:12px 14px 14px; overflow-y:auto; flex:1; }
-
-        /* ══ 演出提醒 Toast ══ */
-        #showToast { position:fixed; top:66px; left:50%; transform:translateX(-50%) translateY(-16px); z-index:500; opacity:0; transition:all .35s cubic-bezier(.4,0,.2,1); pointer-events:none; white-space:nowrap; }
-        #showToast.on { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
-
-        /* ══ 行程规划器 ══ */
-        #plannerPage { position:fixed; inset:0; z-index:190; display:none; flex-direction:column; background:rgba(10,18,36,.94); backdrop-filter:blur(18px); }
-        #plannerPage.open { display:flex; }
-        #planHdr { display:flex; align-items:center; justify-content:space-between; padding:11px 15px 8px; flex-shrink:0; border-bottom:1px solid rgba(255,255,255,.08); }
-        #planBody { display:flex; flex:1; overflow:hidden; min-height:0; }
-        #planLeft { width:185px; flex-shrink:0; border-right:1px solid rgba(255,255,255,.08); padding:8px 10px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; scrollbar-width:none; }
-        #planRight { flex:1; padding:8px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:7px; scrollbar-width:none; }
-        .plan-poi-item { display:flex; align-items:center; gap:7px; padding:6px 9px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); cursor:pointer; transition:background .15s; }
-        .plan-poi-item:hover { background:rgba(255,255,255,.14); }
-        .plan-poi-item.added { opacity:.3; pointer-events:none; }
-        .plan-slot { display:flex; align-items:center; gap:7px; padding:6px 9px; border-radius:10px; background:rgba(37,99,235,.15); border:1px solid rgba(37,99,235,.3); position:relative; animation:jgIn .22s cubic-bezier(.175,.885,.32,1.275) both; }
-        .plan-slot-n { width:17px; height:17px; border-radius:50%; background:#2563eb; color:#fff; font-size:9px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .plan-slot-del { position:absolute; right:7px; top:50%; transform:translateY(-50%); width:15px; height:15px; border-radius:50%; background:rgba(239,68,68,.2); color:#ef4444; font-size:9px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; padding:0; }
-        .plan-drop { min-height:42px; border:2px dashed rgba(37,99,235,.3); border-radius:10px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.3); font-size:11px; }
-
-        /* ══ 打卡排行榜 ══ */
-        #lbCard { background:#fff; border-radius:18px; width:100%; max-width:400px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.4); max-height:calc(100dvh - 20px); display:flex; flex-direction:column; }
-        #lbHdr { background:linear-gradient(135deg,#1e3a5f,#7c3aed); padding:12px 15px 9px; color:#fff; flex-shrink:0; }
-        #lbBody { flex:1; overflow-y:auto; padding:0 4px 6px; scrollbar-width:none; }
-        .lb-row { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:10px; }
-        .lb-row:hover { background:rgba(37,99,235,.05); }
-        .lb-rank { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; flex-shrink:0; }
-        .lb-rank.g { background:#fef9c3; color:#b45309; border:2px solid #fde047; }
-        .lb-rank.s { background:#f1f5f9; color:#475569; border:2px solid #cbd5e1; }
-        .lb-rank.b { background:#fef0e7; color:#9a3412; border:2px solid #fdba74; }
-        .lb-rank.o { background:#f8fafc; color:#94a3b8; font-size:10px; border:1.5px solid #e2e8f0; }
-        .lb-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1; }
-        .lb-bar-w { width:55px; flex-shrink:0; height:5px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
-        .lb-bar-f { height:100%; border-radius:3px; transition:width .8s cubic-bezier(.4,0,.2,1); }
-        .lb-cnt { font-size:12px; font-weight:900; flex-shrink:0; min-width:22px; text-align:right; }
-
-        /* ══ 景点留言 ══ */
-        #cmtModal { position:fixed; inset:0; z-index:200; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.4); backdrop-filter:blur(8px); }
-        #cmtModal.open { display:flex; }
-        #cmtSheet { background:#fff; border-radius:18px 18px 0 0; width:100%; max-width:520px; max-height:56dvh; display:flex; flex-direction:column; box-shadow:0 -12px 40px rgba(0,0,0,.2); animation:sheetUp .3s cubic-bezier(.4,0,.2,1) both; }
-        @keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        .cmt-handle { width:30px; height:3px; border-radius:2px; background:#e2e8f0; margin:8px auto 0; flex-shrink:0; }
-        .cmt-hdr { padding:7px 13px 6px; border-bottom:1px solid #f1f5f9; flex-shrink:0; }
-        #cmtList { flex:1; overflow-y:auto; scrollbar-width:none; }
-        .cmt-input-row { padding:7px 12px 10px; border-top:1px solid #f1f5f9; flex-shrink:0; display:flex; gap:7px; }
-        .cmt-item { padding:7px 13px; border-bottom:1px solid #f8fafc; display:flex; gap:8px; }
-        .cmt-av { width:24px; height:24px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
-        .cmt-nick { font-size:10px; font-weight:700; color:#1e293b; }
-        .cmt-txt { font-size:11px; color:#374151; line-height:1.5; margin-top:1px; }
-        .cmt-time { font-size:9px; color:#94a3b8; margin-top:1px; }
-
-        /* ── 三级客流预警标签 ── */
-        .wait-time-tag { font-size:9px; padding:2px 7px; border-radius:20px; font-weight:800; display:inline-flex; align-items:center; gap:3px; }
-        .time-low  { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
-        .time-med  { background:#fef9c3; color:#a16207; border:1px solid #fde047; }
-        .time-high { background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; }
-        .time-ended{ background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0; }
-        .crowd-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; display:inline-block; }
-        .time-low  .crowd-dot { background:#15803d; }
-        .time-med  .crowd-dot { background:#a16207; animation:crowdPulse 1.2s ease-in-out infinite; }
-        .time-high .crowd-dot { background:#dc2626; animation:crowdPulse 0.7s ease-in-out infinite; }
-        @keyframes crowdPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(1.5)} }
-        /* 侧边栏列表客流标签 */
-        .lst-crowd { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:800; padding:1px 6px; border-radius:12px; }
-
-        /* ── 活动页 (全屏浮层) ── */
-        #activityPage {
-            position:fixed; inset:0; z-index:80; display:none; flex-direction:column;
-            background:rgba(12,18,36,0.96); backdrop-filter:blur(18px);
-        }
-        #activityPage.open { display:flex; }
-        .act-hdr { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px; flex-shrink:0; border-bottom:1px solid rgba(255,255,255,.08); }
-        .act-filter-row { display:flex; gap:6px; padding:8px 14px 0; overflow-x:auto; scrollbar-width:none; flex-shrink:0; }
-        .act-filter-row::-webkit-scrollbar { display:none; }
-        .act-flt { padding:4px 13px; border-radius:20px; font-size:10px; font-weight:700; border:1px solid rgba(255,255,255,.15); color:#94a3b8; background:rgba(255,255,255,.07); cursor:pointer; white-space:nowrap; transition:all .18s; }
-        .act-flt.on { background:rgba(37,99,235,.85); border-color:#2563eb; color:#fff; box-shadow:0 2px 8px rgba(37,99,235,.4); }
-        #actGrid { flex:1; overflow-y:auto; padding:10px 12px 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; scrollbar-width:none; }
-        #actGrid::-webkit-scrollbar { display:none; }
-        .act-card { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); border-radius:16px; padding:13px; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; gap:9px; }
-        .act-card:hover { background:rgba(255,255,255,.13); transform:translateY(-2px); }
-        .act-status-now  { background:#15803d; color:#fff; font-size:9px; font-weight:900; padding:2px 8px; border-radius:16px; animation:nowPulse 1.4s ease-in-out infinite; }
-        .act-status-soon { background:#a16207; color:#fff; font-size:9px; font-weight:900; padding:2px 8px; border-radius:16px; }
-        .act-status-done { background:rgba(255,255,255,.1); color:#64748b; font-size:9px; font-weight:700; padding:2px 8px; border-radius:16px; }
-        @keyframes nowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(21,128,61,.6)} 50%{box-shadow:0 0 0 5px rgba(21,128,61,0)} }
-        .act-time-chip { display:inline-flex; align-items:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:#e2e8f0; font-size:10px; font-weight:700; padding:1px 7px; border-radius:7px; }
-        .act-time-chip.now-chip { background:rgba(21,128,61,.25); border-color:rgba(21,128,61,.5); color:#4ade80; }
-        .act-rem-btn { padding:3px 9px; border-radius:10px; font-size:10px; font-weight:700; border:1px solid rgba(255,255,255,.18); cursor:pointer; background:rgba(255,255,255,.08); color:#94a3b8; transition:all .15s; }
-        .act-rem-btn.active { background:rgba(37,99,235,.2); border-color:#2563eb; color:#93c5fd; }
-
-        /* ── 路线筛选高亮（POI 标注淡化） ── */
-        .poi-label.route-dim { opacity:.12 !important; pointer-events:none; }
-        .poi-label.route-show { opacity:1 !important; }
-
-        /* ── 趣味打卡进度（探险版） ── */
-        #checkinSection .ci-level-bar { height:5px; border-radius:3px; background:#e2e8f0; overflow:hidden; margin:3px 0; }
-        #checkinSection .ci-level-fill { height:100%; border-radius:3px; transition:width .7s cubic-bezier(.4,0,.2,1); }
-        #checkinSection .ci-badge-row { display:flex; gap:3px; justify-content:center; margin-top:3px; }
-        .ci-badge { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; border:1.5px solid; transition:all .3s; }
-        .ci-badge.earned { animation:badgePop .4s cubic-bezier(.175,.885,.32,1.275) forwards; }
-        @keyframes badgePop { 0%{transform:scale(0) rotate(-30deg)} 70%{transform:scale(1.3) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
-        .ci-recent-dot { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; flex-shrink:0; cursor:pointer; transition:transform .2s; }
-        .ci-recent-dot:hover { transform:scale(1.18); }
-        /* 打卡庆祝弹层 */
-        #ciCelebration { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); }
-        #ciCelebration.show { display:flex; }
-        #ciToast { background:rgba(12,20,44,.95); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.13); border-radius:22px; padding:22px 26px; text-align:center; max-width:260px; animation:jgIn .45s cubic-bezier(.175,.885,.32,1.275) both; }
-    </style>
+        </style>
 </head>
 <body class="mode-explorer">
 
@@ -700,7 +562,7 @@
         <div class="nav-btn" id="navRoute" onclick="navClick('navRoute', ()=>showSideList())">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>路线
         </div>
-        <div class="nav-btn" id="navActivity" onclick="navClick('navActivity', ()=>openActivityPage())">
+        <div class="nav-btn" id="navActivity" onclick="navClick('navActivity', ()=>showSideList())">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>活动
         </div>
         <div class="nav-btn" id="navDayNight" onclick="toggleDayNight()" title="切换昼夜模式">
@@ -734,15 +596,6 @@
         </div>
         <div class="tool-btn" onclick="showQRModal()" title="二维码">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
-        </div>
-        <div class="tool-btn" onclick="openPlannerPage()" title="行程规划">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 14 11 16 15 12"/></svg>
-        </div>
-        <div class="tool-btn" onclick="openLeaderboard()" title="打卡排行榜">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
-        </div>
-        <div class="tool-btn" onclick="showTravelReport()" title="游览报告">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
 
     </div>
@@ -781,28 +634,32 @@
         <div id="routeScroll" class="no-scrollbar"></div>
     </div>
 
-    <!-- 打卡区（趣味探险版） -->
+    <!-- 打卡区 -->
     <div id="checkinSection" class="g">
-        <div class="flex items-center justify-between mb-1">
-            <div class="text-[10px] font-black text-slate-700 flex items-center gap-1.5">
-                <span style="font-size:13px;">🗺️</span>
-                <span id="ciLevelLabel" style="color:#7c3aed;font-size:10px;font-weight:900;">🌱 初识靖港</span>
+        <div class="flex items-center justify-between">
+            <div class="text-xs font-black text-slate-700 flex items-center gap-1.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                打卡进度
             </div>
-            <div class="flex items-center gap-1.5">
-                <span style="font-size:9px;color:#94a3b8;font-weight:600;"><span id="checkinCount">0</span>/<span id="ciTotal">20</span></span>
-                <button class="fold-btn" onclick="togglePanel('checkinSection','bottom')" title="收起打卡">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-            </div>
+            <button class="fold-btn" onclick="togglePanel('checkinSection','bottom')" title="收起打卡">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
         </div>
-        <!-- 经验条 -->
-        <div class="ci-level-bar"><div id="ciLevelFill" class="ci-level-fill" style="width:0%;background:linear-gradient(90deg,#7c3aed,#2563eb);"></div></div>
-        <!-- 里程碑徽章 -->
-        <div class="ci-badge-row" id="ciBadgeRow"></div>
-        <!-- 最近打卡 -->
-        <div class="flex items-center gap-2 mt-1.5">
-            <span style="font-size:9px;color:#94a3b8;flex-shrink:0;">最近：</span>
-            <div id="ciRecentRow" style="display:flex;gap:3px;overflow:hidden;"></div>
+        <div class="flex items-center gap-3">
+            <div class="relative flex-shrink-0">
+                <svg width="46" height="46" class="prog-ring">
+                    <circle class="prog-ring-bg" cx="23" cy="23" r="18" stroke-width="3.5"/>
+                    <circle id="progRingFill" class="prog-ring-fill" cx="23" cy="23" r="18" stroke-width="3.5" stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="checkinCount" class="text-sm font-black text-slate-800 leading-none">0</span>
+                    <span class="text-[7px] text-slate-400 font-semibold">点亮</span>
+                </div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-[10px] text-slate-400 mb-1">已点亮 <strong id="checkinText" class="text-slate-700">0</strong>/20 个景点</div>
+                <div class="flex gap-1" id="checkinDots"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -908,7 +765,6 @@
                 </div>
             </div>
             <div class="flex-1 flex flex-col min-w-0">
-                <div id="detailCrowdWrap" class="flex items-center gap-1.5 mb-1.5" style="display:none!important;" id="detailCrowdWrap"><span style="font-size:9px;color:#94a3b8;">实时客流：</span><span id="detailCrowdTag" class="wait-time-tag time-low"><span class="crowd-dot"></span>畅通</span></div>
                 <p id="detailDesc" class="text-xs text-slate-500 leading-relaxed overflow-y-auto max-h-24 desc-scroll pr-1 flex-1">加载中…</p>
                 <div id="audioSection" class="hidden mt-2.5 p-2.5 bg-slate-50 rounded-xl flex items-center justify-between border border-slate-100">
                     <div class="flex items-center gap-2">
@@ -926,7 +782,6 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
                         规划路线
                     </button>
-                    <button onclick="openCommentModal()" title="景点留言" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-purple-200 hover:text-purple-500 transition-all"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
                     <button id="bookmarkBtn" onclick="toggleBookmark()" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-slate-200 transition-all">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                     </button>
@@ -1084,153 +939,6 @@
     </div>
 </div>
 
-<!-- ══ 打卡纪念邮票 ══ -->
-<div id="stampModal" class="jg-modal">
-    <div class="stamp-wrap jg-card">
-        <div id="stampCard">
-            <div class="sp-perf top" id="spPerf1"></div>
-            <div class="stamp-img-wrap"><img id="stampImg" src="" alt=""></div>
-            <div id="stampTitle" class="stamp-title"></div>
-            <div id="stampSub" class="stamp-sub"></div>
-            <div id="stampQuote" class="stamp-quote"></div>
-            <div class="stamp-foot"><span id="stampDate" class="stamp-date"></span><span id="stampBadge" class="stamp-badge">已打卡</span></div>
-            <div class="sp-perf bot" id="spPerf2"></div>
-        </div>
-        <div class="stamp-btns">
-            <button onclick="closeStampModal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);">关闭</button>
-            <button onclick="saveStamp()" style="background:#2563eb;color:#fff;">保存纪念卡</button>
-        </div>
-    </div>
-</div>
-
-<!-- ══ 游览报告 ══ -->
-<div id="reportModal" class="jg-modal">
-    <div id="reportCard" class="jg-card">
-        <div class="rpt-hdr">
-            <div style="font-size:10px;font-weight:700;opacity:.7;margin-bottom:3px;">今日游览报告</div>
-            <div style="font-size:17px;font-weight:900;margin-bottom:1px;" id="rptTitle">靖港探索报告</div>
-            <div style="font-size:10px;opacity:.65;" id="rptSub"></div>
-        </div>
-        <div class="rpt-body">
-            <div style="display:flex;gap:8px;margin-bottom:11px;">
-                <div class="rpt-stat"><div class="rpt-stat-v" id="rStatN">0</div><div class="rpt-stat-l">景点打卡</div></div>
-                <div class="rpt-stat"><div class="rpt-stat-v" id="rStatP">0%</div><div class="rpt-stat-l">完成率</div></div>
-                <div class="rpt-stat"><div class="rpt-stat-v" id="rStatLv">🌱</div><div class="rpt-stat-l">等级</div></div>
-            </div>
-            <div style="font-size:10px;color:#94a3b8;font-weight:700;margin-bottom:6px;">已探索景点</div>
-            <div id="rCheckins" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;"></div>
-            <div id="rAiBox" style="display:none;background:#f8fafc;border-radius:10px;padding:9px;font-size:11px;color:#475569;line-height:1.55;border-left:3px solid #2563eb;margin-bottom:9px;"></div>
-            <button id="rAiBtn" onclick="genAIReport()" style="width:100%;padding:8px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer;margin-bottom:7px;">✨ AI生成游览总结</button>
-            <button onclick="document.getElementById('reportModal').classList.remove('open')" style="width:100%;padding:8px;border-radius:11px;background:#f1f5f9;color:#64748b;font-size:12px;font-weight:700;border:none;cursor:pointer;">关闭</button>
-        </div>
-    </div>
-</div>
-
-<!-- ══ 演出提醒 Toast ══ -->
-<div id="showToast">
-    <div class="g rounded-2xl px-4 py-2.5 shadow-2xl flex items-center gap-3" style="border:1.5px solid rgba(37,99,235,.18);">
-        <span style="font-size:18px;">🎭</span>
-        <div><div id="toastName" style="font-size:12px;font-weight:900;color:#1e293b;"></div><div id="toastDetail" style="font-size:10px;color:#64748b;"></div></div>
-        <button onclick="document.getElementById('showToast').classList.remove('on')" style="width:22px;height:22px;border-radius:7px;background:#f1f5f9;border:none;color:#94a3b8;cursor:pointer;font-size:11px;flex-shrink:0;">✕</button>
-    </div>
-</div>
-
-<!-- ══ 行程规划器 ══ -->
-<div id="plannerPage">
-    <div id="planHdr">
-        <div><div style="font-size:14px;font-weight:900;color:#f8fafc;">行程规划器</div><div style="font-size:10px;color:#94a3b8;margin-top:1px;">点击左侧景点添加到行程</div></div>
-        <button onclick="closePlannerPage()" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-    </div>
-    <div id="planBody">
-        <div id="planLeft">
-            <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">选择景点</div>
-            <div id="planPoiList"></div>
-        </div>
-        <div id="planRight">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-                <div style="font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;">我的行程</div>
-                <div id="planSummary" style="font-size:10px;color:#94a3b8;font-weight:600;"></div>
-            </div>
-            <div id="planSlots" style="display:flex;flex-direction:column;gap:6px;"></div>
-            <div id="planDrop" class="plan-drop">点击左侧景点添加</div>
-            <button id="planStartBtn" onclick="startPlanRoute()" style="display:none;padding:9px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer;">🗺️ 开始这条行程</button>
-            <div id="planConflict" style="display:none;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:9px;padding:7px 10px;font-size:10px;color:#fca5a5;"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ══ 打卡排行榜 ══ -->
-<div id="lbModal" class="jg-modal">
-    <div id="lbCard" class="jg-card">
-        <div id="lbHdr">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div><div style="font-size:14px;font-weight:900;">打卡排行榜</div><div style="font-size:10px;opacity:.6;margin-top:1px;" id="lbSub">今日探险家</div></div>
-                <button onclick="document.getElementById('lbModal').classList.remove('open')" style="width:27px;height:27px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-        </div>
-        <div id="lbBody">
-            <div id="lbMyRank" style="display:none;margin:8px 6px 2px;padding:7px 11px;background:#eff6ff;border-radius:9px;border:1.5px solid #bfdbfe;">
-                <div style="font-size:9px;color:#2563eb;font-weight:700;">你的排名</div>
-                <div style="font-size:11px;font-weight:900;color:#1e40af;" id="lbMyRankTxt"></div>
-            </div>
-            <div id="lbList"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ══ 景点留言 ══ -->
-<div id="cmtModal">
-    <div id="cmtSheet">
-        <div class="cmt-handle"></div>
-        <div class="cmt-hdr">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:13px;font-weight:900;color:#1e293b;" id="cmtPoiName">景点留言</div>
-                <button onclick="document.getElementById('cmtModal').classList.remove('open')" style="width:23px;height:23px;border-radius:50%;background:#f1f5f9;border:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div style="font-size:10px;color:#94a3b8;margin-top:1px;">游客留言板</div>
-        </div>
-        <div id="cmtList"></div>
-        <div class="cmt-input-row">
-            <input id="cmtInput" type="text" maxlength="60" placeholder="留下你的游览感受…（60字内）" style="flex:1;padding:7px 11px;border-radius:11px;border:1.5px solid #e2e8f0;outline:none;font-size:12px;color:#374151;background:#f8fafc;">
-            <button onclick="submitCmt()" style="padding:7px 13px;border-radius:11px;background:#2563eb;color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer;">发送</button>
-        </div>
-    </div>
-</div>
-
-<!-- ══ 活动页 ══ -->
-<div id="activityPage">
-    <div class="act-hdr">
-        <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:18px;">🎪</div>
-            <div>
-                <div style="font-size:16px;font-weight:900;color:#f8fafc;">靖港今日活动</div>
-                <div id="actDateLbl" style="font-size:10px;color:#94a3b8;margin-top:1px;"></div>
-            </div>
-        </div>
-        <button onclick="closeActivityPage()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#e2e8f0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-    </div>
-    <div class="act-filter-row" id="actFilterRow"></div>
-    <div id="actGrid"></div>
-</div>
-
-<!-- 打卡庆祝弹层 -->
-<div id="ciCelebration">
-    <div id="ciToast">
-        <div id="ciToastEmoji" style="font-size:36px;margin-bottom:8px;"></div>
-        <div id="ciToastTitle" style="font-size:15px;font-weight:900;color:#f8fafc;margin-bottom:4px;"></div>
-        <div id="ciToastSub" style="font-size:11px;color:#94a3b8;line-height:1.5;margin-bottom:12px;"></div>
-        <button onclick="document.getElementById('ciCelebration').classList.remove('show')" style="padding:7px 20px;border-radius:12px;background:#2563eb;color:#fff;font-size:12px;font-weight:800;border:none;cursor:pointer;">继续探险 →</button>
-    </div>
-</div>
-
 <!-- Labels -->
 <canvas id="routeLineCanvas"></canvas>
 <canvas id="starsCanvas"></canvas>
@@ -1326,14 +1034,6 @@
         function syncBookmark(poi){
             const btn=document.getElementById('bookmarkBtn');
             btn.classList.toggle('bookmarked',checkinSet.has(poi.id));
-            // 同步客流标签到详情卡
-            const wrap=document.getElementById('detailCrowdWrap');
-            const tag=document.getElementById('detailCrowdTag');
-            if(wrap&&tag){
-                wrap.style.removeProperty('display');
-                tag.className='wait-time-tag '+(poi.currentClass||'time-low');
-                tag.innerHTML=buildCrowdTag(poi.currentClass||'time-low',poi.currentDisplay||'畅通');
-            }
         }
 
         /* ── 演出节目数据 ── */
@@ -1535,18 +1235,7 @@
         updateCrowd();setInterval(updateCrowd,60000);
 
         /* ── Wait Times ── */
-        /* ── 三级客流预警 ── */
-        function getWTC(m){ return m<=15?'time-low':m<=30?'time-med':'time-high'; }
-        function getCrowdLabel(cls){
-            if(cls==='time-low')  return {dot:'🟢', text:'畅通'};
-            if(cls==='time-med')  return {dot:'🟡', text:'适中'};
-            if(cls==='time-high') return {dot:'🔴', text:'拥堵'};
-            return {dot:'⚫', text:'已结束'};
-        }
-        function buildCrowdTag(cls, disp){
-            const cl = getCrowdLabel(cls);
-            return `<span class="crowd-dot"></span>${disp}`;
-        }
+        function getWTC(m){return m<=15?'time-low':m<=30?'time-med':'time-high';}
         function updateWaitTimes(){
             const cur=new Date().getHours()*60+new Date().getMinutes();
             POI_RAW_DATA.forEach(poi=>{
@@ -1556,23 +1245,11 @@
                     for(const t of poi.schedules){const[h,m]=t.split(':').map(Number);if(h*60+m>cur){next=h*60+m;break;}}
                     if(next===-1){disp='今日结束';cls='time-ended';}
                     else{const w=next-cur;disp=`下一场 ${w}min`;cls=getWTC(w);}
-                }else if(poi.baseWaitTime===0){disp='畅通';cls='time-low';}
-                else{const w=Math.max(0,poi.baseWaitTime+Math.floor(Math.sin(cur/5+poi.pos[0])*5));
-                    cls=getWTC(w);
-                    if(cls==='time-low') disp='畅通';
-                    else if(cls==='time-med') disp=`适中 ${w}min`;
-                    else disp=`拥堵 ${w}min`;
-                }
+                }else if(poi.baseWaitTime===0){disp='无需等待';cls='time-low';}
+                else{const w=Math.max(0,poi.baseWaitTime+Math.floor(Math.sin(cur/5+poi.pos[0])*5));disp=`等待 ${w}min`;cls=getWTC(w);}
                 poi.currentDisplay=disp;poi.currentClass=cls;
-                // POI 气泡标签
-                const tag=document.getElementById('wtt-'+poi.id);
-                if(tag){tag.className='wait-time-tag '+cls;tag.innerHTML=buildCrowdTag(cls,disp);}
-                // 侧边栏列表标签
-                const lt=document.getElementById('lst-'+poi.id);
-                if(lt){lt.className='lst-crowd wait-time-tag '+cls;lt.innerHTML=buildCrowdTag(cls,disp);}
-                // 详情卡片（若正在展示该 POI）
-                const dt=document.getElementById('detail-crowd-'+poi.id);
-                if(dt){dt.className='wait-time-tag '+cls;dt.innerHTML=buildCrowdTag(cls,disp);}
+                const tag=document.getElementById('wtt-'+poi.id);if(tag){tag.className='wait-time-tag '+cls;tag.textContent=disp;}
+                const lt=document.getElementById('lst-'+poi.id);if(lt)lt.textContent=disp;
             });
         }
 
@@ -1725,22 +1402,15 @@
                         开始游览 →
                     </button>`;
                 card.onclick=()=>{
-                    const wasActive=card.classList.contains('active');
                     document.querySelectorAll('.route-card').forEach(c=>{
                         c.classList.remove('active');
                         const btn=c.querySelector('.rc-start-btn');
                         if(btn) btn.style.opacity='0';
                     });
-                    if(wasActive){
-                        // 再次点击取消筛选
-                        filterRoutePOIs(null);
-                    } else {
-                        card.classList.add('active');
-                        const btn=card.querySelector('.rc-start-btn');
-                        if(btn) btn.style.opacity='1';
-                        btn.onclick=(e)=>{ e.stopPropagation(); startRoute(r); };
-                        filterRoutePOIs(r);
-                    }
+                    card.classList.add('active');
+                    const btn=card.querySelector('.rc-start-btn');
+                    if(btn) btn.style.opacity='1';
+                    btn.onclick=(e)=>{ e.stopPropagation(); startRoute(r); };
                 };
                 scroll.appendChild(card);
             });
@@ -1999,7 +1669,7 @@
                 const item=document.createElement('div');
                 item.className='flex items-center gap-3 p-2.5 rounded-xl bg-white/50 hover:bg-white cursor-pointer transition';
                 item.onclick=()=>enterDetailMode(poi);
-                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><span id="lst-${poi.id}" class="lst-crowd time-low"><span class="crowd-dot"></span>${poi.currentDisplay||'畅通'}</span></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><div id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
                 list.appendChild(item);
             });
         }
@@ -2828,464 +2498,6 @@
             const sb = document.getElementById('statusBadge');
             if (sb) { sb.textContent = '📍 ' + loc.label; sb.style.color = '#16a34a'; }
             setTimeout(hideLocationModal, 600);
-        }
-
-
-        /* ════════════════════════════
-           ① 打卡纪念邮票
-        ════════════════════════════ */
-        const STAMP_QUOTES = {
-            'vc':'每段旅途，都从踏入这扇门的那一刻开始。','bdw':'三面环水，一碗八味，人间烟火最抚凡心。',
-            'hsjc':'这片土地上，曾有人用血与歌唱出家国情怀。','lcx':'英雄不老，精神永驻，历史在此无声地说话。',
-            'pyx':'一张兽皮，一盏灯光，千年故事在指尖流转。','dpf':'踏过这道门，时光倒流两百年。',
-            'xpf':'古镇之西，是出发，也是归来。','ljg':'登高望远，芦江在脚下蜿蜒，古镇如画卷展开。',
-            'byt':'花鼓声声，茶烟袅袅，岁月在戏台上悄然流淌。','hkjc':'火光与水影交织，那是靖港永恒的浪漫。',
-            'ldy':'光影交错之间，是整个时代的温度与记忆。','ms馆':'八十年代的气息扑面而来，那些年的故事历历在目。',
-            'tcs':'一位母亲，四个儿女，一个信仰，撑起了一段历史。','chmd':'千年漕运从这里起航，码头的石阶见证了无数离合。',
-            'zymd':'古船悠悠，江水潺潺，这是靖港最温柔的呼吸。','hnsy':'红色的火种曾在这里秘密燃起，照亮了黑暗的年代。',
-            'htf':'岁月在青砖上刻下痕迹，繁华与沉寂都成了故事。','ysm':'香火千年不绝，信仰在此无声生长。',
-            'tqg':'叮当声中，是匠人用双手与铁的对话。','edj':'商社故地，见证了靖港昔日的经济繁华。','chy':'泥土的芬芳里，藏着靖港最初的模样。',
-        };
-        function buildSpPerf(id){
-            const el=document.getElementById(id);if(!el)return;el.innerHTML='';
-            for(let i=0;i<16;i++){const h=document.createElement('div');h.className='sp-hole';el.appendChild(h);}
-        }
-        function openStampModal(poi){
-            buildSpPerf('spPerf1');buildSpPerf('spPerf2');
-            document.getElementById('stampImg').src=poi.img||'';
-            document.getElementById('stampTitle').textContent=poi.name;
-            const n=checkinSet.size;
-            document.getElementById('stampSub').textContent='靖港古镇 · 第'+n+'处探索';
-            document.getElementById('stampQuote').textContent='"'+(STAMP_QUOTES[poi.id]||'在靖港古镇，每一处都是一段值得铭记的故事。')+'"';
-            const now=new Date();
-            document.getElementById('stampDate').textContent=now.getFullYear()+'.'+(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getDate().toString().padStart(2,'0');
-            document.getElementById('stampModal').classList.add('open');
-            launchConfetti();
-        }
-        function closeStampModal(){document.getElementById('stampModal').classList.remove('open');}
-        function saveStamp(){alert('纪念卡已生成！长按图片可保存 📸');}
-        function launchConfetti(){
-            const colors=['#2563eb','#7c3aed','#ef4444','#f59e0b','#10b981'];
-            for(let i=0;i<24;i++){
-                const el=document.createElement('div');
-                el.style.cssText='position:fixed;width:'+(5+Math.random()*6)+'px;height:'+(5+Math.random()*6)+'px;background:'+colors[Math.floor(Math.random()*colors.length)]+';left:'+(30+Math.random()*40)+'%;top:'+(15+Math.random()*20)+'%;border-radius:'+(Math.random()>.5?'50%':'2px')+';animation:confFall '+(1.2+Math.random()*1.4)+'s ease-out '+(Math.random()*.4)+'s forwards;pointer-events:none;z-index:999;';
-                document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
-            }
-        }
-
-        /* ════════════════════════════
-           ② 游览报告
-        ════════════════════════════ */
-        const RPT_LEVELS=[
-            {min:0,max:3,label:'🌱 初识靖港'},{min:3,max:7,label:'🚶 古镇漫游'},
-            {min:7,max:12,label:'🏮 水乡探客'},{min:12,max:16,label:'🧭 寻宝达人'},
-            {min:16,max:19,label:'🏯 古镇卫士'},{min:19,max:99,label:'👑 靖港传奇'},
-        ];
-        function showTravelReport(){
-            const n=checkinSet.size,total=POI_RAW_DATA.length;
-            const pct=total>0?Math.round(n/total*100):0;
-            const lv=RPT_LEVELS.find(l=>n>=l.min&&n<l.max)||RPT_LEVELS[RPT_LEVELS.length-1];
-            const now=new Date();
-            document.getElementById('rptTitle').textContent=n===0?'还没有打卡记录':n>=15?'靖港达人！':n>=7?'探索进行中…':'旅途刚刚开始';
-            document.getElementById('rptSub').textContent=(now.getMonth()+1)+'月'+now.getDate()+'日 · 靖港古镇游览报告';
-            document.getElementById('rStatN').textContent=n;
-            document.getElementById('rStatP').textContent=pct+'%';
-            document.getElementById('rStatLv').textContent=lv.label;
-            const el=document.getElementById('rCheckins');el.innerHTML='';
-            if(n===0){el.innerHTML='<span style="font-size:11px;color:#94a3b8;">还没打卡任何景点，快去探索吧！</span>';}
-            else{[...checkinSet].forEach(id=>{const p=POI_RAW_DATA.find(x=>x.id===id);if(!p)return;const c=document.createElement('span');c.className='rpt-chip';c.textContent=p.name;el.appendChild(c);});}
-            document.getElementById('rAiBox').style.display='none';
-            document.getElementById('rAiBtn').style.display=n>0?'block':'none';
-            document.getElementById('reportModal').classList.add('open');
-        }
-        async function genAIReport(){
-            const n=checkinSet.size;
-            const names=[...checkinSet].map(id=>POI_RAW_DATA.find(x=>x.id===id)?.name).filter(Boolean).join('、');
-            const btn=document.getElementById('rAiBtn');btn.textContent='生成中…';btn.disabled=true;
-            try{
-                const res=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer sk-d630efc1a0d04a80a2bd6f9778dd555e'},body:JSON.stringify({model:'deepseek-chat',max_tokens:120,messages:[{role:'user',content:'游客在靖港古镇打卡了'+n+'处景点：'+names+'。用2-3句温暖有趣的话总结他的游览，结尾鼓励下次再来，不超过80字。'}]})});
-                const data=await res.json();
-                const txt=data.choices?.[0]?.message?.content||'今天的靖港之旅充实而美好，期待下次再相遇！';
-                const box=document.getElementById('rAiBox');box.textContent='✨ '+txt;box.style.display='block';
-            }catch(e){const box=document.getElementById('rAiBox');box.textContent='今天的靖港之旅充实而美好，期待下次再相遇！';box.style.display='block';}
-            btn.textContent='✨ AI生成游览总结';btn.disabled=false;
-        }
-
-        /* ════════════════════════════
-           ③ 演出到点提醒
-        ════════════════════════════ */
-        let reminderSet=new Set(JSON.parse(localStorage.getItem('jg_rem')||'[]'));
-        function saveReminders(){localStorage.setItem('jg_rem',JSON.stringify([...reminderSet]));}
-        function toggleReminder(showId){
-            if(reminderSet.has(showId)){reminderSet.delete(showId);}
-            else{
-                reminderSet.add(showId);
-                if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
-                const s=SHOWS.find(x=>x.id===showId);
-                if(s)fireShowToast('已设置提醒：'+s.name+' 开演前15分钟提醒您 ⏰','');
-            }
-            saveReminders();
-            document.querySelectorAll('[data-rem-id="'+showId+'"]').forEach(b=>{b.textContent=reminderSet.has(showId)?'🔔 已提醒':'🔕 提醒';});
-        }
-        function checkReminders(){
-            const now=new Date(),cur=now.getHours()*60+now.getMinutes();
-            reminderSet.forEach(id=>{
-                const s=SHOWS.find(x=>x.id===id);if(!s)return;
-                s.times.forEach(t=>{
-                    const[h,m]=t.split(':').map(Number),diff=h*60+m-cur;
-                    if(diff===15||diff===5){
-                        const key=id+'_'+t+'_'+now.toDateString();
-                        if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');fireShowToast(s.name+' 还有'+diff+'分钟开演！',t+' · '+s.location);if('Notification' in window&&Notification.permission==='granted')new Notification('靖港演出提醒 🎭',{body:s.name+' '+t+'场还有'+diff+'分钟！'});}
-                    }
-                });
-            });
-        }
-        function fireShowToast(name,detail){
-            document.getElementById('toastName').textContent=name;document.getElementById('toastDetail').textContent=detail;
-            const t=document.getElementById('showToast');t.classList.add('on');
-            setTimeout(()=>t.classList.remove('on'),6000);
-        }
-        setInterval(checkReminders,60000);
-
-        /* ════════════════════════════
-           ④ 行程规划器
-        ════════════════════════════ */
-        let planItems=[];
-        function openPlannerPage(){document.getElementById('plannerPage').classList.add('open');buildPlanPoiList();renderPlanSlots();}
-        function closePlannerPage(){document.getElementById('plannerPage').classList.remove('open');}
-        function buildPlanPoiList(){
-            const el=document.getElementById('planPoiList');el.innerHTML='';
-            POI_RAW_DATA.forEach(poi=>{
-                const item=document.createElement('div');
-                item.className='plan-poi-item'+(planItems.includes(poi.id)?' added':'');
-                item.id='ppi_'+poi.id;
-                item.innerHTML='<div style="width:7px;height:7px;border-radius:50%;background:'+poi.color+';flex-shrink:0;"></div><div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+poi.name+'</div><div style="font-size:9px;color:#64748b;">'+poi.type+'</div></div><button onclick="addToPlan(''+poi.id+'')" style="width:20px;height:20px;border-radius:7px;background:rgba(37,99,235,.3);border:none;color:#93c5fd;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>';
-                el.appendChild(item);
-            });
-        }
-        function addToPlan(id){if(planItems.includes(id))return;if(planItems.length>=8){fireShowToast('最多添加8个景点哦 🗺️','');return;}planItems.push(id);document.getElementById('ppi_'+id)?.classList.add('added');renderPlanSlots();}
-        function removeFromPlan(id){planItems=planItems.filter(x=>x!==id);document.getElementById('ppi_'+id)?.classList.remove('added');renderPlanSlots();}
-        function renderPlanSlots(){
-            const sl=document.getElementById('planSlots'),dr=document.getElementById('planDrop'),sb=document.getElementById('planStartBtn');
-            sl.innerHTML='';
-            if(planItems.length===0){dr.style.display='flex';sb.style.display='none';document.getElementById('planSummary').textContent='';return;}
-            dr.style.display='none';sb.style.display='block';
-            let total=0;
-            planItems.forEach((id,i)=>{
-                const p=POI_RAW_DATA.find(x=>x.id===id);if(!p)return;
-                const walk=i===0?0:5;total+=walk+15;
-                const s=document.createElement('div');s.className='plan-slot';
-                s.innerHTML='<div class="plan-slot-n">'+(i+1)+'</div><div style="width:7px;height:7px;border-radius:50%;background:'+p.color+';flex-shrink:0;"></div><div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;color:#f1f5f9;">'+p.name+'</div><div style="font-size:9px;color:#64748b;">'+p.type+(walk>0?' · 步行约'+walk+'分钟':' · 起点')+'</div></div><button class="plan-slot-del" onclick="removeFromPlan(''+id+'')">✕</button>';
-                sl.appendChild(s);
-            });
-            const h=Math.floor(total/60),m=total%60;
-            document.getElementById('planSummary').textContent='约'+(h>0?h+'小时':'')+(m?m+'分钟':'');
-        }
-        function startPlanRoute(){
-            if(planItems.length<2){fireShowToast('至少添加2个景点才能规划路线','');return;}
-            const fakeR={id:'custom',name:'我的行程',icon:'📍',color:'#7c3aed',bg:'#f5f3ff',pois:planItems};
-            closePlannerPage();highlightRoutePOIs(fakeR);
-        }
-
-        /* ════════════════════════════
-           ⑤ 打卡排行榜
-        ════════════════════════════ */
-        async function openLeaderboard(){
-            document.getElementById('lbModal').classList.add('open');
-            document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:28px;color:#94a3b8;font-size:13px;">加载中…</div>';
-            const myN=checkinSet.size;
-            const myKey='visitor_'+(localStorage.getItem('jg_uid')||(()=>{const id=Math.random().toString(36).slice(2,10);localStorage.setItem('jg_uid',id);return id;})());
-            try{
-                await supabaseClient.from('jinggang_leaderboard').upsert([{uid:myKey,count:myN,updated_at:new Date().toISOString()}],{onConflict:'uid'});
-                const{data,error}=await supabaseClient.from('jinggang_leaderboard').select('uid,count').order('count',{ascending:false}).limit(20);
-                if(error)throw error;
-                renderLB(data||[],myKey,myN);
-            }catch(e){renderLB([{uid:myKey,count:myN}],myKey,myN);}
-        }
-        const LB_NICKS=['芦江探险家','水乡行者','古镇漫游者','历史寻踪者','非遗体验官','靖港卫士','码头船长','诗圣脚步','红色寻访','夜游达人','皮影传承人','花鼓听众','八大碗食客','铁艺观察','芦阁守望'];
-        function renderLB(data,myKey,myN){
-            if(!data.find(r=>r.uid===myKey)&&myN>0){data.push({uid:myKey,count:myN});data.sort((a,b)=>b.count-a.count);}
-            const myIdx=data.findIndex(r=>r.uid===myKey);
-            const max=data[0]?.count||1;
-            const rkCls=['g','s','b'],rkIcon=['🥇','🥈','🥉'];
-            const list=document.getElementById('lbList');list.innerHTML='';
-            data.slice(0,15).forEach((row,i)=>{
-                const isMe=row.uid===myKey;
-                const el=document.createElement('div');el.className='lb-row';if(isMe)el.style.background='#eff6ff';
-                const cls=rkCls[i]||'o',icon=rkIcon[i]||(i+1);
-                const name=isMe?'⭐ 你':(LB_NICKS[i]||'探险家'+(i+1));
-                const pct=Math.round(row.count/max*100);
-                el.innerHTML='<div class="lb-rank '+cls+'">'+icon+'</div><div class="lb-name" style="color:'+(isMe?'#2563eb':'#1e293b')+';font-weight:'+(isMe?900:700)+';">'+name+'</div><div class="lb-bar-w"><div class="lb-bar-f" style="width:'+pct+'%;background:'+(isMe?'linear-gradient(90deg,#2563eb,#7c3aed)':'#cbd5e1')+';"></div></div><div class="lb-cnt" style="color:'+(isMe?'#2563eb':'#475569')+';">'+row.count+'</div>';
-                list.appendChild(el);
-            });
-            const mr=document.getElementById('lbMyRank'),mt=document.getElementById('lbMyRankTxt');
-            if(myN>0&&myIdx>=0){mr.style.display='block';mt.textContent='第'+(myIdx+1)+'名 · 已打卡'+myN+'处景点';}else{mr.style.display='none';}
-            document.getElementById('lbSub').textContent='共'+data.length+'位探险家';
-        }
-
-        /* ════════════════════════════
-           ⑥ 景点留言
-        ════════════════════════════ */
-        const CMT_COLORS=['#ef4444','#f59e0b','#10b981','#2563eb','#7c3aed','#ec4899','#0ea5e9','#84cc16'];
-        const CMT_NICKS=['芦江行者','水乡游客','古镇探客','历史寻踪','文化爱好者','非遗传承','古建迷','靖港打卡人'];
-        async function openCommentModal(){
-            if(!currentDetailPOI)return;
-            document.getElementById('cmtPoiName').textContent='📍 '+currentDetailPOI.name+' · 留言';
-            document.getElementById('cmtInput').value='';
-            document.getElementById('cmtModal').classList.add('open');
-            await loadCmts(currentDetailPOI.id);
-        }
-        async function loadCmts(poiId){
-            const el=document.getElementById('cmtList');el.innerHTML='<div style="text-align:center;padding:18px;color:#94a3b8;font-size:12px;">加载中…</div>';
-            try{
-                const{data,error}=await supabaseClient.from('jinggang_comments').select('content,created_at,nick_idx,color_idx').eq('poi_id',poiId).order('created_at',{ascending:false}).limit(30);
-                if(error)throw error;
-                renderCmts(data||[]);
-            }catch(e){el.innerHTML='<div style="text-align:center;padding:18px;color:#94a3b8;font-size:12px;">暂无留言，来第一个说说吧！</div>';}
-        }
-        function renderCmts(cmts){
-            const el=document.getElementById('cmtList');
-            if(cmts.length===0){el.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">暂无留言，来第一个说说吧！✍️</div>';return;}
-            el.innerHTML='';
-            cmts.forEach(c=>{
-                const ci=c.color_idx||0,ni=c.nick_idx||0;
-                const dt=new Date(c.created_at),ts=(dt.getMonth()+1)+'月'+dt.getDate()+'日';
-                const div=document.createElement('div');div.className='cmt-item';
-                div.innerHTML='<div class="cmt-av" style="background:'+CMT_COLORS[ci%CMT_COLORS.length]+';">'+CMT_NICKS[ni%CMT_NICKS.length][0]+'</div><div style="flex:1;min-width:0;"><div class="cmt-nick">'+CMT_NICKS[ni%CMT_NICKS.length]+'</div><div class="cmt-txt">'+c.content+'</div><div class="cmt-time">'+ts+'</div></div>';
-                el.appendChild(div);
-            });
-        }
-        async function submitCmt(){
-            if(!currentDetailPOI)return;
-            const inp=document.getElementById('cmtInput'),txt=inp.value.trim();
-            if(!txt)return;
-            if(txt.length>60){fireShowToast('留言不超过60字哦 ✍️','');return;}
-            const ci=Math.floor(Math.random()*CMT_COLORS.length),ni=Math.floor(Math.random()*CMT_NICKS.length);
-            inp.value='';
-            try{await supabaseClient.from('jinggang_comments').insert([{poi_id:currentDetailPOI.id,content:txt,color_idx:ci,nick_idx:ni,created_at:new Date().toISOString()}]);}catch(e){}
-            await loadCmts(currentDetailPOI.id);
-        }
-
-        /* ════════════════════════════
-           toggleBookmark 增强：打卡成功后弹纪念卡
-        ════════════════════════════ */
-        const _origToggleBookmark = toggleBookmark;
-        // 覆写 toggleBookmark
-        function toggleBookmark(){
-            if(!currentDetailPOI)return;
-            const btn=document.getElementById('bookmarkBtn'),id=currentDetailPOI.id;
-            const wasIn=checkinSet.has(id);
-            if(wasIn){checkinSet.delete(id);btn.classList.remove('bookmarked');}
-            else{
-                checkinSet.add(id);btn.classList.add('bookmarked','pop');
-                setTimeout(()=>btn.classList.remove('pop'),400);
-                setTimeout(()=>openStampModal(currentDetailPOI),500);
-            }
-            saveCheckin();updateCheckinUI();
-        }
-
-        /* ════════════════════════════
-           showPickerDrawer：为演出卡加"提醒"按钮
-        ════════════════════════════ */
-        const _origBuildShowPicker = buildShowPicker;
-        function buildShowPicker(){
-            _origBuildShowPicker();
-            // 为每个 show-item 追加提醒按钮
-            document.querySelectorAll('.show-item').forEach(item=>{
-                const sid=item.id.replace('si_','');
-                if(!sid||item.querySelector('[data-rem-id]'))return;
-                const btn=document.createElement('button');
-                btn.setAttribute('data-rem-id',sid);
-                btn.textContent=reminderSet.has(sid)?'🔔 已提醒':'🔕 提醒';
-                btn.style.cssText='margin-top:6px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(37,99,235,.08);color:#2563eb;border:1px solid rgba(37,99,235,.2);cursor:pointer;';
-                btn.onclick=(e)=>{e.stopPropagation();toggleReminder(sid);};
-                item.appendChild(btn);
-            });
-        }
-
-
-        /* ── 路线 POI 筛选 ── */
-        function filterRoutePOIs(route){
-            if(!route){
-                labels.forEach(lb=>{ lb.element.classList.remove('route-dim','route-show'); });
-                return;
-            }
-            const set=new Set(route.pois);
-            labels.forEach(lb=>{
-                if(set.has(lb.data.id)){
-                    lb.element.classList.remove('route-dim');
-                    lb.element.classList.add('route-show');
-                } else {
-                    lb.element.classList.remove('route-show');
-                    lb.element.classList.add('route-dim');
-                }
-            });
-        }
-
-        /* ── 活动页 ── */
-        const ACT_CATS = ['全部','演艺','非遗','红色','体验'];
-        const ACT_CAT_MAP = {
-            '演艺':['hkjg','mqg','hgx','bdw','htf2','vc2'],
-            '非遗':['pyx','tqg','chy'],
-            '红色':['tcs','lcx','hnsy2'],
-            '体验':['ms80','ldy','zymd','ysm2'],
-        };
-        let actCatFilter='全部';
-
-        function openActivityPage(){
-            const page=document.getElementById('activityPage');
-            page.classList.add('open');
-            const now=new Date();
-            const days=['日','一','二','三','四','五','六'];
-            document.getElementById('actDateLbl').textContent=
-                (now.getMonth()+1)+'月'+now.getDate()+'日 · 星期'+days[now.getDay()]+' · 09:00–22:00 开放';
-            buildActFilters();
-            buildActGrid('全部');
-        }
-        function closeActivityPage(){
-            document.getElementById('activityPage').classList.remove('open');
-            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-            document.getElementById('navSpots').classList.add('active');
-        }
-        function buildActFilters(){
-            const row=document.getElementById('actFilterRow');row.innerHTML='';
-            ACT_CATS.forEach(cat=>{
-                const btn=document.createElement('button');
-                btn.className='act-flt'+(cat==='全部'?' on':'');
-                btn.textContent=cat;
-                btn.onclick=()=>{
-                    document.querySelectorAll('.act-flt').forEach(b=>b.classList.remove('on'));
-                    btn.classList.add('on');
-                    buildActGrid(cat);
-                };
-                row.appendChild(btn);
-            });
-        }
-        function getShowActStatus(show,cur){
-            const times=show.times.map(t=>{const[h,m]=t.split(':').map(Number);return h*60+m;});
-            for(const tm of times){
-                if(cur>=tm&&cur<tm+60) return {order:0,cls:'act-status-now',lbl:'进行中',next:'正在进行！'};
-                if(tm>cur){const d=tm-cur;if(d<=30)return{order:1,cls:'act-status-soon',lbl:'即将开始',next:`${d}分钟后开始`};return{order:2,cls:'act-status-done',lbl:show.times[0]+'场',next:`下一场 ${show.times.find(t=>{const[h,m]=t.split(':').map(Number);return h*60+m>cur;})}`};}
-            }
-            return{order:3,cls:'act-status-done',lbl:'今日结束',next:null};
-        }
-        function buildActGrid(cat){
-            const grid=document.getElementById('actGrid');grid.innerHTML='';
-            const cur=new Date().getHours()*60+new Date().getMinutes();
-            let list=[...SHOWS];
-            if(cat!=='全部'){const ids=ACT_CAT_MAP[cat]||[];list=list.filter(s=>ids.includes(s.id));}
-            list=list.sort((a,b)=>getShowActStatus(a,cur).order-getShowActStatus(b,cur).order);
-            list.forEach(show=>{
-                const st=getShowActStatus(show,cur);
-                const card=document.createElement('div');card.className='act-card';
-                const chips=show.times.map(t=>{
-                    const[h,m]=t.split(':').map(Number),tm=h*60+m;
-                    const isNow=cur>=tm&&cur<tm+60;
-                    return `<span class="act-time-chip${isNow?' now-chip':''}">${t}</span>`;
-                }).join('');
-                const remActive=reminderSet&&reminderSet.has(show.id);
-                card.innerHTML=`
-                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-                        <div style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;">
-                            <div style="width:38px;height:38px;border-radius:11px;background:${show.color}22;border:1px solid ${show.color}44;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${show.icon}</div>
-                            <div style="min-width:0;"><div style="font-size:13px;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${show.name}</div><div style="font-size:10px;color:#94a3b8;margin-top:1px;">📍 ${show.location}</div></div>
-                        </div>
-                        <span class="${st.cls}">${st.lbl}</span>
-                    </div>
-                    <div style="font-size:11px;color:#94a3b8;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${show.desc}</div>
-                    <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-                        <span style="font-size:9px;color:#64748b;margin-right:2px;">场次：</span>${chips}
-                    </div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;">
-                        ${st.next?`<div style="font-size:10px;color:${st.order===0?'#4ade80':'#fbbf24'};font-weight:700;">⏱ ${st.next}</div>`:'<div></div>'}
-                        <button class="act-rem-btn${remActive?' active':''}" data-rem-id="${show.id}" onclick="event.stopPropagation();toggleReminder('${show.id}');this.classList.toggle('active');this.textContent=reminderSet.has('${show.id}')?'🔔 已提醒':'🔕 提醒';">${remActive?'🔔 已提醒':'🔕 提醒'}</button>
-                    </div>`;
-                card.onclick=()=>{ selectShow(show.id); closeActivityPage(); };
-                grid.appendChild(card);
-            });
-            if(list.length===0) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b;font-size:13px;">该分类暂无活动</div>';
-        }
-
-        /* ── 趣味打卡进度（探险等级系统） ── */
-        const CI_LEVELS=[
-            {min:0, max:3, label:'🌱 初识靖港', color:'#16a34a', g1:'#86efac', g2:'#22c55e'},
-            {min:3, max:7, label:'🚶 古镇漫游', color:'#0ea5e9', g1:'#7dd3fc', g2:'#0ea5e9'},
-            {min:7, max:12,label:'🏮 水乡探客', color:'#7c3aed', g1:'#a78bfa', g2:'#7c3aed'},
-            {min:12,max:16,label:'🧭 寻宝达人', color:'#f59e0b', g1:'#fde68a', g2:'#f59e0b'},
-            {min:16,max:19,label:'🏯 古镇卫士', color:'#dc2626', g1:'#fca5a5', g2:'#dc2626'},
-            {min:19,max:99,label:'👑 靖港传奇', color:'#7c2d12', g1:'#fb923c', g2:'#7c2d12'},
-        ];
-        const CI_MILESTONES=[3,7,12,16,19,20];
-        const CI_BADGE_ICONS=['🌿','🔥','💎','⚔️','🏯','👑'];
-
-        function updateCheckinUI(){
-            const n=checkinSet.size, total=POI_RAW_DATA.length;
-            document.getElementById('checkinCount').textContent=n;
-            document.getElementById('ciTotal').textContent=total;
-            // 等级
-            const lv=CI_LEVELS.find(l=>n>=l.min&&n<l.max)||CI_LEVELS[CI_LEVELS.length-1];
-            document.getElementById('ciLevelLabel').textContent=lv.label;
-            document.getElementById('ciLevelLabel').style.color=lv.color;
-            // 经验条
-            const pct=total>0?Math.round(n/total*100):0;
-            const fill=document.getElementById('ciLevelFill');
-            if(fill){fill.style.width=pct+'%';fill.style.background=`linear-gradient(90deg,${lv.g1},${lv.g2})`;}
-            // 里程碑徽章
-            const badgeRow=document.getElementById('ciBadgeRow');
-            if(badgeRow){
-                badgeRow.innerHTML='';
-                CI_MILESTONES.forEach((ms,i)=>{
-                    const earned=n>=ms;
-                    const b=document.createElement('div');b.className='ci-badge'+(earned?' earned':'');
-                    b.textContent=CI_BADGE_ICONS[i];b.title='解锁'+ms+'个景点';
-                    b.style.cssText=earned
-                        ?`background:${lv.color}22;border-color:${lv.color};box-shadow:0 0 7px ${lv.color}44;`
-                        :'background:#f1f5f9;border-color:#e2e8f0;opacity:.35;filter:grayscale(1);';
-                    badgeRow.appendChild(b);
-                });
-            }
-            // 最近打卡
-            const recent=document.getElementById('ciRecentRow');
-            if(recent){
-                recent.innerHTML='';
-                if(checkinSet.size===0){recent.innerHTML='<span style="font-size:9px;color:#cbd5e1;">点击景点打卡吧！</span>';return;}
-                [...checkinSet].slice(-4).reverse().forEach(id=>{
-                    const p=POI_RAW_DATA.find(x=>x.id===id);if(!p)return;
-                    const d=document.createElement('div');d.className='ci-recent-dot';
-                    d.style.background=p.color;d.title=p.name;d.textContent=p.name[0];
-                    recent.appendChild(d);
-                });
-            }
-        }
-
-        function showCiCelebration(poi){
-            const n=checkinSet.size;
-            const isMilestone=CI_MILESTONES.includes(n);
-            const lv=CI_LEVELS.find(l=>n>=l.min&&n<l.max)||CI_LEVELS[CI_LEVELS.length-1];
-            const cel=document.getElementById('ciCelebration');
-            const emojis=['🎊','✨','🎉','⭐','🌟','🎆'];
-            document.getElementById('ciToastEmoji').textContent=isMilestone?'🏆':emojis[Math.floor(Math.random()*emojis.length)];
-            document.getElementById('ciToastTitle').textContent=isMilestone?'解锁成就！':'打卡成功！';
-            document.getElementById('ciToastSub').textContent=isMilestone
-                ?`${lv.label} · 已解锁${n}处景点，继续探险！`
-                :`${poi.name} · 共打卡${n}处景点`;
-            cel.classList.add('show');
-            cel.onclick=()=>cel.classList.remove('show');
-            setTimeout(()=>cel.classList.remove('show'),isMilestone?3500:2000);
-        }
-
-        /* 覆盖 toggleBookmark 加庆祝动画 */
-        function toggleBookmark(){
-            if(!currentDetailPOI)return;
-            const btn=document.getElementById('bookmarkBtn'),id=currentDetailPOI.id;
-            const wasIn=checkinSet.has(id);
-            if(wasIn){checkinSet.delete(id);btn.classList.remove('bookmarked');}
-            else{
-                checkinSet.add(id);btn.classList.add('bookmarked','pop');
-                setTimeout(()=>btn.classList.remove('pop'),400);
-                setTimeout(()=>{openStampModal(currentDetailPOI);showCiCelebration(currentDetailPOI);},400);
-            }
-            saveCheckin();updateCheckinUI();
         }
 
         window.onload = init;
