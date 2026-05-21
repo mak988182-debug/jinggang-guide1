@@ -482,6 +482,343 @@
             border-color: #93c5fd;
             background: #eff6ff;
         }
+
+        /* ══ 人流预警徽章 ══ */
+        .crowd-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 9px; font-weight: 800; padding: 2px 7px;
+            border-radius: 20px; flex-shrink: 0;
+        }
+        .crowd-badge::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            display: inline-block; animation: pulseDot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:.5; transform:scale(1.4); }
+        }
+        .crowd-green  { background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0; }
+        .crowd-green::before  { background:#22c55e; }
+        .crowd-yellow { background:#fef9c3; color:#ca8a04; border:1px solid #fde047; }
+        .crowd-yellow::before { background:#f59e0b; animation-duration:1.2s; }
+        .crowd-red    { background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; }
+        .crowd-red::before    { background:#ef4444; animation-duration:.8s; }
+
+        /* ══ 活动页面 ══ */
+        #activityPage {
+            position: fixed; inset: 0; z-index: 200;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            display: none; flex-direction: column; overflow: hidden;
+            animation: pageSlideIn .35s cubic-bezier(.4,0,.2,1) both;
+        }
+        #activityPage.open { display: flex; }
+        @keyframes pageSlideIn {
+            from { opacity:0; transform:translateX(100%); }
+            to   { opacity:1; transform:translateX(0); }
+        }
+        @keyframes pageSlideOut {
+            from { opacity:1; transform:translateX(0); }
+            to   { opacity:0; transform:translateX(100%); }
+        }
+        #activityPage.closing { animation: pageSlideOut .3s cubic-bezier(.4,0,.2,1) both; }
+        .act-header {
+            padding: 20px 24px 16px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0; display: flex; align-items: center; gap: 16px;
+        }
+        .act-back-btn {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: white; flex-shrink: 0; transition: all .2s;
+        }
+        .act-back-btn:hover { background: rgba(255,255,255,0.18); transform: translateX(-2px); }
+        .act-scroll { flex:1; overflow-y: auto; padding: 16px 20px 24px; }
+        .act-scroll::-webkit-scrollbar { width: 3px; }
+        .act-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius:3px; }
+        .act-tabs { display: flex; gap: 6px; margin-bottom: 16px; padding: 4px;
+            background: rgba(255,255,255,0.06); border-radius: 12px; flex-shrink: 0; }
+        .act-tab { flex: 1; padding: 8px 0; border-radius: 9px; font-size: 12px;
+            font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; text-align: center; transition: all .2s; }
+        .act-tab.active { background: rgba(255,255,255,0.15); color: white; }
+        .act-card { border-radius: 20px; overflow: hidden; margin-bottom: 12px;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: all .22s; }
+        .act-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+        .act-card-header { padding: 16px 16px 12px; display: flex; align-items: flex-start; gap: 14px; }
+        .act-card-icon { width: 52px; height: 52px; border-radius: 16px; display: flex;
+            align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .act-card-body { flex:1; min-width:0; }
+        .act-tag { display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; }
+        .act-footer { padding: 10px 16px 14px; display: flex; align-items: center;
+            gap: 8px; border-top: 1px solid rgba(255,255,255,0.07); }
+        .act-stat { display: flex; align-items: center; gap: 4px;
+            font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 600; }
+        .act-register-btn { margin-left: auto; padding: 6px 16px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; cursor: pointer; transition: all .2s; border: 1.5px solid; flex-shrink: 0; }
+        .act-register-btn:active { transform: scale(.95); }
+        .act-banner { border-radius: 20px; overflow: hidden; margin-bottom: 16px;
+            background: linear-gradient(135deg, #7c3aed, #2563eb); padding: 20px; position: relative; }
+        .act-banner::after { content: ''; position: absolute; right: -20px; top: -20px;
+            width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+
+        /* ══ 趣味打卡进度 ══ */
+        #checkinSection { cursor: pointer; }
+        .ci-xp-bar { height: 5px; border-radius: 3px; background: #e2e8f0; overflow: hidden; margin-top: 2px; }
+        .ci-xp-fill { height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            transition: width .8s cubic-bezier(.4,0,.2,1); }
+        .ci-title-badge { display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 900; padding: 2px 7px; border-radius: 20px; }
+        @keyframes levelUp { 0%{transform:scale(1)} 30%{transform:scale(1.5) rotate(-5deg)} 60%{transform:scale(.9) rotate(3deg)} 100%{transform:scale(1) rotate(0)} }
+        .level-up-anim { animation: levelUp .5s cubic-bezier(.175,.885,.32,1.275) both; }
+        #checkinDetailModal { position: fixed; inset: 0; z-index: 100; display: none;
+            align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+        #checkinDetailModal.open { display: flex; }
+        #checkinDetailInner { width: 100%; max-width: 520px; border-radius: 28px 28px 0 0;
+            background: white; padding: 24px 20px 32px;
+            animation: sheetUp .35s cubic-bezier(.4,0,.2,1) both; max-height: 80vh; overflow-y: auto; }
+        @keyframes sheetUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+        .ci-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 12px; }
+        .ci-grid-dot { aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            font-size: 8px; font-weight: 700; cursor: pointer; transition: all .2s; border: 1.5px solid; }
+        .ci-grid-dot.done { background: #2563eb; color: white; border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+        .ci-grid-dot.undone { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
+        .ci-grid-dot.undone:hover { border-color: #2563eb; color: #2563eb; }
+        .achievement-badge { display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 14px; margin-bottom: 8px; border: 1px solid; }
+        .ach-icon { font-size: 22px; flex-shrink:0; }
+        .ach-locked { filter: grayscale(1) opacity(.4); }
+
+        /* ══ 游客弹幕 Toast ══ */
+        .visitor-toast {
+            position: fixed; z-index: 45; pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.8); border-radius: 30px;
+            padding: 6px 14px 6px 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            font-size: 11px; color: #1e293b; font-weight: 600; white-space: nowrap;
+            animation: toastIn .4s cubic-bezier(.175,.885,.32,1.275) both,
+                       toastOut .4s ease 3.6s both;
+        }
+        @keyframes toastIn  { from{opacity:0;transform:translateY(12px) scale(.9)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes toastOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-8px)} }
+        .visitor-toast .vt-avatar { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+
+        /* ══ 智能推荐提示条 ══ */
+        #smartTipBar {
+            position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            z-index: 50; display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(16px);
+            border: 1px solid rgba(37,99,235,0.2); border-radius: 16px;
+            padding: 9px 14px; box-shadow: 0 8px 28px rgba(37,99,235,0.15);
+            font-size: 11px; color: #1e293b; font-weight: 700;
+            transition: transform .4s cubic-bezier(.175,.885,.32,1.275), opacity .4s;
+            opacity: 0; pointer-events: none; max-width: 340px;
+        }
+        #smartTipBar.visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+        #smartTipBar .stb-dot { width:8px; height:8px; border-radius:50%; background:#2563eb; flex-shrink:0; animation:pulseDot 1.4s ease-in-out infinite; }
+
+        /* ══ 路线卡片 POI 预览徽章 ══ */
+        .rc-poi-chips { display:flex; gap:3px; flex-wrap:wrap; margin-top:4px; }
+        .rc-poi-chip { font-size:8px; font-weight:700; padding:1px 5px; border-radius:8px;
+            background:rgba(0,0,0,0.06); color:#64748b; white-space:nowrap; }
+
+        /* ══ 景点心情标签 ══ */
+        .mood-tag { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:800;
+            padding:2px 7px; border-radius:20px; }
+
+        /* ══ 今日精选横幅 ══ */
+        #todayPickBanner {
+            position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%) translateY(40px);
+            z-index: 44; opacity: 0; pointer-events: none;
+            transition: all .45s cubic-bezier(.175,.885,.32,1.275);
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg,#7c3aed,#2563eb);
+            border-radius: 18px; padding: 10px 16px;
+            box-shadow: 0 12px 32px rgba(124,58,237,0.4);
+            max-width: 300px; cursor: pointer;
+        }
+        #todayPickBanner.visible { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+        </style>
+        .crowd-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 9px; font-weight: 800; padding: 2px 7px;
+            border-radius: 20px; flex-shrink: 0;
+        }
+        .crowd-badge::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            display: inline-block; animation: pulseDot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:.5; transform:scale(1.4); }
+        }
+        .crowd-green  { background:#dcfce7; color:#16a34a; border:1px solid #bbf7d0; }
+        .crowd-green::before  { background:#22c55e; }
+        .crowd-yellow { background:#fef9c3; color:#ca8a04; border:1px solid #fde047; }
+        .crowd-yellow::before { background:#f59e0b; animation-duration:1.2s; }
+        .crowd-red    { background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; }
+        .crowd-red::before    { background:#ef4444; animation-duration:.8s; }
+
+        /* ══ 活动页面 ══ */
+        #activityPage {
+            position: fixed; inset: 0; z-index: 200;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            display: none; flex-direction: column; overflow: hidden;
+            animation: pageSlideIn .35s cubic-bezier(.4,0,.2,1) both;
+        }
+        #activityPage.open { display: flex; }
+        @keyframes pageSlideIn {
+            from { opacity:0; transform:translateX(100%); }
+            to   { opacity:1; transform:translateX(0); }
+        }
+        @keyframes pageSlideOut {
+            from { opacity:1; transform:translateX(0); }
+            to   { opacity:0; transform:translateX(100%); }
+        }
+        #activityPage.closing { animation: pageSlideOut .3s cubic-bezier(.4,0,.2,1) both; }
+
+        .act-header {
+            padding: 20px 24px 16px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .act-back-btn {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: white; flex-shrink: 0; transition: all .2s;
+        }
+        .act-back-btn:hover { background: rgba(255,255,255,0.18); transform: translateX(-2px); }
+
+        .act-scroll { flex:1; overflow-y: auto; padding: 16px 20px 24px; }
+        .act-scroll::-webkit-scrollbar { width: 3px; }
+        .act-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius:3px; }
+
+        .act-tabs {
+            display: flex; gap: 6px; margin-bottom: 16px;
+            padding: 4px; background: rgba(255,255,255,0.06);
+            border-radius: 12px; flex-shrink: 0;
+        }
+        .act-tab {
+            flex: 1; padding: 8px 0; border-radius: 9px; font-size: 12px;
+            font-weight: 700; color: rgba(255,255,255,0.5); cursor: pointer; text-align: center;
+            transition: all .2s;
+        }
+        .act-tab.active { background: rgba(255,255,255,0.15); color: white; }
+
+        .act-card {
+            border-radius: 20px; overflow: hidden; margin-bottom: 12px;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: all .22s;
+        }
+        .act-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+        .act-card-header { padding: 16px 16px 12px; display: flex; align-items: flex-start; gap: 14px; }
+        .act-card-icon {
+            width: 52px; height: 52px; border-radius: 16px; display: flex;
+            align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
+        }
+        .act-card-body { flex:1; min-width:0; }
+        .act-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 800; padding: 2px 8px;
+            border-radius: 20px; margin-bottom: 6px;
+        }
+        .act-footer {
+            padding: 10px 16px 14px; display: flex; align-items: center;
+            gap: 8px; border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .act-stat {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 600;
+        }
+        .act-register-btn {
+            margin-left: auto; padding: 6px 16px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; cursor: pointer; transition: all .2s;
+            border: 1.5px solid; flex-shrink: 0;
+        }
+        .act-register-btn:active { transform: scale(.95); }
+
+        .act-banner {
+            border-radius: 20px; overflow: hidden; margin-bottom: 16px;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            padding: 20px; position: relative;
+        }
+        .act-banner::after {
+            content: ''; position: absolute; right: -20px; top: -20px;
+            width: 140px; height: 140px; border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ══ 趣味打卡进度 ══ */
+        #checkinSection { cursor: pointer; }
+        .ci-xp-bar {
+            height: 5px; border-radius: 3px; background: #e2e8f0; overflow: hidden; margin-top: 2px;
+        }
+        .ci-xp-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            transition: width .8s cubic-bezier(.4,0,.2,1);
+        }
+        .ci-title-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 900; padding: 2px 7px; border-radius: 20px;
+        }
+        @keyframes levelUp {
+            0%   { transform: scale(1); }
+            30%  { transform: scale(1.5) rotate(-5deg); }
+            60%  { transform: scale(.9) rotate(3deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        .level-up-anim { animation: levelUp .5s cubic-bezier(.175,.885,.32,1.275) both; }
+
+        /* 打卡详情弹窗 */
+        #checkinDetailModal {
+            position: fixed; inset: 0; z-index: 100; display: none;
+            align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(6px);
+        }
+        #checkinDetailModal.open { display: flex; }
+        #checkinDetailInner {
+            width: 100%; max-width: 520px; border-radius: 28px 28px 0 0;
+            background: white; padding: 24px 20px 32px;
+            animation: sheetUp .35s cubic-bezier(.4,0,.2,1) both;
+            max-height: 80vh; overflow-y: auto;
+        }
+        @keyframes sheetUp {
+            from { transform: translateY(100%); opacity:0; }
+            to   { transform: translateY(0); opacity:1; }
+        }
+        .ci-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 12px; }
+        .ci-grid-dot {
+            aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            font-size: 8px; font-weight: 700; cursor: pointer; transition: all .2s;
+            border: 1.5px solid;
+        }
+        .ci-grid-dot.done { background: #2563eb; color: white; border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+        .ci-grid-dot.undone { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
+        .ci-grid-dot.undone:hover { border-color: #2563eb; color: #2563eb; }
+
+        /* 成就徽章 */
+        .achievement-badge {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 14px; margin-bottom: 8px;
+            border: 1px solid;
+        }
+        .ach-icon { font-size: 22px; flex-shrink:0; }
+        .ach-locked { filter: grayscale(1) opacity(.4); }
         </style>
 </head>
 <body class="mode-explorer">
@@ -562,7 +899,7 @@
         <div class="nav-btn" id="navRoute" onclick="navClick('navRoute', ()=>showSideList())">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>路线
         </div>
-        <div class="nav-btn" id="navActivity" onclick="navClick('navActivity', ()=>showSideList())">
+        <div class="nav-btn" id="navActivity" onclick="openActivityPage()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>活动
         </div>
         <div class="nav-btn" id="navDayNight" onclick="toggleDayNight()" title="切换昼夜模式">
@@ -629,19 +966,19 @@
                 </button>
             </div>
             <div class="text-xs font-black text-slate-700">选择路线</div>
-            <div class="text-[10px] text-blue-500 font-semibold">开启游览 →</div>
+            <div class="text-[10px] text-blue-500 font-semibold">点击筛选景点 →</div>
         </div>
         <div id="routeScroll" class="no-scrollbar"></div>
     </div>
 
     <!-- 打卡区 -->
-    <div id="checkinSection" class="g">
+    <div id="checkinSection" class="g" onclick="openCheckinDetail()">
         <div class="flex items-center justify-between">
             <div class="text-xs font-black text-slate-700 flex items-center gap-1.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                打卡进度
+                <span id="checkinTitleEmoji" style="font-size:13px;">🧭</span>
+                <span id="checkinTitleText">探索者</span>
             </div>
-            <button class="fold-btn" onclick="togglePanel('checkinSection','bottom')" title="收起打卡">
+            <button class="fold-btn" onclick="event.stopPropagation();togglePanel('checkinSection','bottom')" title="收起打卡">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
         </div>
@@ -657,8 +994,12 @@
                 </div>
             </div>
             <div class="flex-1 min-w-0">
-                <div class="text-[10px] text-slate-400 mb-1">已点亮 <strong id="checkinText" class="text-slate-700">0</strong>/20 个景点</div>
-                <div class="flex gap-1" id="checkinDots"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                    <span id="checkinTitleBadge" class="ci-title-badge" style="background:#dbeafe;color:#2563eb;">🗺️ 初入古镇</span>
+                    <span style="font-size:9px;color:#94a3b8;font-weight:600;" id="checkinPctText">0%</span>
+                </div>
+                <div class="ci-xp-bar"><div class="ci-xp-fill" id="ciXpFill" style="width:0%"></div></div>
+                <div style="font-size:9px;color:#94a3b8;margin-top:3px;">已探索 <strong id="checkinText" class="text-slate-600">0</strong>/20 · 点击查看成就</div>
             </div>
         </div>
     </div>
@@ -729,6 +1070,7 @@
                 <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span id="detailBadge" class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full">文化地标</span>
                     <span id="detailWaitTime" class="bg-green-50 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full">无需等待</span>
+                    <span id="detailCrowdBadge" class="crowd-badge crowd-green">畅游</span>
                 </div>
                 <!-- 距离/时间行 -->
                 <div id="distanceBar" class="hidden mt-2 flex items-center gap-3 text-[11px]">
@@ -911,6 +1253,88 @@
     </div>
 </div>
 
+<!-- ══ 智能推荐提示条 ══ -->
+<div id="smartTipBar">
+    <div class="stb-dot"></div>
+    <span>正在分析最佳路线…</span>
+</div>
+
+<!-- ══ 今日精选浮动横幅 ══ -->
+<div id="todayPickBanner" onclick="goTodayPick()">
+    <div style="font-size:26px;flex-shrink:0;">🎑</div>
+    <div>
+        <div style="font-size:9px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:2px;">✨ 今日精选 · 人流较少</div>
+        <div style="font-size:13px;font-weight:900;color:white;">皮影戏体验馆</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);">现在去，零等待 · 点击前往 →</div>
+    </div>
+</div>
+
+<!-- ══ 活动页面 ══ -->
+<div id="activityPage">
+    <div class="act-header">
+        <button class="act-back-btn" onclick="closeActivityPage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div>
+            <div style="font-size:18px;font-weight:900;color:white;line-height:1.2">靖港活动中心</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">发现精彩，感受文化</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulseDot 1.2s ease-in-out infinite;"></div>
+            <span style="font-size:11px;color:#4ade80;font-weight:700;">实时更新</span>
+        </div>
+    </div>
+
+    <div class="act-scroll">
+        <!-- 横幅 -->
+        <div class="act-banner">
+            <div style="position:relative;z-index:1;">
+                <div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🎉 本周重磅推荐</div>
+                <div style="font-size:20px;font-weight:900;color:white;line-height:1.3;margin-bottom:8px;">湖湘非遗文化节<br>暨靖港古镇嘉年华</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.7);">📅 2025.06.20 — 06.29 · 全天开放</div>
+                <div style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:20px;cursor:pointer;">
+                    <span style="font-size:11px;font-weight:800;color:white;">查看详情</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签筛选 -->
+        <div class="act-tabs" id="actTabs">
+            <div class="act-tab active" onclick="switchActTab('全部',this)">全部</div>
+            <div class="act-tab" onclick="switchActTab('民俗',this)">民俗</div>
+            <div class="act-tab" onclick="switchActTab('演艺',this)">演艺</div>
+            <div class="act-tab" onclick="switchActTab('体验',this)">体验</div>
+            <div class="act-tab" onclick="switchActTab('亲子',this)">亲子</div>
+        </div>
+
+        <!-- 活动列表 -->
+        <div id="activityList"></div>
+    </div>
+</div>
+
+<!-- ══ 打卡详情弹窗 ══ -->
+<div id="checkinDetailModal" onclick="closeCheckinDetail(event)">
+    <div id="checkinDetailInner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="font-size:16px;font-weight:900;color:#1e293b;">🗺️ 我的探索地图</div>
+            <button onclick="closeCheckinDetail()" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div id="checkinRankLabel" style="font-size:11px;color:#64748b;margin-bottom:14px;"></div>
+
+        <!-- 成就区 -->
+        <div style="margin-bottom:14px;" id="achievementSection"></div>
+
+        <!-- 景点格子 -->
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;">景点打卡进度（点击景点进入详情）</div>
+        <div class="ci-grid" id="checkinGrid"></div>
+
+        <button onclick="closeCheckinDetail()" style="width:100%;margin-top:18px;padding:12px;border-radius:14px;background:#2563eb;color:white;font-weight:800;font-size:13px;border:none;cursor:pointer;">继续探索 →</button>
+    </div>
+</div>
+
 <!-- ══ FEEDBACK ══ -->
 <div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
     <div class="g rounded-3xl p-6 max-w-sm w-full relative shadow-2xl">
@@ -1006,23 +1430,109 @@
         /* ── Checkin ── */
         let checkinSet=new Set(JSON.parse(localStorage.getItem('jg_ci')||'[]'));
         function saveCheckin(){localStorage.setItem('jg_ci',JSON.stringify([...checkinSet]));}
+
+        // 探索等级配置
+        const EXPLORER_RANKS = [
+            { min:0,  max:2,  emoji:'🧭', title:'初入古镇',   badge:'🗺️ 初入古镇',   color:'#2563eb', bg:'#dbeafe' },
+            { min:3,  max:5,  emoji:'👣', title:'街巷漫步者', badge:'👣 街巷漫步者', color:'#7c3aed', bg:'#ede9fe' },
+            { min:6,  max:9,  emoji:'🏮', title:'古镇探寻者', badge:'🏮 古镇探寻者', color:'#d97706', bg:'#fef3c7' },
+            { min:10, max:14, emoji:'🌊', title:'水乡达人',   badge:'🌊 水乡达人',   color:'#0ea5e9', bg:'#e0f2fe' },
+            { min:15, max:18, emoji:'🎭', title:'非遗守护者', badge:'🎭 非遗守护者', color:'#ec4899', bg:'#fce7f3' },
+            { min:19, max:20, emoji:'🏆', title:'靖港大使',   badge:'🏆 靖港大使',   color:'#f59e0b', bg:'#fff7ed' },
+        ];
+        const ACHIEVEMENTS = [
+            { id:'first',  name:'初探之旅',  desc:'打卡第1个景点',   icon:'🌟', check: n => n>=1 },
+            { id:'trio',   name:'三人行',    desc:'打卡3个景点',     icon:'🎯', check: n => n>=3 },
+            { id:'water',  name:'水乡情缘',  desc:'打卡两个码头',    icon:'⛵', check: (n,s) => s.has('chmd')&&s.has('zymd') },
+            { id:'red',    name:'红色基因',  desc:'游览全部红色景点', icon:'🏅', check: (n,s) => ['hsjc','lcx','tcs','hnsy'].every(x=>s.has(x)) },
+            { id:'half',   name:'半程英雄',  desc:'打卡10个景点',    icon:'💪', check: n => n>=10 },
+            { id:'full',   name:'集齐靖港',  desc:'打卡全部20个景点', icon:'👑', check: n => n>=20 },
+        ];
+
+        function getRank(n) {
+            return EXPLORER_RANKS.find(r => n >= r.min && n <= r.max) || EXPLORER_RANKS[0];
+        }
+
         function updateCheckinUI(){
-            const n=checkinSet.size,total=POI_RAW_DATA.length;
-            document.getElementById('checkinCount').textContent=n;
-            document.getElementById('checkinText').textContent=n;
+            const n=checkinSet.size, total=POI_RAW_DATA.length;
+            const rank = getRank(n);
             const circ=2*Math.PI*18;
             document.getElementById('progRingFill').style.strokeDashoffset=circ-(n/total)*circ;
-            const dots=document.getElementById('checkinDots');
-            dots.innerHTML='';
-            [...checkinSet].slice(-3).forEach(id=>{
-                const p=POI_RAW_DATA.find(x=>x.id===id);
-                if(!p)return;
-                const d=document.createElement('div');
-                d.className='ci-dot done'; d.title=p.name; d.textContent=p.name[0];
-                dots.appendChild(d);
-            });
-            const rem=total-n;
-            if(rem>0){const d=document.createElement('div');d.className='ci-dot upcoming';d.textContent=rem;dots.appendChild(d);}
+            document.getElementById('progRingFill').style.stroke = rank.color;
+            document.getElementById('checkinCount').textContent=n;
+            document.getElementById('checkinText').textContent=n;
+            const pct = Math.round(n/total*100);
+            document.getElementById('checkinPctText').textContent = pct+'%';
+
+            // 经验条（在等级内的进度）
+            const levelRange = rank.max - rank.min + 1;
+            const levelProg  = n - rank.min;
+            const xpPct = Math.round(levelProg / levelRange * 100);
+            const fill = document.getElementById('ciXpFill');
+            if (fill) { fill.style.width = xpPct+'%'; fill.style.background = `linear-gradient(90deg, ${rank.color}, ${rank.color}99)`; }
+
+            // 称号
+            const badge = document.getElementById('checkinTitleBadge');
+            if (badge) { badge.textContent = rank.badge; badge.style.background = rank.bg; badge.style.color = rank.color; }
+            const emoji = document.getElementById('checkinTitleEmoji');
+            if (emoji) emoji.textContent = rank.emoji;
+            const title = document.getElementById('checkinTitleText');
+            if (title) title.textContent = rank.title;
+        }
+
+        function openCheckinDetail() {
+            const modal = document.getElementById('checkinDetailModal');
+            if (!modal) return;
+            modal.classList.add('open');
+
+            const n = checkinSet.size, total = POI_RAW_DATA.length;
+            const rank = getRank(n);
+
+            // 等级说明
+            const label = document.getElementById('checkinRankLabel');
+            if (label) {
+                const nextRank = EXPLORER_RANKS.find(r => r.min > n);
+                const nextTip = nextRank ? `再打卡 ${nextRank.min - n} 个景点升级为「${nextRank.emoji} ${nextRank.title}」` : '🎉 您已达到最高荣誉！';
+                label.innerHTML = `<span class="ci-title-badge" style="background:${rank.bg};color:${rank.color};font-size:11px;padding:3px 10px;">${rank.badge}</span>  <span style="margin-left:6px;">${nextTip}</span>`;
+            }
+
+            // 成就区
+            const achSec = document.getElementById('achievementSection');
+            if (achSec) {
+                achSec.innerHTML = '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;">🏅 探索成就</div>';
+                ACHIEVEMENTS.forEach(ach => {
+                    const done = ach.check(n, checkinSet);
+                    const div = document.createElement('div');
+                    div.className = 'achievement-badge ' + (done ? '' : 'ach-locked');
+                    div.style.cssText = done
+                        ? `background:#f0fdf4;border-color:#bbf7d0;`
+                        : `background:#f8fafc;border-color:#e2e8f0;`;
+                    div.innerHTML = `<span class="ach-icon">${ach.icon}</span>
+                        <div><div style="font-size:12px;font-weight:800;color:${done?'#16a34a':'#64748b'}">${ach.name}</div>
+                        <div style="font-size:10px;color:#94a3b8">${ach.desc}${done?' ✓':''}</div></div>`;
+                    achSec.appendChild(div);
+                });
+            }
+
+            // 景点格子
+            const grid = document.getElementById('checkinGrid');
+            if (grid) {
+                grid.innerHTML = '';
+                POI_RAW_DATA.forEach(poi => {
+                    const done = checkinSet.has(poi.id);
+                    const div = document.createElement('div');
+                    div.className = `ci-grid-dot ${done?'done':'undone'}`;
+                    div.title = poi.name;
+                    div.onclick = () => { closeCheckinDetail(); enterDetailMode(poi); };
+                    div.innerHTML = `<span style="font-size:14px">${done?'✓':'?'}</span><span style="font-size:7px;text-align:center;line-height:1.2;">${poi.name.slice(0,4)}</span>`;
+                    grid.appendChild(div);
+                });
+            }
+        }
+
+        function closeCheckinDetail(e) {
+            if (e && e.target !== document.getElementById('checkinDetailModal')) return;
+            document.getElementById('checkinDetailModal').classList.remove('open');
         }
         function toggleBookmark(){
             if(!currentDetailPOI)return;
@@ -1152,6 +1662,294 @@
         function hideSideList() { document.getElementById('sideListPanel').classList.add('hide-right'); }
         function toggleSearch() { document.getElementById('searchBox').classList.toggle('hide-right'); }
 
+        /* ══ 活动页面 ══ */
+        const ACTIVITIES = [
+            { id:'a1', cat:'民俗', icon:'🥁', iconBg:'#fef3c7', name:'湖湘非遗文化节', date:'2025.06.20—06.29', time:'09:00—21:00', place:'全景区', desc:'汇聚皮影、花鼓戏、铁艺、木版年画等20余项省级以上非遗项目，大师现场展演互动。', spots:286, hot:true, color:'#f59e0b' },
+            { id:'a2', cat:'演艺', icon:'🎭', iconBg:'#fce7f3', name:'花开靖港·夏夜演艺季', date:'2025.06.01—08.31', time:'19:00—21:30', place:'花开靖港剧场', desc:'以长沙文夕大火为背景的沉浸式大型演艺秀，每周末加场，感受湖湘儿女家国情怀。', spots:124, hot:true, color:'#ec4899' },
+            { id:'a3', cat:'亲子', icon:'👧', iconBg:'#dbeafe', name:'古镇小小传承人', date:'2025.06.01—06.30', time:'10:00—17:00', place:'皮影戏体验馆', desc:'专为8-14岁儿童设计，学习皮影制作、操控技艺，每期15人限额，亲子同乐。', spots:12, hot:false, color:'#2563eb' },
+            { id:'a4', cat:'体验', icon:'🌾', iconBg:'#d1fae5', name:'稻香端午·农耕体验', date:'2025.06.07—06.09', time:'09:30—17:00', place:'锄禾源', desc:'端午时节插秧体验、制作艾草香囊、赛龙舟观赏，感受江南农耕文化的传承与活力。', spots:58, hot:false, color:'#16a34a' },
+            { id:'a5', cat:'民俗', icon:'🏮', iconBg:'#ede9fe', name:'宏泰坊曲艺雅集', date:'每周六、日', time:'11:00·15:00·17:00', place:'宏泰坊', desc:'270年历史古建筑内，知名民间曲艺艺人轮番登场，弹词、说书、花鼓戏，雅趣盎然。', spots:999, hot:false, color:'#7c2d12' },
+            { id:'a6', cat:'演艺', icon:'🎬', iconBg:'#f0f9ff', name:'老电影·忆长沙', date:'长期举办', time:'10:30·13:30·15:30', place:'老电影院', desc:'每场精选不同年代影片，50年代纪录片、80年代文艺片及红色教育影片轮播，情怀满满。', spots:999, hot:false, color:'#111827' },
+            { id:'a7', cat:'亲子', icon:'⛵', iconBg:'#e0f2fe', name:'古镇游船夏令营', date:'2025.07.01—08.31', time:'13:20·16:20', place:'正义码头', desc:'暑期亲子游船营，讲解员带领了解靖港千年漕运历史，孩子可体验仿古船桨操控体验。', spots:45, hot:true, color:'#0ea5e9' },
+            { id:'a8', cat:'体验', icon:'🔨', iconBg:'#f1f5f9', name:'非遗铁艺·打铁体验', date:'每日开放', time:'10:00·11:30·14:00·15:30', place:'铁器文化馆', desc:'现场观摩百年铁艺绝活，亲身体验风箱鼓风、铁锤锻打，打造属于自己的铁艺小纪念品。', spots:999, hot:false, color:'#475569' },
+        ];
+
+        let currentActTab = '全部';
+        function switchActTab(tab, el) {
+            currentActTab = tab;
+            document.querySelectorAll('.act-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderActivities();
+        }
+
+        function renderActivities() {
+            const list = document.getElementById('activityList');
+            if (!list) return;
+            list.innerHTML = '';
+            const filtered = currentActTab === '全部' ? ACTIVITIES : ACTIVITIES.filter(a => a.cat === currentActTab);
+            filtered.forEach(act => {
+                const card = document.createElement('div');
+                card.className = 'act-card';
+                card.innerHTML = `
+                    <div class="act-card-header">
+                        <div class="act-card-icon" style="background:${act.iconBg};">${act.icon}</div>
+                        <div class="act-card-body">
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span class="act-tag" style="background:${act.color}22;color:${act.color};border:1px solid ${act.color}44;">${act.cat}</span>
+                                ${act.hot ? '<span class="act-tag" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">🔥 热门</span>' : ''}
+                            </div>
+                            <div style="font-size:15px;font-weight:900;color:white;margin:4px 0 3px;">${act.name}</div>
+                            <div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.5;">${act.desc}</div>
+                        </div>
+                    </div>
+                    <div class="act-footer">
+                        <div class="act-stat">📅 ${act.date}</div>
+                        <div class="act-stat" style="margin-left:8px;">🕒 ${act.time}</div>
+                        <button class="act-register-btn" style="color:${act.color};border-color:${act.color}44;background:${act.color}18;"
+                            onclick="event.stopPropagation();actRegister('${act.id}','${act.name}')">
+                            ${act.spots < 30 ? '⚡ 仅剩'+act.spots+'名' : '立即报名'}
+                        </button>
+                    </div>`;
+                list.appendChild(card);
+            });
+        }
+
+        function openActivityPage() {
+            const page = document.getElementById('activityPage');
+            page.classList.remove('closing');
+            page.classList.add('open');
+            renderActivities();
+            // 活动按钮高亮
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navActivity')?.classList.add('active');
+        }
+
+        function closeActivityPage() {
+            const page = document.getElementById('activityPage');
+            page.classList.add('closing');
+            setTimeout(() => { page.classList.remove('open','closing'); }, 300);
+            // 恢复默认按钮
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('navSpots')?.classList.add('active');
+        }
+
+        function actRegister(id, name) {
+            const act = ACTIVITIES.find(a => a.id === id);
+            if (!act) return;
+            const tip = act.spots < 30
+                ? `「${name}」仅剩 ${act.spots} 个名额！\n活动时间：${act.date} ${act.time}\n地点：${act.place}\n\n请前往游客服务中心或扫码小程序报名。`
+                : `「${name}」\n活动时间：${act.date} ${act.time}\n地点：${act.place}\n\n请前往游客服务中心或扫码小程序报名。`;
+            alert(tip);
+        }
+
+        /* ══ 路线筛选地图景点 ══ */
+        let activeFilterRouteId = null;
+
+        function filterMapByRoute(r) {
+            // 再次点击同一路线 → 取消筛选
+            if (activeFilterRouteId === r.id) {
+                activeFilterRouteId = null;
+                // 所有景点渐显回来（交错动画）
+                labels.forEach((lb, i) => {
+                    lb.element.style.transition = `opacity .3s ease ${i*18}ms, transform .3s ease ${i*18}ms`;
+                    lb.element.style.opacity   = '1';
+                    lb.element.style.transform = 'scale(1)';
+                    lb.element.style.display   = '';
+                    lb.element.style.pointerEvents = 'auto';
+                });
+                document.querySelectorAll('.route-card').forEach(c => c.classList.remove('active'));
+                hideFilterPill();
+                clearRouteHighlight();
+                return;
+            }
+            activeFilterRouteId = r.id;
+            const routeIds = new Set(r.pois || []);
+
+            // 先把所有点位快速缩小淡出
+            labels.forEach(lb => {
+                lb.element.style.transition = 'opacity .18s ease, transform .18s ease';
+                lb.element.style.opacity    = '0';
+                lb.element.style.transform  = 'scale(0.6)';
+                lb.element.style.pointerEvents = 'none';
+            });
+
+            // 短暂延迟后：路线内景点交错弹入，其余隐藏
+            setTimeout(() => {
+                let seq = 0;
+                labels.forEach(lb => {
+                    if (routeIds.has(lb.data.id)) {
+                        const delay = seq * 60;
+                        lb.element.style.display  = '';
+                        lb.element.style.transition = `opacity .35s cubic-bezier(.175,.885,.32,1.275) ${delay}ms, transform .35s cubic-bezier(.175,.885,.32,1.275) ${delay}ms`;
+                        lb.element.style.opacity   = '1';
+                        lb.element.style.transform = 'scale(1)';
+                        lb.element.style.pointerEvents = 'auto';
+                        seq++;
+                    } else {
+                        lb.element.style.display = 'none';
+                    }
+                });
+                showFilterPill(r);
+            }, 220);
+        }
+
+        /* 浮动筛选提示胶囊 */
+        function showFilterPill(r) {
+            let pill = document.getElementById('filterPill');
+            if (!pill) {
+                pill = document.createElement('div');
+                pill.id = 'filterPill';
+                pill.style.cssText = `
+                    position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+                    z-index:60; display:flex; align-items:center; gap:8px;
+                    background:rgba(15,23,42,0.92); backdrop-filter:blur(14px);
+                    border:1px solid rgba(255,255,255,0.15); border-radius:30px;
+                    padding:8px 14px 8px 12px; box-shadow:0 8px 28px rgba(0,0,0,0.4);
+                    color:white; font-size:12px; font-weight:700;
+                    transition:all .35s cubic-bezier(.175,.885,.32,1.275); opacity:0;
+                `;
+                document.body.appendChild(pill);
+            }
+            pill.innerHTML = `
+                <span style="width:8px;height:8px;border-radius:50%;background:${r.color};flex-shrink:0;"></span>
+                <span>${r.icon} ${r.name}</span>
+                <span style="color:rgba(255,255,255,.45);font-weight:600;">${(r.pois||[]).length} 个景点</span>
+                <button onclick="clearRouteFilter()" style="margin-left:4px;width:20px;height:20px;border-radius:50%;
+                    background:rgba(255,255,255,.15);border:none;cursor:pointer;color:white;font-size:11px;
+                    display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
+            `;
+            requestAnimationFrame(() => {
+                pill.style.opacity = '1';
+                pill.style.transform = 'translateX(-50%) translateY(0)';
+            });
+        }
+
+        function hideFilterPill() {
+            const pill = document.getElementById('filterPill');
+            if (!pill) return;
+            pill.style.opacity = '0';
+            pill.style.transform = 'translateX(-50%) translateY(12px)';
+            setTimeout(() => pill.remove(), 350);
+        }
+
+        function clearRouteFilter() {
+            activeFilterRouteId = null;
+            labels.forEach((lb, i) => {
+                lb.element.style.display = '';
+                lb.element.style.transition = `opacity .3s ease ${i*15}ms, transform .3s ease ${i*15}ms`;
+                lb.element.style.opacity = '1';
+                lb.element.style.transform = 'scale(1)';
+                lb.element.style.pointerEvents = 'auto';
+            });
+            document.querySelectorAll('.route-card').forEach(c => {
+                c.classList.remove('active');
+                const btn = c.querySelector('.rc-start-btn');
+                if (btn) btn.style.opacity = '0';
+            });
+            hideFilterPill();
+            clearRouteHighlight();
+        }
+
+        /* ══ 游客弹幕 Toast ══ */
+        const VISITOR_COMMENTS = [
+            { avatar:'🧓', name:'张大爷', text:'八元堂的花鼓戏真好听！' },
+            { avatar:'👩', name:'小美',   text:'皮影戏太有趣了，孩子超喜欢' },
+            { avatar:'👨', name:'阿伟',   text:'芦江阁的夜景绝了！' },
+            { avatar:'👵', name:'李奶奶', text:'八大碗的鱼头真鲜，推荐！' },
+            { avatar:'🧑', name:'小强',   text:'靖港古镇比想象中大很多' },
+            { avatar:'👩‍👧', name:'晴晴妈', text:'亲子游首选，孩子玩了一整天' },
+            { avatar:'🧔', name:'老王',   text:'花开靖港夜场太震撼了！' },
+            { avatar:'👧', name:'糖糖',   text:'皮影戏自己上台操控很好玩' },
+            { avatar:'👨‍💼', name:'周总',  text:'非遗文化保护得真好，值得一看' },
+            { avatar:'🧒', name:'小辉',   text:'宏泰坊的曲艺听了停不下来' },
+        ];
+        const TOAST_POSITIONS = [
+            { left:'18%', top:'28%' }, { left:'60%', top:'22%' },
+            { left:'30%', top:'55%' }, { left:'55%', top:'60%' },
+            { left:'72%', top:'38%' }, { left:'20%', top:'70%' },
+        ];
+        let toastIdx = 0, toastPosIdx = 0;
+
+        function spawnVisitorToast() {
+            const comment = VISITOR_COMMENTS[toastIdx % VISITOR_COMMENTS.length];
+            const pos     = TOAST_POSITIONS[toastPosIdx % TOAST_POSITIONS.length];
+            toastIdx++; toastPosIdx++;
+
+            const toast = document.createElement('div');
+            toast.className = 'visitor-toast';
+            toast.style.left = pos.left;
+            toast.style.top  = pos.top;
+            toast.innerHTML  = `
+                <div class="vt-avatar" style="background:#f1f5f9">${comment.avatar}</div>
+                <div><span style="color:#94a3b8;font-size:9px;">${comment.name} · 刚刚</span><br>${comment.text}</div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4200);
+        }
+
+        function startVisitorToasts() {
+            // 随机间隔 8-18 秒弹一条
+            function next() {
+                spawnVisitorToast();
+                setTimeout(next, 8000 + Math.random() * 10000);
+            }
+            setTimeout(next, 5000); // 5秒后开始
+        }
+
+        /* ══ 智能推荐提示条 ══ */
+        const SMART_TIPS = [
+            '🟢 现在人少，推荐前往 皮影戏体验馆！',
+            '🎭 15分钟后 八元堂花鼓戏 即将开场，快去占位！',
+            '💡 今日天气晴好，芦江阁登高观景正当时',
+            '⛵ 下午3:20 正义码头 有游船出发，名额有限',
+            '🏅 您已接近「水乡达人」称号，再打卡1个景点即可升级',
+        ];
+        let smartTipVisible = false;
+
+        function showSmartTip(text) {
+            const bar = document.getElementById('smartTipBar');
+            if (!bar) return;
+            bar.innerHTML = `<div class="stb-dot"></div><span style="flex:1">${text}</span>
+                <button onclick="hideSmartTip()" style="margin-left:6px;background:none;border:none;cursor:pointer;color:#94a3b8;font-size:13px;padding:0;">✕</button>`;
+            bar.classList.add('visible');
+            smartTipVisible = true;
+            setTimeout(hideSmartTip, 6000);
+        }
+
+        function hideSmartTip() {
+            document.getElementById('smartTipBar')?.classList.remove('visible');
+            smartTipVisible = false;
+        }
+
+        function triggerSmartTips() {
+            // 动态提示：根据当前状态选择最合适的提示
+            function pickTip() {
+                const n = checkinSet.size;
+                const nextRank = EXPLORER_RANKS.find(r => r.min > n);
+                if (nextRank && nextRank.min - n === 1) {
+                    showSmartTip(`🏅 再打卡 1 个景点即可升级为「${nextRank.emoji} ${nextRank.title}」！`);
+                } else {
+                    showSmartTip(SMART_TIPS[Math.floor(Math.random() * SMART_TIPS.length)]);
+                }
+            }
+            setTimeout(pickTip, 12000);
+            setInterval(pickTip, 40000);
+        }
+
+        /* ══ 今日精选浮动横幅 ══ */
+        function showTodayPick() {
+            const banner = document.getElementById('todayPickBanner');
+            if (!banner) return;
+            setTimeout(() => banner.classList.add('visible'), 3000);
+            setTimeout(() => banner.classList.remove('visible'), 10000);
+        }
+
+        function goTodayPick() {
+            document.getElementById('todayPickBanner')?.classList.remove('visible');
+            // 直接跳到皮影戏（人流少的推荐景点）
+            const poi = POI_RAW_DATA.find(p => p.id === 'pyx');
+            if (poi) enterDetailMode(poi);
+        }
+
         function navClick(navId, fn) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(navId)?.classList.add('active');
@@ -1227,6 +2025,32 @@
         updateCountdown();
 
         /* ── Crowd ── */
+        // 人流预警等级：根据等待时间和时段决定
+        function getCrowdLevel(poi) {
+            const wt = poi.baseWaitTime || 0;
+            const h = new Date().getHours();
+            const isPeakHour = (h >= 11 && h <= 13) || (h >= 15 && h <= 17);
+            if (poi.schedules?.length) {
+                // 演出类景点：根据距下场时间
+                const cur = new Date().getHours()*60 + new Date().getMinutes();
+                let minWait = 9999;
+                for (const t of poi.schedules) {
+                    const [hh,mm] = t.split(':').map(Number);
+                    const diff = hh*60+mm - cur;
+                    if (diff > 0 && diff < minWait) minWait = diff;
+                }
+                if (minWait < 20) return 'red';
+                if (minWait < 45) return 'yellow';
+                return 'green';
+            }
+            const effectiveWt = wt + (isPeakHour ? 10 : 0);
+            if (effectiveWt >= 25) return 'red';
+            if (effectiveWt >= 10) return 'yellow';
+            return 'green';
+        }
+        const CROWD_LABELS = { green:'畅游', yellow:'稍拥挤', red:'高峰' };
+        const CROWD_ICONS  = { green:'🟢', yellow:'🟡', red:'🔴' };
+
         function updateCrowd(){
             const h=new Date().getHours();
             const[txt,col]=h<9?['未开园','#94a3b8']:h<11?['较少','#22c55e']:h<13||h>=17?['适中','#f59e0b']:['较多','#ef4444'];
@@ -1351,6 +2175,15 @@
             if(routeLineMesh&&mapGroup){mapGroup.remove(routeLineMesh);routeLineMesh.geometry.dispose();routeLineMesh.material.dispose();routeLineMesh=null;}
             document.getElementById('clearRouteBtn')?.classList.add('hidden');
             clearRouteHighlight();
+            // 恢复所有景点标注可见
+            activeFilterRouteId = null;
+            labels.forEach(lb => {
+                lb.element.style.display   = '';
+                lb.element.style.opacity   = '1';
+                lb.element.style.transform = 'scale(1)';
+                lb.element.style.pointerEvents = 'auto';
+            });
+            hideFilterPill();
         }
 
         /* ── QR / Feedback ── */
@@ -1390,6 +2223,13 @@
             const scroll=document.getElementById('routeScroll');
             scroll.innerHTML='';
             ROUTES.forEach(r=>{
+                // POI 名称芯片（最多4个）
+                const chipNames = (r.pois||[]).slice(0,4).map(id => {
+                    const p = POI_RAW_DATA.find(x=>x.id===id);
+                    return p ? `<span class="rc-poi-chip">${p.name}</span>` : '';
+                }).join('');
+                const moreCount = (r.pois||[]).length - 4;
+
                 const card=document.createElement('div');
                 card.className='route-card';
                 card.style.cssText=`background:${r.bg};`;
@@ -1398,7 +2238,8 @@
                     <div class="rc-icon">${r.icon}</div>
                     <div class="rc-name" style="color:${r.color}">${r.name}</div>
                     <div class="rc-meta">${r.duration} · ${r.count}</div>
-                    <button class="rc-start-btn" style="margin-top:5px;padding:4px 0;width:100%;border-radius:8px;font-size:10px;font-weight:800;color:white;background:${r.color};border:none;cursor:pointer;opacity:0;transition:opacity .2s;">
+                    <div class="rc-poi-chips">${chipNames}${moreCount>0?`<span class="rc-poi-chip" style="color:${r.color};background:${r.color}18;">+${moreCount}</span>`:''}</div>
+                    <button class="rc-start-btn" style="margin-top:6px;padding:4px 0;width:100%;border-radius:8px;font-size:10px;font-weight:800;color:white;background:${r.color};border:none;cursor:pointer;opacity:0;transition:opacity .2s;">
                         开始游览 →
                     </button>`;
                 card.onclick=()=>{
@@ -1411,6 +2252,8 @@
                     const btn=card.querySelector('.rc-start-btn');
                     if(btn) btn.style.opacity='1';
                     btn.onclick=(e)=>{ e.stopPropagation(); startRoute(r); };
+                    // 过滤地图景点：只显示该路线的景点
+                    filterMapByRoute(r);
                 };
                 scroll.appendChild(card);
             });
@@ -1666,10 +2509,12 @@
         function buildPOIList(){
             const list=document.getElementById('poiList');list.innerHTML='';
             POI_RAW_DATA.forEach(poi=>{
+                const cl = getCrowdLevel(poi);
+                const crowdHtml = `<span class="crowd-badge crowd-${cl}" style="font-size:8px;padding:1px 5px;">${CROWD_LABELS[cl]}</span>`;
                 const item=document.createElement('div');
                 item.className='flex items-center gap-3 p-2.5 rounded-xl bg-white/50 hover:bg-white cursor-pointer transition';
                 item.onclick=()=>enterDetailMode(poi);
-                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><div id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><div class="flex items-center gap-1.5 mt-0.5">${crowdHtml}<span id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</span></div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
                 list.appendChild(item);
             });
         }
@@ -1710,6 +2555,10 @@
             document.getElementById('detailImg').src=poi.img;
             document.getElementById('detailBadge').textContent=poi.type;
             document.getElementById('detailWaitTime').textContent=poi.currentDisplay||'无需等待';
+            // 人流预警徽章
+            const cl = getCrowdLevel(poi);
+            const cb = document.getElementById('detailCrowdBadge');
+            if (cb) { cb.className = `crowd-badge crowd-${cl}`; cb.textContent = CROWD_LABELS[cl]; }
             const sw=document.getElementById('mediaSwitcher');
             poi.video?sw.classList.remove('hidden'):sw.classList.add('hidden');
             switchDetailMedia('img');
@@ -1815,10 +2664,14 @@
         }
         function filterPOIs(q){
             const items=document.getElementById('poiList').children;
+            const routeIds = activeFilterRouteId
+                ? new Set(ROUTES.find(r=>r.id===activeFilterRouteId)?.pois||[])
+                : null;
             POI_RAW_DATA.forEach((poi,i)=>{
-                const m=!q||poi.name.includes(q);
-                items[i].style.display=m?'flex':'none';
-                labels[i].element.style.opacity=m?'1':'.12';
+                const matchSearch=!q||poi.name.includes(q);
+                const matchRoute=!routeIds||routeIds.has(poi.id);
+                if(items[i]) items[i].style.display=(matchSearch&&matchRoute)?'flex':'none';
+                if(labels[i]) labels[i].element.style.opacity=(matchSearch&&matchRoute)?'1':'.12';
             });
         }
 
@@ -2500,7 +3353,15 @@
             setTimeout(hideLocationModal, 600);
         }
 
-        window.onload = init;
+        window.onload = () => {
+            init();
+            // 启动趣味功能
+            setTimeout(() => {
+                startVisitorToasts();
+                triggerSmartTips();
+                showTodayPick();
+            }, 1500);
+        };
     </script>
 </body>
 </html>
