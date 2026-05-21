@@ -75,11 +75,17 @@
         .poi-label:hover .poi-scale-wrapper { transform: scale(1.15) !important; }
         .poi-bubble { background: rgba(8,16,36,0.88); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.18); border-radius: 30px; padding: 3px 4px 3px 10px; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
         .poi-name { color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .3px; }
-        .wait-time-tag { font-size: 9px; padding: 2px 7px; border-radius: 20px; font-weight: 800; }
-        .time-low    { background: #22c55e; color:#fff; }
-        .time-med    { background: #f59e0b; color:#fff; }
-        .time-high   { background: #ef4444; color:#fff; }
-        .time-ended  { background: #64748b; color:#fff; }
+        .wait-time-tag { font-size: 9px; padding: 2px 7px; border-radius: 20px; font-weight: 800; display:flex; align-items:center; gap:3px; }
+        .time-low    { background: #dcfce7; color:#16a34a; border:1px solid #86efac; }
+        .time-med    { background: #fef9c3; color:#b45309; border:1px solid #fde047; }
+        .time-high   { background: #fee2e2; color:#dc2626; border:1px solid #fca5a5; }
+        .time-ended  { background: #f1f5f9; color:#64748b; border:1px solid #cbd5e1; }
+        /* crowd dot pulse */
+        .crowd-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .time-low  .crowd-dot { background:#16a34a; animation: crowdPulse 2s ease-in-out infinite; }
+        .time-med  .crowd-dot { background:#b45309; animation: crowdPulse 1.3s ease-in-out infinite; }
+        .time-high .crowd-dot { background:#dc2626; animation: crowdPulse 0.8s ease-in-out infinite; }
+        @keyframes crowdPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .poi-pin { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,0.35); }
 
         /* ── 模式切换 ── */
@@ -232,18 +238,43 @@
 
         /* 打卡面板 */
         #checkinSection {
-            flex-shrink:0; width:156px; border-radius:18px; padding:10px 12px;
+            flex-shrink:0; width:168px; border-radius:18px; padding:10px 12px;
             box-shadow: 0 6px 24px rgba(0,0,0,0.1);
-            display:flex; flex-direction:column; gap:6px;
+            display:flex; flex-direction:column; gap:5px;
             transition: opacity .3s, transform .3s;
         }
         #checkinSection.hide-bottom { opacity:0; pointer-events:none; transform:translateY(10px); }
-        .prog-ring { transform: rotate(-90deg); }
-        .prog-ring-bg  { fill:none; stroke:#e2e8f0; }
-        .prog-ring-fill{ fill:none; stroke:#2563eb; stroke-linecap:round; transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1); }
-        .ci-dot { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; flex-shrink:0; }
-        .ci-dot.done     { background:#2563eb; color:#fff; }
-        .ci-dot.upcoming { background:#dbeafe; color:#2563eb; border:1.5px dashed #93c5fd; }
+        /* level badge */
+        .ci-star-badge {
+            width:20px; height:20px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:10px; border:1.5px solid;
+            transition: all .3s cubic-bezier(.175,.885,.32,1.275);
+        }
+        .ci-star-badge.earned { animation: starPop .4s cubic-bezier(.175,.885,.32,1.275) forwards; }
+        @keyframes starPop { 0%{transform:scale(0) rotate(-30deg)} 70%{transform:scale(1.3) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
+        .ci-recent-dot {
+            width:22px; height:22px; border-radius:50%; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            font-size:9px; font-weight:800; color:white;
+            transition: transform .2s;
+        }
+        .ci-recent-dot:hover { transform:scale(1.2); }
+        /* checkin celebration overlay */
+        #ciCelebration {
+            position:fixed; inset:0; z-index:200; pointer-events:none;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            opacity:0; transition:opacity .3s;
+        }
+        #ciCelebration.show { opacity:1; pointer-events:auto; }
+        .ci-toast {
+            background:rgba(15,23,42,0.92); backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.15); border-radius:24px;
+            padding:20px 28px; text-align:center; max-width:280px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: toastIn .45s cubic-bezier(.175,.885,.32,1.275) both;
+        }
+        @keyframes toastIn { from{transform:scale(.7) translateY(30px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
 
         /* ── Bookmark ── */
         #bookmarkBtn { transition: all .25s cubic-bezier(.175,.885,.32,1.275); }
@@ -482,6 +513,110 @@
             border-color: #93c5fd;
             background: #eff6ff;
         }
+
+        /* ── Activity Page ── */
+        .act-card {
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 18px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all .22s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .act-card:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+        .act-card::before { content:''; position:absolute; inset:0; border-radius:18px; opacity:0; background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), transparent 70%); transition: opacity .3s; }
+        .act-card:hover::before { opacity:1; }
+        .act-status-now  { background:#16a34a; color:#fff; font-size:9px; font-weight:900; padding:3px 8px; border-radius:20px; animation: nowPulse 1.5s ease-in-out infinite; }
+        .act-status-soon { background:#f59e0b; color:#fff; font-size:9px; font-weight:900; padding:3px 8px; border-radius:20px; }
+        .act-status-later{ background:rgba(255,255,255,.15); color:#94a3b8; font-size:9px; font-weight:700; padding:3px 8px; border-radius:20px; }
+        @keyframes nowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.6)} 50%{box-shadow:0 0 0 6px rgba(22,163,74,0)} }
+        .act-time-chip { display:inline-flex; align-items:center; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:#e2e8f0; font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; }
+        .act-time-chip.chip-now { background:rgba(22,163,74,0.25); border-color:rgba(22,163,74,0.5); color:#4ade80; }
+        .act-filter-btn { flex-shrink:0; padding:5px 14px; border-radius:20px; font-size:11px; font-weight:700; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; cursor:pointer; transition:all .18s; white-space:nowrap; }
+        .act-filter-btn.active { background:rgba(37,99,235,0.8); border-color:#2563eb; color:#fff; box-shadow:0 2px 10px rgba(37,99,235,.4); }
+
+        /* ══ 打卡纪念卡 Modal ══ */
+        #stampModal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.65); backdrop-filter:blur(16px); }
+        #stampModal.open { display:flex; }
+        #stampCard {
+            background:#fffdf5; border-radius:24px; padding:28px 24px 20px;
+            width:280px; text-align:center; position:relative;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,255,255,0.08);
+            animation: stampIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+        }
+        @keyframes stampIn { from{transform:scale(.7) rotate(-4deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+        .stamp-perforation { position:absolute; left:-1px; right:-1px; height:12px; display:flex; gap:0; }
+        .stamp-perforation.top { top:-7px; }
+        .stamp-perforation.bottom { bottom:-7px; }
+        .stamp-hole { flex:1; height:12px; background:#fffdf5; border-radius:50%; box-shadow:0 0 0 2px rgba(0,0,0,0.12); }
+        .stamp-img { width:160px; height:110px; object-fit:cover; border-radius:10px; border:3px solid #e8dfc8; display:block; margin:0 auto 10px; }
+        .stamp-title { font-size:15px; font-weight:900; color:#1e293b; letter-spacing:.5px; }
+        .stamp-subtitle { font-size:10px; color:#94a3b8; margin:3px 0 8px; }
+        .stamp-quote { font-size:11px; color:#475569; line-height:1.6; font-style:italic; padding:8px 10px; background:#f1efe8; border-radius:10px; margin-bottom:10px; }
+        .stamp-footer { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #e2d9c8; padding-top:10px; margin-top:4px; }
+        .stamp-date { font-size:9px; color:#94a3b8; font-weight:700; letter-spacing:.5px; }
+        .stamp-badge { background:#2563eb; color:#fff; font-size:9px; font-weight:800; padding:2px 8px; border-radius:10px; }
+        @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+        /* ══ 游览报告 Modal ══ */
+        #reportModal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(16px); padding:16px; }
+        #reportModal.open { display:flex; }
+        #reportCard {
+            background:#fff; border-radius:28px; padding:0; width:100%; max-width:360px;
+            overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,0.4);
+            animation: stampIn .4s cubic-bezier(.4,0,.2,1) both;
+        }
+        .report-header { padding:24px 24px 16px; background:linear-gradient(135deg,#1e3a5f,#2563eb,#7c3aed); color:#fff; position:relative; overflow:hidden; }
+        .report-header::after { content:''; position:absolute; right:-20px; top:-20px; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,0.06); }
+        .report-stat { background:#f8fafc; border-radius:16px; padding:12px 14px; flex:1; text-align:center; }
+        .report-stat-val { font-size:22px; font-weight:900; color:#1e293b; line-height:1; }
+        .report-stat-lbl { font-size:10px; color:#94a3b8; margin-top:3px; font-weight:600; }
+        .report-poi-chip { background:#eff6ff; color:#2563eb; font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px; border:1px solid #bfdbfe; }
+
+        /* ══ 演出提醒 ══ */
+        #showReminderToast { position:fixed; top:80px; left:50%; transform:translateX(-50%) translateY(-20px); z-index:300; opacity:0; transition:all .4s cubic-bezier(.4,0,.2,1); pointer-events:none; }
+        #showReminderToast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+
+        /* ══ 行程规划器 ══ */
+        #plannerPage { display:none; position:fixed; inset:0; z-index:90; background:rgba(15,23,42,0.75); backdrop-filter:blur(18px); }
+        #plannerPage.open { display:flex; flex-direction:column; }
+        .planner-poi-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:14px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); cursor:grab; transition:all .15s; }
+        .planner-poi-item:hover { background:rgba(255,255,255,0.13); }
+        .planner-poi-item.in-plan { opacity:.4; pointer-events:none; }
+        .plan-slot { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:14px; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); position:relative; animation: slotIn .25s cubic-bezier(.175,.885,.32,1.275) both; }
+        @keyframes slotIn { from{transform:scale(.9) translateX(-10px);opacity:0} to{transform:scale(1) translateX(0);opacity:1} }
+        .plan-slot-num { width:20px; height:20px; border-radius:50%; background:#2563eb; color:#fff; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .plan-slot-del { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:18px; height:18px; border-radius:50%; background:rgba(239,68,68,0.2); color:#ef4444; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; }
+        .plan-drop-zone { min-height:60px; border:2px dashed rgba(37,99,235,0.3); border-radius:14px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.3); font-size:12px; transition:all .2s; }
+        .plan-drop-zone.drag-over { border-color:#2563eb; background:rgba(37,99,235,0.1); color:#93c5fd; }
+
+        /* ══ 打卡排行榜 ══ */
+        #leaderboardModal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(16px); padding:16px; }
+        #leaderboardModal.open { display:flex; }
+        .lb-row { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; transition:background .15s; }
+        .lb-row:hover { background:rgba(37,99,235,0.05); }
+        .lb-rank { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0; }
+        .lb-rank.gold { background:#fef9c3; color:#b45309; border:2px solid #fde047; }
+        .lb-rank.silver { background:#f1f5f9; color:#475569; border:2px solid #cbd5e1; }
+        .lb-rank.bronze { background:#fef0e7; color:#9a3412; border:2px solid #fdba74; }
+        .lb-rank.other { background:#f8fafc; color:#94a3b8; font-size:10px; border:1.5px solid #e2e8f0; }
+        .lb-bar-wrap { flex:1; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
+        .lb-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#2563eb,#7c3aed); transition:width .8s cubic-bezier(.4,0,.2,1); }
+
+        /* ══ 景点留言墙 ══ */
+        #commentModal { position:fixed; inset:0; z-index:150; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,0.5); backdrop-filter:blur(10px); }
+        #commentModal.open { display:flex; }
+        #commentSheet { background:#fff; border-radius:28px 28px 0 0; width:100%; max-width:520px; max-height:70vh; display:flex; flex-direction:column; padding:0; box-shadow:0 -20px 60px rgba(0,0,0,0.3); animation:sheetUp .35s cubic-bezier(.4,0,.2,1) both; }
+        @keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .comment-item { padding:10px 16px; border-bottom:1px solid #f1f5f9; display:flex; gap:10px; align-items:flex-start; }
+        .comment-avatar { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; }
+        .comment-bubble { flex:1; font-size:12px; color:#374151; line-height:1.55; }
+        .comment-time { font-size:10px; color:#94a3b8; margin-top:2px; }
         </style>
 </head>
 <body class="mode-explorer">
@@ -562,7 +697,7 @@
         <div class="nav-btn" id="navRoute" onclick="navClick('navRoute', ()=>showSideList())">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>路线
         </div>
-        <div class="nav-btn" id="navActivity" onclick="navClick('navActivity', ()=>showSideList())">
+        <div class="nav-btn" id="navActivity" onclick="navClick('navActivity', ()=>openActivityPage())">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>活动
         </div>
         <div class="nav-btn" id="navDayNight" onclick="toggleDayNight()" title="切换昼夜模式">
@@ -597,9 +732,15 @@
         <div class="tool-btn" onclick="showQRModal()" title="二维码">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
         </div>
-
-    </div>
-</div>
+        <div class="tool-btn" onclick="openPlannerPage()" title="行程规划">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><polyline points="12 14 14 16 18 12"/></svg>
+        </div>
+        <div class="tool-btn" onclick="openLeaderboard()" title="打卡排行榜">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+        </div>
+        <div class="tool-btn" onclick="showTravelReport()" title="游览报告">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
 
 <!-- ══ SIDE LIST ══ -->
 <div id="sideListPanel">
@@ -634,32 +775,34 @@
         <div id="routeScroll" class="no-scrollbar"></div>
     </div>
 
-    <!-- 打卡区 -->
+    <!-- 打卡区（趣味探险版） -->
     <div id="checkinSection" class="g">
-        <div class="flex items-center justify-between">
-            <div class="text-xs font-black text-slate-700 flex items-center gap-1.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                打卡进度
+        <div class="flex items-center justify-between mb-1">
+            <div class="text-[10px] font-black text-slate-700 flex items-center gap-1.5">
+                <span style="font-size:13px;">🗺️</span>探险地图
             </div>
             <button class="fold-btn" onclick="togglePanel('checkinSection','bottom')" title="收起打卡">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="relative flex-shrink-0">
-                <svg width="46" height="46" class="prog-ring">
-                    <circle class="prog-ring-bg" cx="23" cy="23" r="18" stroke-width="3.5"/>
-                    <circle id="progRingFill" class="prog-ring-fill" cx="23" cy="23" r="18" stroke-width="3.5" stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
-                </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span id="checkinCount" class="text-sm font-black text-slate-800 leading-none">0</span>
-                    <span class="text-[7px] text-slate-400 font-semibold">点亮</span>
+        <!-- Progress bar with level -->
+        <div style="position:relative;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                <span id="ciLevelLabel" style="font-size:9px;font-weight:900;color:#7c3aed;">🌱 初识靖港</span>
+                <span style="font-size:9px;color:#94a3b8;font-weight:600;"><span id="checkinCount">0</span>/<span id="ciTotal">20</span></span>
+            </div>
+            <div style="height:6px;border-radius:4px;background:#e2e8f0;overflow:hidden;position:relative;">
+                <div id="ciProgressBar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#7c3aed,#2563eb,#06b6d4);transition:width .6s cubic-bezier(.4,0,.2,1);width:0%;position:relative;">
+                    <div style="position:absolute;right:0;top:-1px;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid #2563eb;transform:translateX(50%);box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
                 </div>
             </div>
-            <div class="flex-1 min-w-0">
-                <div class="text-[10px] text-slate-400 mb-1">已点亮 <strong id="checkinText" class="text-slate-700">0</strong>/20 个景点</div>
-                <div class="flex gap-1" id="checkinDots"></div>
-            </div>
+        </div>
+        <!-- Star badges -->
+        <div id="ciBadgeRow" style="display:flex;gap:3px;justify-content:center;margin-top:3px;"></div>
+        <!-- Recent checkin -->
+        <div id="ciRecentRow" style="display:flex;gap:4px;align-items:center;margin-top:2px;">
+            <span style="font-size:9px;color:#94a3b8;flex-shrink:0;">最近：</span>
+            <div id="ciRecentDots" style="display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;"></div>
         </div>
     </div>
 </div>
@@ -689,6 +832,29 @@
 </div>
 
 </div><!-- /ui-explorer -->
+
+<!-- ══ ACTIVITY PAGE OVERLAY ══ -->
+<div id="activityPage" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(15,23,42,0.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:24px 20px 32px;">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:18px;">🎪</div>
+                <div>
+                    <div style="font-size:17px;font-weight:900;color:#f8fafc;line-height:1.1;">靖港今日活动</div>
+                    <div id="actDateLabel" style="font-size:11px;color:#94a3b8;margin-top:2px;"></div>
+                </div>
+            </div>
+            <button onclick="closeActivityPage()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#e2e8f0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <!-- Filter tabs -->
+        <div id="actFilterRow" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:6px;"></div>
+        <!-- Activity grid -->
+        <div id="activityGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
+    </div>
+</div>
 
 <!-- ══ BACK BTN ══ -->
 <button id="backBtn" onclick="exitDetailMode()" class="fixed top-5 left-5 z-50 g px-4 py-2 rounded-2xl flex items-center gap-2 text-slate-700 font-bold shadow-xl text-sm hover:bg-white transition-all">
@@ -781,6 +947,9 @@
                     <button onclick="currentDetailPOI && planRoute(currentDetailPOI)" class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-200 transition active:scale-95 flex items-center justify-center gap-1.5">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
                         规划路线
+                    </button>
+                    <button onclick="openCommentModal()" title="景点留言" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-purple-200 hover:text-purple-500 transition-all">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </button>
                     <button id="bookmarkBtn" onclick="toggleBookmark()" class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-slate-100 text-slate-400 hover:border-slate-200 transition-all">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
@@ -950,6 +1119,153 @@
     <div class="poi-pin" style="background:#fff"></div>
 </div>
 
+<!-- ══ 打卡纪念邮票 Modal ══ -->
+<div id="stampModal">
+    <div style="position:relative;">
+        <div id="stampCard">
+            <div class="stamp-perforation top" id="stampPerf1"></div>
+            <img id="stampImg" class="stamp-img" src="" alt="">
+            <div id="stampTitle" class="stamp-title">景点名</div>
+            <div id="stampSubtitle" class="stamp-subtitle">靖港古镇 · 第N处探索</div>
+            <div id="stampQuote" class="stamp-quote">"加载中…"</div>
+            <div class="stamp-footer">
+                <span id="stampDate" class="stamp-date"></span>
+                <span id="stampBadge" class="stamp-badge">已打卡</span>
+            </div>
+            <div class="stamp-perforation bottom" id="stampPerf2"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button onclick="saveStampImage()" style="flex:1;padding:11px;border-radius:14px;background:#2563eb;color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer;">保存纪念卡</button>
+            <button onclick="closeStampModal()" style="flex:1;padding:11px;border-radius:14px;background:rgba(255,255,255,0.15);color:#fff;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,0.2);cursor:pointer;">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ 游览报告 Modal ══ -->
+<div id="reportModal">
+    <div id="reportCard">
+        <div class="report-header">
+            <div style="font-size:11px;font-weight:700;opacity:.7;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">今日游览报告</div>
+            <div style="font-size:24px;font-weight:900;margin-bottom:2px;" id="reportTitle">靖港古镇探索完成！</div>
+            <div style="font-size:11px;opacity:.7;" id="reportSubtitle"></div>
+        </div>
+        <div style="padding:20px;">
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                <div class="report-stat">
+                    <div class="report-stat-val" id="rStatCount">0</div>
+                    <div class="report-stat-lbl">景点打卡</div>
+                </div>
+                <div class="report-stat">
+                    <div class="report-stat-val" id="rStatPct">0%</div>
+                    <div class="report-stat-lbl">探索完成率</div>
+                </div>
+                <div class="report-stat">
+                    <div class="report-stat-val" id="rStatLevel">🌱</div>
+                    <div class="report-stat-lbl">当前等级</div>
+                </div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <div style="font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:8px;">已探索景点</div>
+                <div id="rCheckinList" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+            </div>
+            <div id="rAiSummary" style="background:#f8fafc;border-radius:14px;padding:12px;font-size:12px;color:#475569;line-height:1.6;border-left:3px solid #2563eb;margin-bottom:16px;display:none;"></div>
+            <button onclick="generateAIReportSummary()" id="rGenBtn" style="width:100%;padding:10px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:13px;font-weight:800;border:none;cursor:pointer;margin-bottom:10px;">✨ AI生成游览总结</button>
+            <button onclick="closeReportModal()" style="width:100%;padding:10px;border-radius:14px;background:#f1f5f9;color:#64748b;font-size:13px;font-weight:700;border:none;cursor:pointer;">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ 行程规划器 ══ -->
+<div id="plannerPage">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 10px;flex-shrink:0;">
+        <div>
+            <div style="font-size:17px;font-weight:900;color:#f8fafc;">行程规划器</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;">点击景点添加到今日行程</div>
+        </div>
+        <button onclick="closePlannerPage()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div style="display:flex;flex:1;gap:0;overflow:hidden;min-height:0;">
+        <!-- Left: POI picker -->
+        <div style="width:220px;flex-shrink:0;padding:0 16px 16px;overflow-y:auto;border-right:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">选择景点</div>
+            <div id="plannerPoiList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <!-- Right: Plan slots -->
+        <div style="flex:1;padding:0 16px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;">我的行程</div>
+                <div id="plannerSummary" style="font-size:11px;color:#94a3b8;font-weight:600;"></div>
+            </div>
+            <div id="plannerSlots" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div id="plannerDropZone" class="plan-drop-zone">点击左侧景点添加行程</div>
+            <button id="plannerStartBtn" onclick="startPlannerRoute()" style="display:none;padding:12px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer;margin-top:4px;">
+                🗺️ 开始这条行程
+            </button>
+            <div id="plannerConflict" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:10px 12px;font-size:11px;color:#fca5a5;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ 打卡排行榜 Modal ══ -->
+<div id="leaderboardModal">
+    <div style="background:#fff;border-radius:28px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.4);animation:stampIn .4s cubic-bezier(.4,0,.2,1) both;">
+        <div style="background:linear-gradient(135deg,#1e3a5f,#7c3aed);padding:20px 20px 16px;color:#fff;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="font-size:17px;font-weight:900;">打卡排行榜</div>
+                    <div style="font-size:11px;opacity:.65;margin-top:2px;" id="lbSubtitle">今日探险家</div>
+                </div>
+                <button onclick="closeLeaderboard()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+        <div style="padding:0 8px 8px;">
+            <div id="lbMyRank" style="margin:12px 8px 4px;padding:10px 14px;background:#eff6ff;border-radius:14px;border:1.5px solid #bfdbfe;display:none;">
+                <div style="font-size:11px;color:#2563eb;font-weight:700;">你的排名</div>
+                <div style="font-size:13px;font-weight:900;color:#1e40af;" id="lbMyRankText"></div>
+            </div>
+            <div id="lbList" style="max-height:340px;overflow-y:auto;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ 景点留言 Modal ══ -->
+<div id="commentModal">
+    <div id="commentSheet">
+        <div style="padding:16px 20px 10px;border-bottom:1px solid #f1f5f9;flex-shrink:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+                <div style="font-size:15px;font-weight:900;color:#1e293b;" id="commentPoiName">景点留言</div>
+                <button onclick="closeCommentModal()" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;">游客们在这里说…</div>
+        </div>
+        <div id="commentList" style="flex:1;overflow-y:auto;min-height:120px;"></div>
+        <div style="padding:12px 16px 16px;border-top:1px solid #f1f5f9;flex-shrink:0;">
+            <div style="display:flex;gap:8px;">
+                <input id="commentInput" type="text" maxlength="60" placeholder="留下你的游览感受…（最多60字）" style="flex:1;padding:10px 14px;border-radius:14px;border:1.5px solid #e2e8f0;outline:none;font-size:13px;color:#374151;background:#f8fafc;">
+                <button onclick="submitComment()" style="padding:10px 16px;border-radius:14px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;white-space:nowrap;">发送</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 演出提醒 Toast -->
+<div id="showReminderToast">
+    <div class="g rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3" style="border:1.5px solid rgba(37,99,235,.2);">
+        <span style="font-size:20px;">🎭</span>
+        <div>
+            <div id="toastShowName" style="font-size:13px;font-weight:900;color:#1e293b;"></div>
+            <div id="toastShowDetail" style="font-size:11px;color:#64748b;"></div>
+        </div>
+        <button onclick="dismissShowToast()" style="width:24px;height:24px;border-radius:8px;background:#f1f5f9;border:none;color:#94a3b8;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+    </div>
+</div>
+
     <script>
         /* ── Supabase ── */
         const { createClient } = window.supabase;
@@ -1006,30 +1322,119 @@
         /* ── Checkin ── */
         let checkinSet=new Set(JSON.parse(localStorage.getItem('jg_ci')||'[]'));
         function saveCheckin(){localStorage.setItem('jg_ci',JSON.stringify([...checkinSet]));}
+
+        // Level definitions for gamified checkin
+        const CI_LEVELS = [
+            { min:0,  max:3,  label:'🌱 初识靖港',  color:'#16a34a', gradStart:'#86efac', gradEnd:'#22c55e' },
+            { min:3,  max:7,  label:'🚶 古镇漫游',  color:'#0ea5e9', gradStart:'#7dd3fc', gradEnd:'#0ea5e9' },
+            { min:7,  max:12, label:'🏮 水乡探客',  color:'#7c3aed', gradStart:'#a78bfa', gradEnd:'#7c3aed' },
+            { min:12, max:16, label:'🧭 寻宝达人',  color:'#f59e0b', gradStart:'#fde68a', gradEnd:'#f59e0b' },
+            { min:16, max:19, label:'🏯 古镇卫士',  color:'#dc2626', gradStart:'#fca5a5', gradEnd:'#dc2626' },
+            { min:19, max:99, label:'👑 靖港传奇',  color:'#7c2d12', gradStart:'#fb923c', gradEnd:'#7c2d12' },
+        ];
+        const CI_MILESTONES = [3, 7, 12, 16, 19, 20]; // badge milestones
+
         function updateCheckinUI(){
-            const n=checkinSet.size,total=POI_RAW_DATA.length;
+            const n=checkinSet.size, total=POI_RAW_DATA.length;
             document.getElementById('checkinCount').textContent=n;
-            document.getElementById('checkinText').textContent=n;
-            const circ=2*Math.PI*18;
-            document.getElementById('progRingFill').style.strokeDashoffset=circ-(n/total)*circ;
-            const dots=document.getElementById('checkinDots');
-            dots.innerHTML='';
-            [...checkinSet].slice(-3).forEach(id=>{
-                const p=POI_RAW_DATA.find(x=>x.id===id);
-                if(!p)return;
-                const d=document.createElement('div');
-                d.className='ci-dot done'; d.title=p.name; d.textContent=p.name[0];
-                dots.appendChild(d);
-            });
-            const rem=total-n;
-            if(rem>0){const d=document.createElement('div');d.className='ci-dot upcoming';d.textContent=rem;dots.appendChild(d);}
+
+            // Progress bar
+            const pct = total > 0 ? (n/total*100) : 0;
+            const bar = document.getElementById('ciProgressBar');
+            if (bar) bar.style.width = pct + '%';
+
+            // Level label
+            const level = CI_LEVELS.find(l => n >= l.min && n < l.max) || CI_LEVELS[CI_LEVELS.length-1];
+            const lbl = document.getElementById('ciLevelLabel');
+            if (lbl) { lbl.textContent = level.label; lbl.style.color = level.color; }
+
+            // Gradient update
+            if (bar) bar.style.background = `linear-gradient(90deg,${level.gradStart},${level.gradEnd})`;
+
+            // Star milestone badges
+            const badgeRow = document.getElementById('ciBadgeRow');
+            if (badgeRow) {
+                badgeRow.innerHTML = '';
+                CI_MILESTONES.forEach((ms, i) => {
+                    const earned = n >= ms;
+                    const icons = ['🌿','🔥','💎','⚔️','🏯','👑'];
+                    const colors = ['#16a34a','#f59e0b','#0ea5e9','#7c3aed','#dc2626','#7c2d12'];
+                    const badge = document.createElement('div');
+                    badge.className = 'ci-star-badge' + (earned ? ' earned' : '');
+                    badge.title = `解锁 ${ms} 个景点`;
+                    badge.textContent = icons[i];
+                    badge.style.cssText = earned
+                        ? `background:${colors[i]}22;border-color:${colors[i]};box-shadow:0 0 8px ${colors[i]}44;`
+                        : 'background:rgba(0,0,0,0.05);border-color:#e2e8f0;opacity:0.35;filter:grayscale(1);';
+                    badgeRow.appendChild(badge);
+                });
+            }
+
+            // Recent checkins
+            const recentDots = document.getElementById('ciRecentDots');
+            if (recentDots) {
+                recentDots.innerHTML = '';
+                [...checkinSet].slice(-4).reverse().forEach(id => {
+                    const p = POI_RAW_DATA.find(x=>x.id===id);
+                    if(!p) return;
+                    const d = document.createElement('div');
+                    d.className = 'ci-recent-dot';
+                    d.style.background = p.color;
+                    d.title = p.name;
+                    d.textContent = p.name[0];
+                    recentDots.appendChild(d);
+                });
+                if (checkinSet.size === 0) {
+                    recentDots.innerHTML = '<span style="font-size:9px;color:#cbd5e1;">点击景点开始打卡</span>';
+                }
+            }
         }
         function toggleBookmark(){
             if(!currentDetailPOI)return;
             const btn=document.getElementById('bookmarkBtn'),id=currentDetailPOI.id;
-            if(checkinSet.has(id)){checkinSet.delete(id);btn.classList.remove('bookmarked');}
-            else{checkinSet.add(id);btn.classList.add('bookmarked','pop');setTimeout(()=>btn.classList.remove('pop'),400);}
+            const wasChecked = checkinSet.has(id);
+            if(wasChecked){checkinSet.delete(id);btn.classList.remove('bookmarked');}
+            else{
+                checkinSet.add(id);
+                btn.classList.add('bookmarked','pop');
+                setTimeout(()=>btn.classList.remove('pop'),400);
+                // Show celebration toast
+                showCheckinCelebration(currentDetailPOI);
+                // Show stamp modal after short delay
+                setTimeout(()=>openStampModal(currentDetailPOI), 500);
+            }
             saveCheckin();updateCheckinUI();
+        }
+
+        function showCheckinCelebration(poi) {
+            const n = checkinSet.size;
+            const isMilestone = [3,7,12,16,19,20].includes(n);
+            const level = CI_LEVELS.find(l=>n>=l.min&&n<l.max)||CI_LEVELS[CI_LEVELS.length-1];
+            let el = document.getElementById('ciCelebration');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'ciCelebration';
+                el.onclick = () => { el.classList.remove('show'); };
+                el.innerHTML = `<div class="ci-toast" id="ciToastInner"></div>`;
+                document.body.appendChild(el);
+            }
+            const inner = document.getElementById('ciToastInner');
+            const emojis = ['🎊','✨','🏮','🎉','⭐','🌟'];
+            const emoji = emojis[Math.floor(Math.random()*emojis.length)];
+            inner.innerHTML = isMilestone ? `
+                <div style="font-size:36px;margin-bottom:6px;">🎊</div>
+                <div style="font-size:15px;font-weight:900;color:#f8fafc;margin-bottom:4px;">解锁成就！</div>
+                <div style="font-size:13px;font-weight:800;color:${level.color};">${level.label}</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:6px;">已解锁 ${n} 个景点 · 继续探险！</div>
+                <div style="margin-top:12px;font-size:10px;color:#475569;">点击任意处关闭</div>
+            ` : `
+                <div style="font-size:28px;margin-bottom:4px;">${emoji}</div>
+                <div style="font-size:13px;font-weight:900;color:#f8fafc;">打卡 ${poi.name}！</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:4px;">已探索 ${n}/${POI_RAW_DATA.length} 个景点</div>
+                <div style="margin-top:10px;font-size:10px;color:#475569;">点击关闭</div>
+            `;
+            el.classList.add('show');
+            setTimeout(()=>el.classList.remove('show'), isMilestone ? 3000 : 1800);
         }
         function syncBookmark(poi){
             const btn=document.getElementById('bookmarkBtn');
@@ -1234,22 +1639,49 @@
         }
         updateCrowd();setInterval(updateCrowd,60000);
 
-        /* ── Wait Times ── */
-        function getWTC(m){return m<=15?'time-low':m<=30?'time-med':'time-high';}
+        /* ── Three-Level Crowd Warning ── */
+        // 级别定义：绿=畅通(<15min), 黄=适中(15-30min), 红=拥堵(>30min)
+        const CROWD_LEVELS = [
+            { cls:'time-low',  label:'畅通',  dot:'🟢', threshold: 15  },
+            { cls:'time-med',  label:'适中',  dot:'🟡', threshold: 30  },
+            { cls:'time-high', label:'拥堵',  dot:'🔴', threshold: Infinity },
+        ];
+        function getCrowdLevel(waitMins) {
+            if (waitMins <= 0) return { cls:'time-low',  label:'无需等待', isZero:true };
+            for (const lv of CROWD_LEVELS) if (waitMins <= lv.threshold) return { ...lv, waitMins };
+            return { cls:'time-high', label:'拥堵', waitMins };
+        }
+        function buildCrowdTag(lv) {
+            if (lv.isZero)     return `<span class="crowd-dot"></span>畅通`;
+            if (lv.cls==='time-ended') return `今日结束`;
+            return `<span class="crowd-dot"></span>${lv.label} ${lv.waitMins ? lv.waitMins+'min' : ''}`;
+        }
+        function getWTC(m){ return m<=15?'time-low':m<=30?'time-med':'time-high'; }
         function updateWaitTimes(){
             const cur=new Date().getHours()*60+new Date().getMinutes();
             POI_RAW_DATA.forEach(poi=>{
-                let disp='',cls='';
+                let waitMins=0, cls='', displayHTML='', displayText='';
                 if(poi.schedules?.length){
                     let next=-1;
                     for(const t of poi.schedules){const[h,m]=t.split(':').map(Number);if(h*60+m>cur){next=h*60+m;break;}}
-                    if(next===-1){disp='今日结束';cls='time-ended';}
-                    else{const w=next-cur;disp=`下一场 ${w}min`;cls=getWTC(w);}
-                }else if(poi.baseWaitTime===0){disp='无需等待';cls='time-low';}
-                else{const w=Math.max(0,poi.baseWaitTime+Math.floor(Math.sin(cur/5+poi.pos[0])*5));disp=`等待 ${w}min`;cls=getWTC(w);}
-                poi.currentDisplay=disp;poi.currentClass=cls;
-                const tag=document.getElementById('wtt-'+poi.id);if(tag){tag.className='wait-time-tag '+cls;tag.textContent=disp;}
-                const lt=document.getElementById('lst-'+poi.id);if(lt)lt.textContent=disp;
+                    if(next===-1){ cls='time-ended'; displayHTML='今日结束'; displayText='今日结束'; }
+                    else {
+                        waitMins = next - cur;
+                        const lv = getCrowdLevel(waitMins);
+                        cls = lv.cls; displayHTML = buildCrowdTag(lv); displayText = `下一场 ${waitMins}min`;
+                    }
+                } else if(poi.baseWaitTime===0){
+                    cls='time-low'; displayHTML='<span class="crowd-dot"></span>畅通'; displayText='畅通';
+                } else {
+                    waitMins = Math.max(0, poi.baseWaitTime + Math.floor(Math.sin(cur/5+poi.pos[0])*5));
+                    const lv = getCrowdLevel(waitMins);
+                    cls = lv.cls; displayHTML = buildCrowdTag(lv); displayText = `等待 ${waitMins}min`;
+                }
+                poi.currentDisplay=displayText; poi.currentClass=cls;
+                const tag=document.getElementById('wtt-'+poi.id);
+                if(tag){ tag.className='wait-time-tag '+cls; tag.innerHTML=displayHTML; }
+                const lt=document.getElementById('lst-'+poi.id);
+                if(lt){ lt.innerHTML=`<span class="inline-flex items-center gap-1 wait-time-tag ${cls} mt-0.5">${displayHTML}</span>`; }
             });
         }
 
@@ -1411,6 +1843,16 @@
                     const btn=card.querySelector('.rc-start-btn');
                     if(btn) btn.style.opacity='1';
                     btn.onclick=(e)=>{ e.stopPropagation(); startRoute(r); };
+                    // Filter POIs on map to only show this route's spots
+                    if (activeRouteFilterId === r.id) {
+                        clearRouteFilter();
+                        activeRouteFilterId = null;
+                        card.classList.remove('active');
+                        if(btn) btn.style.opacity='0';
+                    } else {
+                        activeRouteFilterId = r.id;
+                        applyRouteFilter(r.id);
+                    }
                 };
                 scroll.appendChild(card);
             });
@@ -1865,7 +2307,7 @@
                 ring.rotation.x=-Math.PI/2;ring.position.set(...poi.pos);mapGroup.add(ring);poi.ring=ring;
                 const div=document.createElement('div');div.className='poi-label';
                 div.onclick=e=>{e.stopPropagation();enterDetailMode(poi);};
-                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}">${poi.currentDisplay||''}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
+                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}"><span class="crowd-dot"></span>${poi.currentDisplay||'畅通'}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
                 lc.appendChild(div);
                 labels.push({element:div,position:new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0,.5,0)),data:poi});
             });
@@ -2498,6 +2940,637 @@
             const sb = document.getElementById('statusBadge');
             if (sb) { sb.textContent = '📍 ' + loc.label; sb.style.color = '#16a34a'; }
             setTimeout(hideLocationModal, 600);
+        }
+
+        /* ── Activity Page ── */
+        let actFilter = 'all';
+        const ACT_CATEGORIES = ['全部', '演艺', '非遗', '红色', '体验'];
+        const ACT_CATEGORY_MAP = {
+            '演艺': ['hkjg','mqg','hgx','bdw','htf2','vc2'],
+            '非遗': ['pyx','tqg','chy'],
+            '红色': ['tcs','lcx','hnsy2'],
+            '体验': ['ms80','ldy','zymd','ysm2'],
+        };
+
+        function openActivityPage() {
+            const page = document.getElementById('activityPage');
+            page.style.display = 'block';
+            // date label
+            const now = new Date();
+            const days = ['日','一','二','三','四','五','六'];
+            document.getElementById('actDateLabel').textContent =
+                `${now.getMonth()+1}月${now.getDate()}日 · 星期${days[now.getDay()]} · 景区开放时间 09:00–22:00`;
+            buildActivityFilters();
+            buildActivityGrid('all');
+            // animate in
+            page.style.opacity = '0'; page.style.transform = 'scale(0.97)';
+            page.style.transition = 'opacity .28s ease, transform .28s cubic-bezier(.4,0,.2,1)';
+            requestAnimationFrame(() => { page.style.opacity = '1'; page.style.transform = 'scale(1)'; });
+        }
+
+        function closeActivityPage() {
+            const page = document.getElementById('activityPage');
+            page.style.opacity = '0'; page.style.transform = 'scale(0.97)';
+            setTimeout(() => { page.style.display = 'none'; page.style.transform = ''; page.style.opacity = ''; }, 280);
+            // deactivate navActivity button
+            document.getElementById('navActivity')?.classList.remove('active');
+            // re-activate navSpots
+            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+            document.getElementById('navSpots')?.classList.add('active');
+        }
+
+        function buildActivityFilters() {
+            const row = document.getElementById('actFilterRow');
+            row.innerHTML = '';
+            ACT_CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'act-filter-btn' + (cat==='全部' ? ' active' : '');
+                btn.textContent = cat;
+                btn.onclick = () => {
+                    document.querySelectorAll('.act-filter-btn').forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const key = cat === '全部' ? 'all' : cat;
+                    buildActivityGrid(key);
+                };
+                row.appendChild(btn);
+            });
+        }
+
+        function buildActivityGrid(categoryKey) {
+            const grid = document.getElementById('activityGrid');
+            grid.innerHTML = '';
+            const now = new Date();
+            const curMins = now.getHours() * 60 + now.getMinutes();
+
+            let filtered = SHOWS;
+            if (categoryKey !== 'all') {
+                const ids = ACT_CATEGORY_MAP[categoryKey] || [];
+                filtered = SHOWS.filter(s => ids.includes(s.id));
+            }
+
+            // Sort: ongoing first, then upcoming, then ended
+            filtered = [...filtered].sort((a, b) => {
+                const statusA = getShowStatus(a, curMins);
+                const statusB = getShowStatus(b, curMins);
+                return statusA.order - statusB.order;
+            });
+
+            filtered.forEach(show => {
+                const status = getShowStatus(show, curMins);
+                const card = document.createElement('div');
+                card.className = 'act-card';
+                card.onclick = () => { selectShow(show.id); closeActivityPage(); };
+
+                const timeTags = show.times.map(t => {
+                    const [h,m] = t.split(':').map(Number);
+                    const tMins = h*60+m;
+                    const isNow = Math.abs(tMins - curMins) < 45 && tMins <= curMins + 45;
+                    return `<span class="act-time-chip ${isNow?'chip-now':''}">${t}</span>`;
+                }).join('');
+
+                card.innerHTML = `
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                            <div style="width:42px;height:42px;border-radius:13px;background:${show.color}22;border:1px solid ${show.color}44;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${show.icon}</div>
+                            <div style="min-width:0;">
+                                <div style="font-size:14px;font-weight:900;color:#f8fafc;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${show.name}</div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">📍 ${show.location}</div>
+                            </div>
+                        </div>
+                        <span class="${status.cls}">${status.label}</span>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${show.desc}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
+                        <span style="font-size:10px;color:#64748b;margin-right:2px;">场次：</span>
+                        ${timeTags}
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                        ${status.nextLabel ? `<div style="font-size:10px;color:${status.order===0?'#4ade80':'#fbbf24'};font-weight:700;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${status.nextLabel}</div>` : '<div></div>'}
+                        <button class="show-reminder-btn" data-show-id="${show.id}" onclick="event.stopPropagation();toggleShowReminder('${show.id}')" style="padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;border:1px solid rgba(255,255,255,0.2);cursor:pointer;background:rgba(255,255,255,0.1);color:#94a3b8;transition:all .18s;">${reminderSet.has(show.id)?'🔔 已提醒':'🔕 提醒我'}</button>
+                    </div>`;
+                grid.appendChild(card);
+            });
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:#475569;padding:40px 0;font-size:14px;">该分类暂无活动</div>`;
+            }
+        }
+
+        function getShowStatus(show, curMins) {
+            for (const t of show.times) {
+                const [h,m] = t.split(':').map(Number);
+                const tMins = h*60+m;
+                if (curMins >= tMins && curMins < tMins + 60) {
+                    return { order:0, cls:'act-status-now', label:'进行中', nextLabel:'正在进行 · 快来参与！' };
+                }
+                if (tMins > curMins) {
+                    const diff = tMins - curMins;
+                    if (diff <= 30) return { order:1, cls:'act-status-soon', label:'即将开始', nextLabel: `距开始 ${diff} 分钟` };
+                    return { order:2, cls:'act-status-later', label:`${t} 场`, nextLabel:`下一场 ${t}` };
+                }
+            }
+            return { order:3, cls:'act-status-later', label:'今日已结束', nextLabel: null };
+        }
+
+        /* ── Route POI Filter ── */
+        let activeRouteFilterId = null;
+        function applyRouteFilter(routeId) {
+            const route = ROUTES.find(r => r.id === routeId);
+            if (!route) return;
+            const routeSet = new Set(route.pois);
+            labels.forEach(lb => {
+                const visible = routeSet.has(lb.data.id);
+                lb.element.style.opacity = visible ? '1' : '0.08';
+                lb.element.style.pointerEvents = visible ? 'auto' : 'none';
+                lb.element.style.filter = visible ? '' : 'grayscale(90%)';
+            });
+            // Update POI list items
+            document.querySelectorAll('#poiList > div').forEach((item, i) => {
+                const poi = POI_RAW_DATA[i];
+                if (!poi) return;
+                const visible = routeSet.has(poi.id);
+                item.style.display = visible ? 'flex' : 'none';
+            });
+        }
+        function clearRouteFilter() {
+            activeRouteFilterId = null;
+            labels.forEach(lb => {
+                lb.element.style.opacity = '1';
+                lb.element.style.pointerEvents = 'auto';
+                lb.element.style.filter = '';
+            });
+            document.querySelectorAll('#poiList > div').forEach(item => { item.style.display = 'flex'; });
+        }
+
+        /* ════════════════════════════════════════════
+           ① 打卡纪念邮票
+        ════════════════════════════════════════════ */
+        const STAMP_QUOTES = {
+            'vc':   '每段旅途，都从踏入这扇门的那一刻开始。',
+            'bdw':  '三面环水，一碗八味，人间烟火最抚凡心。',
+            'hsjc': '这片土地上，曾有人用血与歌唱出家国情怀。',
+            'lcx':  '英雄不老，精神永驻，历史在此无声地说话。',
+            'pyx':  '一张兽皮，一盏灯光，千年故事在指尖流转。',
+            'dpf':  '踏过这道门，时光倒流两百年。',
+            'xpf':  '古镇之西，是出发，也是归来。',
+            'ljg':  '登高望远，芦江在脚下蜿蜒，古镇如画卷展开。',
+            'byt':  '花鼓声声，茶烟袅袅，岁月在戏台上悄然流淌。',
+            'hkjc': '火光与水影交织，那是靖港永恒的浪漫。',
+            'ldy':  '光影交错之间，是整个时代的温度与记忆。',
+            'ms馆': '八十年代的气息扑面而来，那些年的故事历历在目。',
+            'tcs':  '一位母亲，四个儿女，一个信仰，撑起了一段历史。',
+            'chmd': '千年漕运从这里起航，码头的石阶见证了无数离合。',
+            'zymd': '古船悠悠，江水潺潺，这是靖港最温柔的呼吸。',
+            'hnsy': '红色的火种曾在这里秘密燃起，照亮了黑暗的年代。',
+            'htf':  '岁月在青砖上刻下痕迹，繁华与沉寂都成了故事。',
+            'ysm':  '香火千年不绝，信仰在此无声生长。',
+            'tqg':  '叮当声中，是匠人用双手与铁的对话。',
+            'edj':  '商社故地，见证了靖港昔日的经济繁华与市井百态。',
+            'chy':  '泥土的芬芳里，藏着靖港最初的模样。',
+        };
+        function buildStampPerforations() {
+            ['stampPerf1','stampPerf2'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = '';
+                for (let i=0; i<18; i++) {
+                    const h = document.createElement('div');
+                    h.className = 'stamp-hole';
+                    el.appendChild(h);
+                }
+            });
+        }
+        function openStampModal(poi) {
+            buildStampPerforations();
+            document.getElementById('stampImg').src = poi.img || '';
+            document.getElementById('stampTitle').textContent = poi.name;
+            const n = checkinSet.size;
+            document.getElementById('stampSubtitle').textContent = `靖港古镇 · 第 ${n} 处探索`;
+            const quote = STAMP_QUOTES[poi.id] || `在靖港古镇，每一处都是一段值得铭记的故事。`;
+            document.getElementById('stampQuote').textContent = `"${quote}"`;
+            const now = new Date();
+            document.getElementById('stampDate').textContent =
+                `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+            const level = CI_LEVELS.find(l=>n>=l.min&&n<l.max)||CI_LEVELS[CI_LEVELS.length-1];
+            document.getElementById('stampBadge').textContent = level.label;
+            document.getElementById('stampModal').classList.add('open');
+            launchConfetti();
+        }
+        function closeStampModal() { document.getElementById('stampModal').classList.remove('open'); }
+        function launchConfetti() {
+            const colors = ['#2563eb','#7c3aed','#ef4444','#f59e0b','#10b981'];
+            for (let i=0; i<28; i++) {
+                const el = document.createElement('div');
+                el.style.cssText = `position:fixed;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;
+                    background:${colors[Math.floor(Math.random()*colors.length)]};
+                    left:${30+Math.random()*40}%;top:${20+Math.random()*20}%;
+                    border-radius:${Math.random()>.5?'50%':'2px'};
+                    animation:confettiFall ${1.2+Math.random()*1.5}s ease-out ${Math.random()*.5}s forwards;
+                    pointer-events:none;z-index:999;`;
+                document.body.appendChild(el);
+                setTimeout(()=>el.remove(), 3000);
+            }
+        }
+        function saveStampImage() {
+            const card = document.getElementById('stampCard');
+            if (!card) return;
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(card).then(canvas => {
+                    const a = document.createElement('a'); a.download = '靖港打卡纪念.png';
+                    a.href = canvas.toDataURL(); a.click();
+                });
+            } else {
+                alert('纪念卡已生成，长按图片可保存 📸');
+            }
+        }
+
+        /* ════════════════════════════════════════════
+           ② 游览报告卡
+        ════════════════════════════════════════════ */
+        function showTravelReport() {
+            const n = checkinSet.size;
+            const total = POI_RAW_DATA.length;
+            const pct = total > 0 ? Math.round(n/total*100) : 0;
+            const level = CI_LEVELS.find(l=>n>=l.min&&n<l.max)||CI_LEVELS[CI_LEVELS.length-1];
+            const now = new Date();
+            document.getElementById('reportTitle').textContent = n===0 ? '还没有打卡记录' : n>=15 ? '厉害！你是靖港达人！' : n>=7 ? '探索进行中…' : '旅途刚刚开始';
+            document.getElementById('reportSubtitle').textContent = `${now.getMonth()+1}月${now.getDate()}日 · 靖港古镇游览报告`;
+            document.getElementById('rStatCount').textContent = n;
+            document.getElementById('rStatPct').textContent = pct + '%';
+            document.getElementById('rStatLevel').textContent = level.label;
+            const listEl = document.getElementById('rCheckinList');
+            listEl.innerHTML = '';
+            if (n === 0) {
+                listEl.innerHTML = '<span style="font-size:12px;color:#94a3b8;">还没有打卡任何景点，快去探索吧！</span>';
+            } else {
+                [...checkinSet].forEach(id => {
+                    const p = POI_RAW_DATA.find(x=>x.id===id);
+                    if (!p) return;
+                    const chip = document.createElement('span');
+                    chip.className = 'report-poi-chip';
+                    chip.textContent = p.name;
+                    listEl.appendChild(chip);
+                });
+            }
+            document.getElementById('rAiSummary').style.display = 'none';
+            document.getElementById('rGenBtn').style.display = n>0 ? 'block' : 'none';
+            document.getElementById('reportModal').classList.add('open');
+        }
+        function closeReportModal() { document.getElementById('reportModal').classList.remove('open'); }
+        async function generateAIReportSummary() {
+            const n = checkinSet.size;
+            const names = [...checkinSet].map(id=>POI_RAW_DATA.find(x=>x.id===id)?.name).filter(Boolean).join('、');
+            const btn = document.getElementById('rGenBtn');
+            btn.textContent = '✨ 生成中…'; btn.disabled = true;
+            const prompt = `游客今天在靖港古镇打卡了${n}处景点：${names}。请用2-3句温暖有趣的话总结他的游览，突出亮点，结尾鼓励下次再来。不超过80字。`;
+            try {
+                const res = await fetch('https://api.deepseek.com/chat/completions', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','Authorization':'Bearer sk-d630efc1a0d04a80a2bd6f9778dd555e'},
+                    body:JSON.stringify({model:'deepseek-chat',max_tokens:150,messages:[{role:'user',content:prompt}]})
+                });
+                const data = await res.json();
+                const summary = data.choices?.[0]?.message?.content || '今天的靖港之旅充实而美好，每一处打卡都是一段独特的记忆！';
+                const el = document.getElementById('rAiSummary');
+                el.textContent = '✨ ' + summary;
+                el.style.display = 'block';
+            } catch(e) {
+                document.getElementById('rAiSummary').textContent = '今天的靖港之旅充实而美好，期待下次再相遇！';
+                document.getElementById('rAiSummary').style.display = 'block';
+            }
+            btn.textContent = '✨ AI生成游览总结'; btn.disabled = false;
+        }
+
+        /* ════════════════════════════════════════════
+           ③ 演出到点提醒
+        ════════════════════════════════════════════ */
+        let reminderSet = new Set(JSON.parse(localStorage.getItem('jg_reminders')||'[]'));
+        let _reminderInterval = null;
+        function saveReminders() { localStorage.setItem('jg_reminders', JSON.stringify([...reminderSet])); }
+
+        function requestShowNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+        function toggleShowReminder(showId) {
+            if (reminderSet.has(showId)) {
+                reminderSet.delete(showId);
+            } else {
+                reminderSet.add(showId);
+                requestShowNotificationPermission();
+                const show = SHOWS.find(s=>s.id===showId);
+                if (show) showToast(`已设置提醒：${show.name}，开演前15分钟将提醒您 ⏰`);
+            }
+            saveReminders();
+            updateReminderButtons();
+        }
+        function updateReminderButtons() {
+            document.querySelectorAll('.show-reminder-btn').forEach(btn => {
+                const id = btn.dataset.showId;
+                const active = reminderSet.has(id);
+                btn.textContent = active ? '🔔 已提醒' : '🔕 提醒我';
+                btn.style.background = active ? 'rgba(37,99,235,0.15)' : 'rgba(255,255,255,0.1)';
+                btn.style.color = active ? '#93c5fd' : '#94a3b8';
+            });
+        }
+        function checkShowReminders() {
+            const now = new Date();
+            const cur = now.getHours()*60 + now.getMinutes();
+            reminderSet.forEach(showId => {
+                const show = SHOWS.find(s=>s.id===showId);
+                if (!show) return;
+                show.times.forEach(t => {
+                    const [h,m] = t.split(':').map(Number);
+                    const diff = h*60+m - cur;
+                    if (diff === 15 || diff === 5) {
+                        const key = `${showId}_${t}_${now.toDateString()}`;
+                        if (!sessionStorage.getItem(key)) {
+                            sessionStorage.setItem(key, '1');
+                            fireShowReminder(show, t, diff);
+                        }
+                    }
+                });
+            });
+        }
+        function fireShowReminder(show, time, minsLeft) {
+            const toast = document.getElementById('showReminderToast');
+            document.getElementById('toastShowName').textContent = `${show.name} 还有 ${minsLeft} 分钟！`;
+            document.getElementById('toastShowDetail').textContent = `${time} 场 · ${show.location}`;
+            toast.classList.add('show');
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`靖港古镇演出提醒 🎭`, { body: `${show.name} ${time} 场还有${minsLeft}分钟开始！`, icon: './hongsejuchang.jpg' });
+            }
+            setTimeout(() => toast.classList.remove('show'), 8000);
+        }
+        function dismissShowToast() { document.getElementById('showReminderToast').classList.remove('show'); }
+        function showToast(msg, dur=2500) {
+            const toast = document.getElementById('showReminderToast');
+            document.getElementById('toastShowName').textContent = msg;
+            document.getElementById('toastShowDetail').textContent = '';
+            toast.classList.add('show');
+            setTimeout(()=>toast.classList.remove('show'), dur);
+        }
+        _reminderInterval = setInterval(checkShowReminders, 60000);
+
+        /* ════════════════════════════════════════════
+           ④ 行程规划器
+        ════════════════════════════════════════════ */
+        let plannerItems = []; // array of poi ids
+        function openPlannerPage() {
+            document.getElementById('plannerPage').classList.add('open');
+            buildPlannerPoiList();
+            renderPlannerSlots();
+        }
+        function closePlannerPage() { document.getElementById('plannerPage').classList.remove('open'); }
+        function buildPlannerPoiList() {
+            const el = document.getElementById('plannerPoiList');
+            el.innerHTML = '';
+            POI_RAW_DATA.forEach(poi => {
+                const item = document.createElement('div');
+                item.className = 'planner-poi-item' + (plannerItems.includes(poi.id) ? ' in-plan' : '');
+                item.id = 'pp_' + poi.id;
+                item.innerHTML = `
+                    <div style="width:28px;height:28px;border-radius:9px;background:${poi.color}22;border:1.5px solid ${poi.color}55;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <div style="width:8px;height:8px;border-radius:50%;background:${poi.color};"></div>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${poi.name}</div>
+                        <div style="font-size:10px;color:#64748b;">${poi.type}</div>
+                    </div>
+                    <button onclick="addToPlan('${poi.id}')" style="width:24px;height:24px;border-radius:8px;background:rgba(37,99,235,0.3);border:none;color:#93c5fd;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">+</button>`;
+                el.appendChild(item);
+            });
+        }
+        function addToPlan(poiId) {
+            if (plannerItems.includes(poiId)) return;
+            if (plannerItems.length >= 8) { showToast('最多添加8个景点哦 🗺️'); return; }
+            plannerItems.push(poiId);
+            document.getElementById('pp_'+poiId)?.classList.add('in-plan');
+            renderPlannerSlots();
+            checkPlannerConflicts();
+        }
+        function removeFromPlan(poiId) {
+            plannerItems = plannerItems.filter(id=>id!==poiId);
+            document.getElementById('pp_'+poiId)?.classList.remove('in-plan');
+            renderPlannerSlots();
+            checkPlannerConflicts();
+        }
+        function renderPlannerSlots() {
+            const slots = document.getElementById('plannerSlots');
+            const zone = document.getElementById('plannerDropZone');
+            const startBtn = document.getElementById('plannerStartBtn');
+            slots.innerHTML = '';
+            if (plannerItems.length === 0) {
+                zone.style.display = 'flex';
+                startBtn.style.display = 'none';
+                document.getElementById('plannerSummary').textContent = '';
+                return;
+            }
+            zone.style.display = 'none';
+            startBtn.style.display = 'block';
+            let totalMins = 0;
+            plannerItems.forEach((id, i) => {
+                const poi = POI_RAW_DATA.find(p=>p.id===id);
+                if (!poi) return;
+                const walkMins = i === 0 ? 0 : 5;
+                totalMins += walkMins + 15;
+                const slot = document.createElement('div');
+                slot.className = 'plan-slot';
+                slot.innerHTML = `
+                    <div class="plan-slot-num">${i+1}</div>
+                    <div style="width:8px;height:8px;border-radius:50%;background:${poi.color};flex-shrink:0;"></div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:12px;font-weight:700;color:#f1f5f9;">${poi.name}</div>
+                        <div style="font-size:10px;color:#64748b;">${poi.type}${walkMins>0?` · 步行约${walkMins}分钟`:' · 起点'}</div>
+                    </div>
+                    <button class="plan-slot-del" onclick="removeFromPlan('${poi.id}')">✕</button>`;
+                slots.appendChild(slot);
+            });
+            const h = Math.floor(totalMins/60), m = totalMins%60;
+            document.getElementById('plannerSummary').textContent = `约${h>0?h+'小时':''}${m?m+'分钟':''}`;
+        }
+        function checkPlannerConflicts() {
+            const conflict = document.getElementById('plannerConflict');
+            const showPois = new Set(SHOWS.flatMap(s=>s.id ? [s.id] : []));
+            const conflicts = [];
+            plannerItems.forEach((id, i) => {
+                plannerItems.forEach((id2, j) => {
+                    if (i >= j) return;
+                    const p1 = SHOWS.find(s=>s.id===id);
+                    const p2 = SHOWS.find(s=>s.id===id2);
+                    if (p1 && p2) {
+                        const t1 = p1.times.map(t=>{const[h,m]=t.split(':').map(Number);return h*60+m;});
+                        const t2 = p2.times.map(t=>{const[h,m]=t.split(':').map(Number);return h*60+m;});
+                        const clash = t1.some(a=>t2.some(b=>Math.abs(a-b)<30));
+                        if (clash) conflicts.push(`${POI_RAW_DATA.find(p=>p.id===id)?.name} 与 ${POI_RAW_DATA.find(p=>p.id===id2)?.name} 演出时间可能冲突`);
+                    }
+                });
+            });
+            if (conflicts.length > 0) {
+                conflict.style.display = 'block';
+                conflict.innerHTML = '⚠️ 演出时间冲突提示：<br>' + conflicts.join('<br>');
+            } else {
+                conflict.style.display = 'none';
+            }
+        }
+        function startPlannerRoute() {
+            if (plannerItems.length < 2) { showToast('至少添加2个景点才能规划路线'); return; }
+            const fakeRoute = { id:'custom', name:'我的行程', icon:'📍', color:'#7c3aed', bg:'#f5f3ff', pois: plannerItems };
+            closePlannerPage();
+            highlightRoutePOIs(fakeRoute);
+        }
+
+        /* ════════════════════════════════════════════
+           ⑤ 打卡排行榜（Supabase）
+        ════════════════════════════════════════════ */
+        async function openLeaderboard() {
+            document.getElementById('leaderboardModal').classList.add('open');
+            document.getElementById('lbList').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">加载中…</div>';
+            try {
+                // 上传本人数据
+                const myN = checkinSet.size;
+                const myKey = 'visitor_' + (localStorage.getItem('jg_uid') || (() => {
+                    const id = Math.random().toString(36).slice(2,10);
+                    localStorage.setItem('jg_uid', id); return id;
+                })());
+                await supabaseClient.from('jinggang_leaderboard').upsert([{ uid: myKey, count: myN, updated_at: new Date().toISOString() }], { onConflict: 'uid' });
+                // 拉榜单
+                const { data, error } = await supabaseClient.from('jinggang_leaderboard').select('uid,count').order('count',{ascending:false}).limit(20);
+                if (error) throw error;
+                renderLeaderboard(data || [], myKey, myN);
+            } catch(e) {
+                // 降级：仅显示本地
+                renderLeaderboard([{ uid:'you', count: checkinSet.size }], 'you', checkinSet.size);
+            }
+        }
+        function renderLeaderboard(data, myKey, myN) {
+            const list = document.getElementById('lbList');
+            list.innerHTML = '';
+            const max = data[0]?.count || 1;
+            let myRankIdx = data.findIndex(r=>r.uid===myKey);
+            if (myRankIdx < 0 && myN > 0) {
+                data.push({ uid: myKey, count: myN });
+                data.sort((a,b)=>b.count-a.count);
+                myRankIdx = data.findIndex(r=>r.uid===myKey);
+            }
+            const rankClasses = ['gold','silver','bronze'];
+            const rankIcons = ['🥇','🥈','🥉'];
+            const nicknames = ['芦江探险家','水乡行者','古镇漫游者','历史寻踪者','非遗体验官','靖港卫士','码头船长','诗圣脚步','红色寻访','夜游达人','皮影传承人','花鼓听众','八大碗食客','铁艺观察者','芦阁守望者'];
+            data.slice(0,15).forEach((row, i) => {
+                const isMe = row.uid === myKey;
+                const cls = rankClasses[i] || 'other';
+                const icon = rankIcons[i] || (i+1);
+                const name = isMe ? '⭐ 你' : (nicknames[i] || `探险家${i+1}`);
+                const pct = max > 0 ? Math.round(row.count/max*100) : 0;
+                const el = document.createElement('div');
+                el.className = 'lb-row';
+                if (isMe) el.style.background = '#eff6ff';
+                el.innerHTML = `
+                    <div class="lb-rank ${cls}">${icon}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:13px;font-weight:${isMe?'900':'700'};color:${isMe?'#2563eb':'#1e293b'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+                        <div class="lb-bar-wrap" style="margin-top:4px;">
+                            <div class="lb-bar-fill" style="width:${pct}%;background:${isMe?'linear-gradient(90deg,#2563eb,#7c3aed)':'#e2e8f0'};"></div>
+                        </div>
+                    </div>
+                    <div style="font-size:13px;font-weight:900;color:${isMe?'#2563eb':'#475569'};flex-shrink:0;min-width:28px;text-align:right;">${row.count}</div>`;
+                list.appendChild(el);
+            });
+            const myRankEl = document.getElementById('lbMyRank');
+            const myRankText = document.getElementById('lbMyRankText');
+            if (myN > 0) {
+                myRankEl.style.display = 'block';
+                myRankText.textContent = `第 ${myRankIdx+1} 名 · 已打卡 ${myN} 处景点`;
+            } else {
+                myRankEl.style.display = 'none';
+            }
+            document.getElementById('lbSubtitle').textContent = `共 ${data.length} 位探险家 · 今日排行`;
+        }
+        function closeLeaderboard() { document.getElementById('leaderboardModal').classList.remove('open'); }
+
+        /* ════════════════════════════════════════════
+           ⑥ 景点留言墙（Supabase）
+        ════════════════════════════════════════════ */
+        const COMMENT_AVATARS = ['#ef4444','#f59e0b','#10b981','#2563eb','#7c3aed','#ec4899','#0ea5e9','#84cc16'];
+        const COMMENT_NICKS = ['芦江行者','水乡游客','古镇探客','历史寻踪','文化爱好者','非遗传承人','古建发烧友','靖港打卡人'];
+        async function openCommentModal() {
+            if (!currentDetailPOI) return;
+            document.getElementById('commentPoiName').textContent = `📍 ${currentDetailPOI.name} · 游客留言`;
+            document.getElementById('commentInput').value = '';
+            document.getElementById('commentModal').classList.add('open');
+            await loadComments(currentDetailPOI.id);
+        }
+        function closeCommentModal() { document.getElementById('commentModal').classList.remove('open'); }
+        async function loadComments(poiId) {
+            const list = document.getElementById('commentList');
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">加载中…</div>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('jinggang_comments')
+                    .select('content,created_at,nick_idx,color_idx')
+                    .eq('poi_id', poiId)
+                    .order('created_at', { ascending: false })
+                    .limit(30);
+                if (error) throw error;
+                renderComments(data || []);
+            } catch(e) {
+                list.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">暂无留言，来第一个说说吧！</div>';
+            }
+        }
+        function renderComments(comments) {
+            const list = document.getElementById('commentList');
+            if (comments.length === 0) {
+                list.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">暂无留言，来第一个说说吧！✍️</div>';
+                return;
+            }
+            list.innerHTML = '';
+            comments.forEach(c => {
+                const ci = c.color_idx || 0;
+                const ni = c.nick_idx || 0;
+                const color = COMMENT_AVATARS[ci % COMMENT_AVATARS.length];
+                const nick = COMMENT_NICKS[ni % COMMENT_NICKS.length];
+                const dt = new Date(c.created_at);
+                const timeStr = `${dt.getMonth()+1}月${dt.getDate()}日`;
+                const el = document.createElement('div');
+                el.className = 'comment-item';
+                el.innerHTML = `
+                    <div class="comment-avatar" style="background:${color};">${nick[0]}</div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:2px;">${nick}</div>
+                        <div class="comment-bubble">${c.content}</div>
+                        <div class="comment-time">${timeStr}</div>
+                    </div>`;
+                list.appendChild(el);
+            });
+        }
+        async function submitComment() {
+            if (!currentDetailPOI) return;
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text) return;
+            if (text.length > 60) { showToast('留言不超过60字哦 ✍️'); return; }
+            const ci = Math.floor(Math.random() * COMMENT_AVATARS.length);
+            const ni = Math.floor(Math.random() * COMMENT_NICKS.length);
+            input.value = '';
+            try {
+                await supabaseClient.from('jinggang_comments').insert([{
+                    poi_id: currentDetailPOI.id,
+                    content: text,
+                    color_idx: ci,
+                    nick_idx: ni,
+                    created_at: new Date().toISOString()
+                }]);
+                await loadComments(currentDetailPOI.id);
+            } catch(e) {
+                // Optimistic render even if DB fails
+                const list = document.getElementById('commentList');
+                const color = COMMENT_AVATARS[ci];
+                const nick = COMMENT_NICKS[ni];
+                const el = document.createElement('div');
+                el.className = 'comment-item';
+                el.innerHTML = `<div class="comment-avatar" style="background:${color};">${nick[0]}</div><div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:2px;">${nick}</div><div class="comment-bubble">${text}</div><div class="comment-time">刚刚</div></div>`;
+                list.prepend(el);
+            }
         }
 
         window.onload = init;
