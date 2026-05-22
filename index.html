@@ -285,6 +285,228 @@
         /* ── Status ── */
         #statusBadge { position:fixed; bottom:100px; left:66px; z-index:35; font-size:11px; background:rgba(255,255,255,.82); backdrop-filter:blur(10px); padding:4px 12px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#64748b; }
 
+        /* ══════════════════════════════════════
+           ★ 语音唤醒导览
+        ══════════════════════════════════════ */
+        #voiceWakeOverlay {
+            position: fixed; inset: 0; z-index: 220;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(10,10,20,0.82); backdrop-filter: blur(18px);
+            flex-direction: column; gap: 20px;
+        }
+        #voiceWakeOverlay.open { display: flex; }
+        .vw-orb {
+            position: relative; width: 120px; height: 120px;
+            border-radius: 50%; background: linear-gradient(135deg,#2563eb,#7c3aed);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform .2s;
+            box-shadow: 0 0 0 0 rgba(37,99,235,0.5);
+        }
+        .vw-orb.listening {
+            animation: orbPulse 1.5s ease-in-out infinite;
+        }
+        .vw-orb.listening .vw-orb-inner { background: rgba(255,255,255,0.25); }
+        @keyframes orbPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(37,99,235,0.7); transform: scale(1); }
+            50%  { box-shadow: 0 0 0 28px rgba(37,99,235,0); transform: scale(1.06); }
+            100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); transform: scale(1); }
+        }
+        .vw-orb-inner {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            transition: background .3s;
+        }
+        .vw-wave-ring {
+            position: absolute; inset: -6px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.25);
+            animation: waveRing 2s ease-in-out infinite;
+        }
+        .vw-wave-ring:nth-child(2) { inset:-16px; animation-delay:.4s; border-color:rgba(255,255,255,0.12); }
+        .vw-wave-ring:nth-child(3) { inset:-28px; animation-delay:.8s; border-color:rgba(255,255,255,0.06); }
+        @keyframes waveRing { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.05)} }
+        .vw-status {
+            font-size: 14px; font-weight: 700; color: white;
+            text-align: center; min-height: 22px;
+        }
+        .vw-hint {
+            font-size: 11px; color: rgba(255,255,255,0.45);
+            text-align: center; max-width: 260px; line-height: 1.7;
+        }
+        .vw-keywords {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            justify-content: center; max-width: 320px;
+        }
+        .vw-kw {
+            padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+            color: white; cursor: pointer; transition: all .2s;
+        }
+        .vw-kw:hover { background: rgba(37,99,235,0.4); border-color: #2563eb; }
+        .vw-kw.spoken { background: rgba(37,99,235,0.6); border-color: #60a5fa; }
+        .vw-close {
+            padding: 9px 24px; border-radius: 14px; font-size: 12px; font-weight: 800;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; cursor: pointer; transition: all .2s;
+        }
+        .vw-close:hover { background: rgba(255,255,255,0.2); }
+        /* active nav btn */
+        .nav-btn.voice-active { background: #ef4444 !important; color: white !important; }
+        @keyframes micBlink { 0%,100%{opacity:1}50%{opacity:.4} }
+        .nav-btn.voice-active svg { animation: micBlink 1.2s ease-in-out infinite; }
+
+        /* ══════════════════════════════════════
+           ★ 震动触觉反馈 (CSS only indicator)
+        ══════════════════════════════════════ */
+        .haptic-flash {
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            background: rgba(37,99,235,0.12);
+            animation: hapticFlash .18s ease-out forwards;
+        }
+        @keyframes hapticFlash { 0%{opacity:1} 100%{opacity:0} }
+        .haptic-ring {
+            position: fixed; border-radius: 50%; border: 2px solid rgba(37,99,235,0.7);
+            pointer-events: none; z-index: 9998;
+            animation: hapticRing .5s ease-out forwards;
+        }
+        @keyframes hapticRing {
+            0%   { opacity:1; transform:scale(1); }
+            100% { opacity:0; transform:scale(3); }
+        }
+
+        /* ══════════════════════════════════════
+           ★ 多语言切换
+        ══════════════════════════════════════ */
+        #languageModal {
+            position: fixed; inset: 0; z-index: 220;
+            display: none; align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(10px);
+        }
+        #languageModal.open { display: flex; }
+        #languageInner {
+            width: 100%; max-width: 520px; border-radius: 28px 28px 0 0;
+            background: white; padding: 22px 20px 32px;
+            animation: sheetUp .35s cubic-bezier(.4,0,.2,1) both;
+        }
+        .lang-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+            margin-top: 14px;
+        }
+        .lang-item {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            padding: 14px 8px; border-radius: 16px; cursor: pointer; transition: all .22s;
+            border: 2px solid #e2e8f0; background: #f8fafc;
+        }
+        .lang-item:hover { border-color: #2563eb; background: #eff6ff; }
+        .lang-item.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .lang-flag { font-size: 26px; line-height: 1; }
+        .lang-name { font-size: 12px; font-weight: 800; color: #1e293b; }
+        .lang-native { font-size: 10px; color: #94a3b8; font-weight: 600; }
+
+        /* ══════════════════════════════════════
+           ★ 组团游实时共享
+        ══════════════════════════════════════ */
+        #groupTourPage {
+            position: fixed; inset: 0; z-index: 200;
+            background: linear-gradient(160deg, #0f172a 0%, #0f2a1a 50%, #0f172a 100%);
+            display: none; flex-direction: column; overflow: hidden;
+            animation: pageSlideIn .35s cubic-bezier(.4,0,.2,1) both;
+        }
+        #groupTourPage.open { display: flex; }
+        .gt-header {
+            padding: 20px 24px 14px; flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .gt-back {
+            width: 36px; height: 36px; border-radius: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: white; transition: all .2s;
+        }
+        .gt-back:hover { background: rgba(255,255,255,0.2); }
+        .gt-body { flex: 1; overflow-y: auto; padding: 16px 20px 24px; }
+        .gt-body::-webkit-scrollbar { width: 3px; }
+        .gt-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        .gt-card {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 16px; margin-bottom: 12px;
+        }
+        .gt-card-title {
+            font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.9);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        /* 成员头像行 */
+        .gt-member {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .gt-member:last-child { border-bottom: none; padding-bottom: 0; }
+        .gt-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0;
+        }
+        .gt-avatar.online { border-color: #22c55e; }
+        .gt-member-info { flex: 1; min-width: 0; }
+        .gt-member-name { font-size: 12px; font-weight: 700; color: white; }
+        .gt-member-loc { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+        .gt-member-status {
+            font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 10px; flex-shrink: 0;
+        }
+        .gt-status-online { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .gt-status-offline { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+        /* 实时动态feed */
+        .gt-feed-item {
+            display: flex; gap: 10px; padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            animation: tlSlide .3s ease both;
+        }
+        .gt-feed-item:last-child { border-bottom: none; }
+        .gt-feed-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+        }
+        /* 房间码 */
+        .gt-room-code {
+            font-size: 32px; font-weight: 900; color: white; letter-spacing: 8px;
+            text-align: center; margin: 12px 0;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255,255,255,0.06); border-radius: 14px; padding: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .gt-action-btn {
+            padding: 10px 0; border-radius: 14px; font-size: 13px; font-weight: 800;
+            cursor: pointer; transition: all .2s; border: none; width: 100%;
+        }
+        .gt-action-btn:active { transform: scale(.97); }
+        /* 地图热力图风格成员位置 */
+        .gt-map-preview {
+            background: rgba(0,0,0,0.4); border-radius: 14px; padding: 12px;
+            position: relative; overflow: hidden; min-height: 100px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .gt-map-dot {
+            position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid white; font-size: 9px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: transform .3s;
+            box-shadow: 0 0 12px currentColor;
+        }
+        .gt-map-dot:hover { transform: scale(1.4); z-index: 10; }
+        @keyframes memberPulse { 0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 0 8px transparent} }
+        .gt-map-dot.me { animation: memberPulse 2s ease infinite; }
+        /* 通知横幅 */
+        .gt-notif {
+            position: fixed; top: 72px; left: 50%; transform: translateX(-50%) translateY(-90px);
+            z-index: 250; background: linear-gradient(135deg,#059669,#065f46);
+            border-radius: 20px; padding: 10px 16px; min-width: 260px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 28px rgba(5,150,105,0.4);
+            transition: transform .45s cubic-bezier(.175,.885,.32,1.275), opacity .45s;
+            opacity: 0; pointer-events: none;
+        }
+        .gt-notif.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+
         /* ── Search ── */
         #searchBox { position:fixed; top:16px; right:76px; z-index:55; width:220px; transition:all .25s; }
         #searchBox.hide-right { opacity:0; pointer-events:none; transform:translateX(8px); }
@@ -1201,6 +1423,15 @@
                 <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
             </svg>昼夜
+        </div>
+        <div class="nav-btn" id="navVoiceWake" onclick="toggleVoiceWake()" title="语音唤醒导览">
+            <svg id="voiceWakeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>语音
+        </div>
+        <div class="nav-btn" id="navGroupTour" onclick="openGroupTour()" title="组团游实时共享">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>组团
+        </div>
+        <div class="nav-btn" id="navLanguage" onclick="openLanguageSwitcher()" title="多语言切换">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>语言
         </div>
     </div>
     <div id="leftFoldTab" onclick="toggleFoldTab('leftNav','left','leftFoldTab')" title="收起/展开导航">
@@ -4822,5 +5053,736 @@
             setTimeout(checkShowAlerts, 2000);
         };
     </script>
+
+<!-- ══════════════════════════════════════════════════
+     ★ 语音唤醒导览 MODAL
+══════════════════════════════════════════════════ -->
+<div id="voiceWakeOverlay">
+    <div class="vw-orb" id="vwOrb" onclick="toggleVoiceListen()">
+        <div class="vw-wave-ring"></div>
+        <div class="vw-wave-ring"></div>
+        <div class="vw-wave-ring"></div>
+        <div class="vw-orb-inner">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+    </div>
+    <div class="vw-status" id="vwStatus">点击麦克风开始语音导览</div>
+    <div class="vw-hint">说出景点名称或指令，靖靖会为您自动导航和讲解</div>
+    <div class="vw-keywords" id="vwKeywords"></div>
+    <button class="vw-close" onclick="closeVoiceWake()">关闭语音导览</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ★ 多语言切换 MODAL
+══════════════════════════════════════════════════ -->
+<div id="languageModal" onclick="if(event.target===this)closeLanguageSwitcher()">
+    <div id="languageInner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="font-size:16px;font-weight:900;color:#1e293b;">🌐 导览语言</div>
+            <button onclick="closeLanguageSwitcher()" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">选择您偏好的导览语言，界面文字与语音讲解将同步切换</div>
+        <div class="lang-grid" id="langGrid"></div>
+        <div id="langPreview" style="margin-top:14px;padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;font-size:12px;color:#475569;line-height:1.7;"></div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ★ 组团游实时共享 PAGE
+══════════════════════════════════════════════════ -->
+<div id="groupTourPage">
+    <div class="gt-header">
+        <button class="gt-back" onclick="closeGroupTour()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div>
+            <div style="font-size:18px;font-weight:900;color:white;">👥 组团游共享</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">实时位置与动态同步</div>
+        </div>
+        <div id="gtRoomBadge" style="margin-left:auto;padding:5px 12px;border-radius:10px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);font-size:10px;font-weight:800;color:#4ade80;display:none;">
+            <span id="gtRoomBadgeText">房间已连接</span>
+        </div>
+    </div>
+    <div class="gt-body" id="gtBody">
+        <!-- 动态渲染 -->
+    </div>
+</div>
+
+<!-- 组团游通知横幅 -->
+<div class="gt-notif" id="gtNotif">
+    <span style="font-size:20px;" id="gtNotifIcon">👥</span>
+    <div>
+        <div style="font-size:11px;font-weight:800;color:white;" id="gtNotifTitle">队友动态</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);" id="gtNotifText">小美 到达了 芦江阁</div>
+    </div>
+    <button onclick="hideGtNotif()" style="margin-left:auto;background:rgba(255,255,255,0.15);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">✕</button>
+</div>
+
+<script>
+/* ╔════════════════════════════════════════════════════════════════════╗
+   ║  ★ 新增功能模块                                                    ║
+   ╠════════════════════════════════════════════════════════════════════╣
+   ║  1. 语音唤醒导览  (Web Speech API + 关键词匹配)                    ║
+   ║  2. 震动触觉反馈  (Vibration API + 视觉涟漪)                       ║
+   ║  3. 多语言切换    (中/EN/日/한 四语, 动态替换UI文字)               ║
+   ║  4. 组团游实时共享 (模拟实时位置 + 队友动态 + 房间码)              ║
+   ╚════════════════════════════════════════════════════════════════════╝ */
+
+/* ════════════════════════════════════════════════════════
+   ② 震动触觉反馈系统
+════════════════════════════════════════════════════════ */
+const HAPTIC = {
+    light:   () => { if (navigator.vibrate) navigator.vibrate(15);  HAPTIC._ring(); },
+    medium:  () => { if (navigator.vibrate) navigator.vibrate(30);  HAPTIC._flash(); HAPTIC._ring(); },
+    heavy:   () => { if (navigator.vibrate) navigator.vibrate([30,20,50]); HAPTIC._flash(); HAPTIC._ring(); HAPTIC._ring(80,80); },
+    success: () => { if (navigator.vibrate) navigator.vibrate([15,10,25,10,15]); HAPTIC._flash(); },
+    error:   () => { if (navigator.vibrate) navigator.vibrate([50,30,50]); },
+    checkin: () => { if (navigator.vibrate) navigator.vibrate([30,20,80,20,30]); HAPTIC._flash(); HAPTIC._ring(); HAPTIC._ring(100,100); },
+    _flash() {
+        const el = document.createElement('div');
+        el.className = 'haptic-flash';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 250);
+    },
+    _ring(cx, cy) {
+        const x = cx || window.innerWidth/2, y = cy || window.innerHeight/2;
+        const el = document.createElement('div');
+        el.className = 'haptic-ring';
+        const s = 50;
+        el.style.cssText = `left:${x-s/2}px;top:${y-s/2}px;width:${s}px;height:${s}px;`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 600);
+    }
+};
+
+// 注入触觉反馈到现有关键操作
+document.addEventListener('DOMContentLoaded', () => {
+    // 打卡按钮
+    const origDoCheckin = window.doCheckin;
+    if (origDoCheckin) {
+        window.doCheckin = function(...args) { HAPTIC.checkin(); return origDoCheckin.apply(this, args); };
+    }
+});
+
+// 劫持 openDetailCard 来注入触觉
+const _origOpenDetail = window.openDetailCard;
+window.openDetailCard = function(...args) {
+    HAPTIC.light();
+    if (_origOpenDetail) return _origOpenDetail.apply(this, args);
+};
+
+/* ════════════════════════════════════════════════════════
+   ① 语音唤醒导览系统
+════════════════════════════════════════════════════════ */
+let voiceWakeActive = false;
+let recognition = null;
+let voiceListening = false;
+
+// POI关键词映射 (在POI数据加载后由initVoiceKeywords()完善)
+const VOICE_CMDS = {
+    '芦江阁': 'ljg', '八元堂': 'byt', '皮影戏': 'pyx', '花开靖港': 'hkjc',
+    '老电影': 'ldy', '民俗': 'ms馆', '陶承': 'tcs', '楚河码头': 'chmd',
+    '正义码头': 'zymd', '省委旧址': 'hnsy', '宏泰坊': 'htf', '杨泗庙': 'ysm',
+    '铁器': 'tqg', '锄禾源': 'chy', '西牌坊': 'xpf',
+    '导航': '__navigate', '路线': '__route', '附近': '__nearby',
+    '打卡': '__checkin', 'AI': '__ai', '帮助': '__help',
+};
+
+function initVoiceWakeUI() {
+    const container = document.getElementById('vwKeywords');
+    if (!container) return;
+    const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
+    const names = pois.slice(0,10).map(p => p.name);
+    names.push('附近景点', '今日路线', '打开AI', '打卡');
+    container.innerHTML = names.map(n =>
+        `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')">${n}</div>`
+    ).join('');
+}
+
+function toggleVoiceWake() {
+    voiceWakeActive = !voiceWakeActive;
+    const overlay = document.getElementById('voiceWakeOverlay');
+    const navBtn = document.getElementById('navVoiceWake');
+    if (voiceWakeActive) {
+        overlay.classList.add('open');
+        navBtn.classList.add('voice-active');
+        initVoiceWakeUI();
+        HAPTIC.medium();
+    } else {
+        closeVoiceWake();
+    }
+}
+
+function closeVoiceWake() {
+    voiceWakeActive = false;
+    stopVoiceListen();
+    document.getElementById('voiceWakeOverlay').classList.remove('open');
+    document.getElementById('navVoiceWake').classList.remove('voice-active');
+}
+
+function toggleVoiceListen() {
+    if (voiceListening) { stopVoiceListen(); return; }
+    startVoiceListen();
+}
+
+function startVoiceListen() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setVwStatus('⚠️ 您的浏览器不支持语音识别，请使用 Chrome');
+        return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.onstart = () => {
+        voiceListening = true;
+        document.getElementById('vwOrb').classList.add('listening');
+        setVwStatus('🎙️ 正在聆听，请说出景点名称…');
+        HAPTIC.light();
+    };
+    recognition.onresult = (e) => {
+        const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+        setVwStatus('🔍 识别中：' + transcript);
+        if (e.results[0].isFinal) processVoiceResult(transcript);
+    };
+    recognition.onerror = () => {
+        voiceListening = false;
+        document.getElementById('vwOrb').classList.remove('listening');
+        setVwStatus('❌ 识别失败，请重试');
+        HAPTIC.error();
+    };
+    recognition.onend = () => {
+        voiceListening = false;
+        document.getElementById('vwOrb').classList.remove('listening');
+        if (voiceWakeActive && document.getElementById('vwStatus').textContent.startsWith('🔍')) {
+            setVwStatus('点击麦克风继续语音导览');
+        }
+    };
+    recognition.start();
+}
+
+function stopVoiceListen() {
+    if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+    voiceListening = false;
+    document.getElementById('vwOrb').classList.remove('listening');
+    setVwStatus('点击麦克风开始语音导览');
+}
+
+function setVwStatus(txt) {
+    const el = document.getElementById('vwStatus');
+    if (el) el.textContent = txt;
+}
+
+function processVoiceResult(text) {
+    // 关键词匹配
+    for (const [kw, id] of Object.entries(VOICE_CMDS)) {
+        if (text.includes(kw)) {
+            highlightVoiceKw(kw);
+            if (id.startsWith('__')) {
+                handleVoiceAction(id);
+            } else {
+                const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
+                if (poi) {
+                    setVwStatus('✅ 找到：' + poi.name);
+                    HAPTIC.success();
+                    setTimeout(() => {
+                        closeVoiceWake();
+                        if (typeof openDetailCard === 'function') openDetailCard(poi);
+                    }, 800);
+                    return;
+                }
+            }
+            return;
+        }
+    }
+    // 模糊匹配POI名称
+    if (typeof POI_RAW_DATA !== 'undefined') {
+        const matched = POI_RAW_DATA.find(p => p.name.includes(text) || text.includes(p.name));
+        if (matched) {
+            setVwStatus('✅ 导航至：' + matched.name);
+            HAPTIC.success();
+            setTimeout(() => {
+                closeVoiceWake();
+                if (typeof openDetailCard === 'function') openDetailCard(matched);
+            }, 800);
+            return;
+        }
+    }
+    setVwStatus('❓ 未找到"' + text + '"，请重试');
+    HAPTIC.error();
+}
+
+function handleVoiceAction(action) {
+    closeVoiceWake();
+    switch(action) {
+        case '__ai':    if(typeof toggleAIPanel==='function') toggleAIPanel(); break;
+        case '__route': if(typeof showSideList==='function') showSideList(); break;
+        case '__checkin': if(typeof openCheckinDetail==='function') openCheckinDetail(); break;
+        case '__help':
+            setVwStatus('💡 可说：景点名 / 附近景点 / 今日路线 / 打卡');
+            break;
+    }
+    HAPTIC.medium();
+}
+
+function highlightVoiceKw(kw) {
+    document.querySelectorAll('.vw-kw').forEach(el => {
+        if (el.textContent.trim() === kw) el.classList.add('spoken');
+    });
+}
+
+function simulateVoiceCmd(name) {
+    HAPTIC.light();
+    setVwStatus('🔍 识别中：' + name);
+    setTimeout(() => processVoiceResult(name), 400);
+}
+
+/* ════════════════════════════════════════════════════════
+   ③ 多语言切换系统
+════════════════════════════════════════════════════════ */
+let currentLang = localStorage.getItem('jg_lang') || 'zh';
+
+const LANGUAGES = [
+    { code:'zh', flag:'🇨🇳', name:'中文', native:'简体中文' },
+    { code:'en', flag:'🇺🇸', name:'English', native:'英文' },
+    { code:'ja', flag:'🇯🇵', name:'日本語', native:'日文' },
+    { code:'ko', flag:'🇰🇷', name:'한국어', native:'韩文' },
+];
+
+// 翻译字典 (核心 UI 文字)
+const I18N = {
+    zh: {
+        appTitle: '靖港古镇3D智能导览系统',
+        spots: '景点', route: '路线', activity: '活动', history: '历史',
+        ranking: '榜单', planner: '规划', dayNight: '昼夜',
+        voiceNav: '语音', groupTour: '组团', language: '语言',
+        search: '搜索景点名称…', aiTitle: '靖靖 · AI导游', aiOnline: '在线 · 随时为您服务',
+        checkinTitle: '探索者', checkinSub: '点击查看成就',
+        routeLabel: '推荐路线', selectRoute: '选择路线',
+        audioPlay: '播放', planRoute: '规划路线', messageWall: '留言墙',
+        backToMap: '返回地图', todayShow: '今日演出',
+        preview: '靖港古镇，始建于唐朝，是长沙最有名的古镇之一，被誉为"小汉口"。',
+    },
+    en: {
+        appTitle: 'Jinggang Ancient Town 3D Smart Guide',
+        spots: 'Spots', route: 'Routes', activity: 'Events', history: 'History',
+        ranking: 'Rank', planner: 'Plan', dayNight: 'Day/Night',
+        voiceNav: 'Voice', groupTour: 'Group', language: 'Lang',
+        search: 'Search attractions…', aiTitle: 'Jingjing · AI Guide', aiOnline: 'Online · At your service',
+        checkinTitle: 'Explorer', checkinSub: 'Tap to view achievements',
+        routeLabel: 'Recommended', selectRoute: 'Select Route',
+        audioPlay: 'Play', planRoute: 'Get Route', messageWall: 'Messages',
+        backToMap: 'Back to Map', todayShow: "Today's Shows",
+        preview: 'Jinggang Ancient Town, founded in the Tang Dynasty, is one of the most famous ancient towns near Changsha, known as "Little Hankou".',
+    },
+    ja: {
+        appTitle: '靖港古鎮3Dスマートガイド',
+        spots: 'スポット', route: 'ルート', activity: 'イベント', history: '歴史',
+        ranking: 'ランク', planner: '計画', dayNight: '昼夜',
+        voiceNav: '音声', groupTour: 'グループ', language: '言語',
+        search: '観光スポットを検索…', aiTitle: '靖靖 · AIガイド', aiOnline: 'オンライン · いつでもご相談を',
+        checkinTitle: '探検家', checkinSub: 'タップして実績を確認',
+        routeLabel: 'おすすめルート', selectRoute: 'ルートを選択',
+        audioPlay: '再生', planRoute: 'ルート案内', messageWall: 'メッセージ',
+        backToMap: 'マップに戻る', todayShow: '本日のショー',
+        preview: '靖港古鎮は唐代に創建された、長沙近郊で最も有名な古い町のひとつで「小漢口」と称されています。',
+    },
+    ko: {
+        appTitle: '징강 고진 3D 스마트 가이드',
+        spots: '명소', route: '노선', activity: '이벤트', history: '역사',
+        ranking: '순위', planner: '계획', dayNight: '주야',
+        voiceNav: '음성', groupTour: '그룹', language: '언어',
+        search: '명소 검색…', aiTitle: '징징 · AI 가이드', aiOnline: '온라인 · 언제든지 서비스',
+        checkinTitle: '탐험가', checkinSub: '탭하여 업적 확인',
+        routeLabel: '추천 노선', selectRoute: '노선 선택',
+        audioPlay: '재생', planRoute: '길안내', messageWall: '메시지',
+        backToMap: '지도로 돌아가기', todayShow: '오늘의 공연',
+        preview: '징강 고진은 당나라 때 세워진 창사 근교에서 가장 유명한 고대 도시 중 하나로 "작은 한커우"라 불립니다.',
+    },
+};
+
+function t(key) { return (I18N[currentLang] || I18N.zh)[key] || (I18N.zh)[key] || key; }
+
+function openLanguageSwitcher() {
+    const modal = document.getElementById('languageModal');
+    modal.classList.add('open');
+    renderLangGrid();
+    HAPTIC.light();
+}
+
+function closeLanguageSwitcher() {
+    document.getElementById('languageModal').classList.remove('open');
+}
+
+function renderLangGrid() {
+    const grid = document.getElementById('langGrid');
+    grid.innerHTML = LANGUAGES.map(l => `
+        <div class="lang-item ${l.code===currentLang?'active':''}" onclick="switchLanguage('${l.code}')">
+            <div class="lang-flag">${l.flag}</div>
+            <div class="lang-name">${l.name}</div>
+            <div class="lang-native">${l.native}</div>
+        </div>
+    `).join('');
+    document.getElementById('langPreview').textContent = t('preview');
+}
+
+function switchLanguage(code) {
+    currentLang = code;
+    localStorage.setItem('jg_lang', code);
+    renderLangGrid();
+    applyLanguage();
+    HAPTIC.success();
+    // 短暂延迟后关闭
+    setTimeout(closeLanguageSwitcher, 600);
+}
+
+function applyLanguage() {
+    const d = (id, key) => { const el=document.getElementById(id); if(el) el.textContent=t(key); };
+    const q = (sel, key) => { document.querySelectorAll(sel).forEach(el=>el.textContent=t(key)); };
+
+    // 标题
+    document.title = t('appTitle');
+
+    // 左侧导航按钮文字 (保留SVG图标，只替换文字节点)
+    const navMap = {
+        navSpots:'spots', navRoute:'route', navActivity:'activity',
+        navTimeline:'history', navLeaderboard:'ranking', navPlanner:'planner',
+        navDayNight:'dayNight', navVoiceWake:'voiceNav', navGroupTour:'groupTour', navLanguage:'language'
+    };
+    Object.entries(navMap).forEach(([id, key]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        // 找到最后一个文字节点并替换
+        const nodes = [...btn.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
+        if (nodes.length) nodes[nodes.length-1].textContent = t(key);
+        else btn.appendChild(document.createTextNode(t(key)));
+    });
+
+    // 搜索框
+    const si = document.getElementById('searchInput');
+    if (si) si.placeholder = t('search');
+
+    // AI 面板
+    const aiTitle = document.querySelector('#aiPanel .text-\\[13px\\].font-black');
+    if (aiTitle) aiTitle.textContent = t('aiTitle');
+
+    // 返回地图按钮
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        const txt = backBtn.querySelector('svg+*') || [...backBtn.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
+        if (txt) txt.textContent = ' ' + t('backToMap');
+    }
+
+    // 打卡区标题
+    const ciTitle = document.getElementById('checkinTitleText');
+    if (ciTitle && ciTitle.textContent !== '') {
+        // 保留当前等级称号不覆盖
+    }
+}
+
+/* ════════════════════════════════════════════════════════
+   ④ 组团游实时共享系统
+════════════════════════════════════════════════════════ */
+const GT = {
+    roomCode: null,
+    members: [],
+    isInRoom: false,
+    feedItems: [],
+    _timer: null,
+    _notifTimer: null,
+};
+
+const GT_MOCK_MEMBERS = [
+    { id:'m1', name:'小美',   avatar:'👩', emoji:'👩', color:'#ec4899', poi:'ljg',  status:'online', dist:null },
+    { id:'m2', name:'阿伟',   avatar:'👨', emoji:'👨', color:'#2563eb', poi:'byt',  status:'online', dist:null },
+    { id:'m3', name:'老王',   avatar:'🧔', emoji:'🧔', color:'#f59e0b', poi:'chmd', status:'offline',dist:null },
+    { id:'m4', name:'糖糖',   avatar:'👧', emoji:'👧', color:'#7c3aed', poi:'hkjc', status:'online', dist:null },
+];
+const GT_EVENTS = [
+    { member:'小美', poi:'芦江阁',   action:'到达了',  icon:'📍', color:'#ec4899' },
+    { member:'阿伟', poi:'八元堂',   action:'打卡了',  icon:'✅', color:'#2563eb' },
+    { member:'糖糖', poi:'皮影戏馆', action:'到达了',  icon:'📍', color:'#7c3aed' },
+    { member:'小美', poi:'花开靖港', action:'拍了照片',icon:'📸', color:'#ec4899' },
+    { member:'阿伟', poi:'老电影院', action:'完成了导览',icon:'🎧',color:'#2563eb' },
+    { member:'糖糖', poi:'杨泗庙',   action:'打卡了',  icon:'✅', color:'#7c3aed' },
+];
+
+function generateRoomCode() {
+    return Math.floor(100000 + Math.random()*900000).toString();
+}
+
+function openGroupTour() {
+    const page = document.getElementById('groupTourPage');
+    page.classList.add('open');
+    renderGroupTourBody();
+    HAPTIC.medium();
+}
+
+function closeGroupTour() {
+    document.getElementById('groupTourPage').classList.remove('open');
+    if (GT._timer) { clearInterval(GT._timer); GT._timer = null; }
+}
+
+function renderGroupTourBody() {
+    const body = document.getElementById('gtBody');
+    if (!GT.isInRoom) {
+        // 未加入房间 — 显示创建/加入选项
+        body.innerHTML = `
+        <div class="gt-card" style="text-align:center;padding:24px 16px;">
+            <div style="font-size:48px;margin-bottom:12px;">👥</div>
+            <div style="font-size:16px;font-weight:900;color:white;margin-bottom:6px;">和朋友一起游靖港</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:20px;line-height:1.7;">
+                创建房间，邀请同行伙伴加入<br>实时共享位置、打卡动态与推荐路线
+            </div>
+            <button class="gt-action-btn" onclick="gtCreateRoom()" style="background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;margin-bottom:8px;">
+                ✨ 创建组团房间
+            </button>
+            <button class="gt-action-btn" onclick="gtShowJoinInput()" style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);">
+                🔗 输入房间码加入
+            </button>
+            <div id="gtJoinInput" style="display:none;margin-top:12px;">
+                <input id="gtRoomInput" type="text" maxlength="6" placeholder="输入6位房间码"
+                    style="width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-size:18px;font-weight:900;text-align:center;letter-spacing:6px;outline:none;font-family:monospace;"
+                    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <button class="gt-action-btn" onclick="gtJoinRoom()" style="background:#059669;color:white;margin-top:8px;">确认加入</button>
+            </div>
+        </div>
+        <div class="gt-card">
+            <div class="gt-card-title">
+                <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulseDot 1.5s ease infinite;"></span>
+                功能特色
+            </div>
+            ${[
+                ['📍','实时位置共享','在地图上看到所有队友的当前位置'],
+                ['🔔','智能提醒','队友到达景点时，自动振动提醒'],
+                ['🗺️','同步路线','队长设置路线后，所有成员同步更新'],
+                ['💬','队内动态','打卡、照片、留言实时推送给全队'],
+            ].map(([ic,ti,de])=>`
+                <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:20px;flex-shrink:0;">${ic}</div>
+                    <div><div style="font-size:12px;font-weight:700;color:white;">${ti}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;">${de}</div></div>
+                </div>`).join('')}
+        </div>`;
+    } else {
+        renderGroupTourRoom();
+    }
+}
+
+function gtShowJoinInput() {
+    const d = document.getElementById('gtJoinInput');
+    if (d) { d.style.display = d.style.display==='none'?'block':'none'; }
+    HAPTIC.light();
+}
+
+function gtCreateRoom() {
+    GT.roomCode = generateRoomCode();
+    GT.isInRoom = true;
+    GT.members = [
+        { id:'me', name:'我', avatar:'🙂', emoji:'🙂', color:'#2563eb', poi:null, status:'online', isMe:true },
+        ...GT_MOCK_MEMBERS
+    ];
+    GT.feedItems = GT_EVENTS.slice(0,2).map((e,i) => ({...e, time: (5-i*2)+'分钟前'}));
+    document.getElementById('gtRoomBadge').style.display = '';
+    document.getElementById('gtRoomBadgeText').textContent = '房间 ' + GT.roomCode;
+    renderGroupTourRoom();
+    HAPTIC.success();
+    // 模拟实时动态推送
+    let eventIdx = 2;
+    GT._timer = setInterval(() => {
+        const evt = GT_EVENTS[eventIdx % GT_EVENTS.length];
+        eventIdx++;
+        const item = { ...evt, time: '刚刚' };
+        GT.feedItems.unshift(item);
+        if (GT.feedItems.length > 12) GT.feedItems.pop();
+        // 更新成员位置
+        GT.members.forEach(m => {
+            if (!m.isMe) {
+                const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
+                if (pois.length) m.poi = pois[Math.floor(Math.random()*pois.length)].id;
+            }
+        });
+        renderGroupTourRoom();
+        // 显示通知横幅
+        showGtNotif(evt.icon + ' ' + evt.member + ' ' + evt.action + ' ' + evt.poi, evt.color);
+        HAPTIC.light();
+    }, 6000);
+}
+
+function gtJoinRoom() {
+    const code = document.getElementById('gtRoomInput').value.trim();
+    if (code.length !== 6) { HAPTIC.error(); return; }
+    GT.roomCode = code;
+    gtCreateRoom();
+}
+
+function renderGroupTourRoom() {
+    const body = document.getElementById('gtBody');
+    const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
+    const getPoiName = id => { const p = pois.find(x=>x.id===id); return p ? p.name : '途中'; };
+
+    // 构建小地图点
+    const mapDots = GT.members.filter(m=>m.poi||m.isMe).map(m => {
+        const poi = pois.find(p=>p.id===m.poi);
+        // 把3D坐标映射到 mini-map (100x60 容器内)
+        const px = poi ? Math.round((poi.pos[0]+30)/60*100) : 50;
+        const py = poi ? Math.round((poi.pos[2]+20)/35*60) : 30;
+        const cx = Math.max(4, Math.min(96, px));
+        const cy = Math.max(4, Math.min(56, py));
+        return `<div class="gt-map-dot${m.isMe?' me':''}"
+            style="left:${cx}%;top:${cy}%;background:${m.color};color:${m.color};"
+            title="${m.name}${poi?(' · '+poi.name):''}">
+            <span style="font-size:10px;">${m.emoji}</span>
+        </div>`;
+    }).join('');
+
+    body.innerHTML = `
+    <!-- 房间码 -->
+    <div class="gt-card">
+        <div class="gt-card-title">🔑 房间码 · 邀请队友扫码加入</div>
+        <div class="gt-room-code">${GT.roomCode}</div>
+        <div style="display:flex;gap:8px;">
+            <button class="gt-action-btn" onclick="gtCopyCode()" style="flex:1;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.15);">📋 复制</button>
+            <button class="gt-action-btn" onclick="gtShareCode()" style="flex:1;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;">📤 分享</button>
+        </div>
+    </div>
+    <!-- 成员位置小地图 -->
+    <div class="gt-card">
+        <div class="gt-card-title">
+            <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulseDot 1.5s ease infinite;display:inline-block;"></span>
+            实时位置 · ${GT.members.filter(m=>m.status==='online').length} 人在线
+        </div>
+        <div class="gt-map-preview" style="height:80px;">${mapDots}
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(124,58,237,0.05));border-radius:14px;"></div>
+            <div style="position:absolute;bottom:6px;right:8px;font-size:9px;color:rgba(255,255,255,.3);">靖港古镇示意图</div>
+        </div>
+    </div>
+    <!-- 成员列表 -->
+    <div class="gt-card">
+        <div class="gt-card-title">👥 队伍成员 (${GT.members.length}人)</div>
+        ${GT.members.map(m => `
+        <div class="gt-member">
+            <div class="gt-avatar${m.status==='online'?' online':''}" style="background:${m.color}22;">${m.emoji}</div>
+            <div class="gt-member-info">
+                <div class="gt-member-name">${m.name}${m.isMe?'<span style="font-size:9px;background:rgba(37,99,235,.3);color:#93c5fd;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:700;">我</span>':''}</div>
+                <div class="gt-member-loc">${m.poi ? '📍 ' + getPoiName(m.poi) : '行进中'}</div>
+            </div>
+            <div class="gt-member-status ${m.status==='online'?'gt-status-online':'gt-status-offline'}">${m.status==='online'?'在线':'离线'}</div>
+        </div>`).join('')}
+    </div>
+    <!-- 实时动态 -->
+    <div class="gt-card">
+        <div class="gt-card-title">📡 实时动态</div>
+        ${GT.feedItems.length===0 ? '<div style="text-align:center;padding:16px;color:rgba(255,255,255,.3);font-size:12px;">等待动态...</div>' :
+        GT.feedItems.map((f,i)=>`
+        <div class="gt-feed-item" style="animation-delay:${i*40}ms;">
+            <div class="gt-feed-dot" style="background:${f.color};margin-top:5px;box-shadow:0 0 6px ${f.color};"></div>
+            <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);">
+                    ${f.icon} <span style="color:${f.color};">${f.member}</span> ${f.action} <strong style="color:white;">${f.poi}</strong>
+                </div>
+                <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;">${f.time}</div>
+            </div>
+        </div>`).join('')}
+    </div>
+    <!-- 队长功能 -->
+    <div class="gt-card">
+        <div class="gt-card-title">⚙️ 队长功能</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button class="gt-action-btn" onclick="gtSyncRoute()" style="background:rgba(37,99,235,0.2);color:#93c5fd;border:1px solid rgba(37,99,235,.3);font-size:11px;">📤 同步路线给全队</button>
+            <button class="gt-action-btn" onclick="gtCallGather()" style="background:rgba(236,72,153,0.2);color:#f9a8d4;border:1px solid rgba(236,72,153,.3);font-size:11px;">📣 召集集合</button>
+        </div>
+    </div>
+    <button class="gt-action-btn" onclick="gtLeaveRoom()" style="background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);margin-top:4px;">退出房间</button>`;
+}
+
+function gtCopyCode() {
+    if (navigator.clipboard) navigator.clipboard.writeText(GT.roomCode);
+    showGtNotif('✅ 房间码 ' + GT.roomCode + ' 已复制', '#2563eb');
+    HAPTIC.success();
+}
+
+function gtShareCode() {
+    if (navigator.share) {
+        navigator.share({ title:'靖港古镇组团游', text:'加入我的靖港导览组，房间码：' + GT.roomCode });
+    } else {
+        gtCopyCode();
+    }
+    HAPTIC.medium();
+}
+
+function gtSyncRoute() {
+    showGtNotif('📤 已将当前路线同步给全队', '#2563eb');
+    HAPTIC.success();
+}
+
+function gtCallGather() {
+    showGtNotif('📣 集合通知已发送给所有队员', '#ec4899');
+    HAPTIC.heavy();
+}
+
+function gtLeaveRoom() {
+    GT.isInRoom = false; GT.roomCode = null; GT.members = []; GT.feedItems = [];
+    if (GT._timer) { clearInterval(GT._timer); GT._timer = null; }
+    document.getElementById('gtRoomBadge').style.display = 'none';
+    renderGroupTourBody();
+    HAPTIC.medium();
+}
+
+function showGtNotif(text, color) {
+    const notif = document.getElementById('gtNotif');
+    document.getElementById('gtNotifText').textContent = text;
+    notif.style.borderLeft = `4px solid ${color || '#22c55e'}`;
+    notif.classList.add('show');
+    if (GT._notifTimer) clearTimeout(GT._notifTimer);
+    GT._notifTimer = setTimeout(() => notif.classList.remove('show'), 3800);
+}
+
+function hideGtNotif() {
+    document.getElementById('gtNotif').classList.remove('show');
+}
+
+/* ════════════════════════════════════════════════════════
+   初始化 & 触觉注入到打卡功能
+════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+    // 应用保存的语言
+    if (currentLang !== 'zh') applyLanguage();
+
+    // 给所有 nav-btn 加触觉
+    document.querySelectorAll('.nav-btn, .tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => HAPTIC.light(), { passive: true });
+    });
+
+    // 给 POI 标注加触觉 (动态元素用委托)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.poi-label')) HAPTIC.light();
+        if (e.target.closest('.route-card')) HAPTIC.light();
+        if (e.target.closest('.ci-grid-dot')) HAPTIC.medium();
+    });
+});
+
+// 在原始 doCheckin / checkin 完成后注入触觉 — 用setTimeout等待其定义
+setTimeout(() => {
+    const _orig = window.doCheckin;
+    if (_orig && typeof _orig === 'function') {
+        window.doCheckin = function(...a) { const r = _orig.apply(this,a); HAPTIC.checkin(); return r; };
+    }
+    // 演出提醒触觉
+    const _origAlert = window.checkShowAlerts;
+    if (_origAlert && typeof _origAlert === 'function') {
+        window.checkShowAlerts = function(...a) {
+            const r = _origAlert.apply(this,a);
+            const bar = document.getElementById('showAlertBar');
+            if (bar && bar.classList.contains('visible')) HAPTIC.heavy();
+            return r;
+        };
+    }
+}, 2000);
+
+</script>
 </body>
 </html>
