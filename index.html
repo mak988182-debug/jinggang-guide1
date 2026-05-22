@@ -141,8 +141,9 @@
 
         /* ═══════ LEFT PANEL ═══════ */
         #leftPanel {
-            position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
+            position: fixed; left: 8px; top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
+            max-height: calc(100dvh - 24px);
         }
         #leftNav {
             display: flex; flex-direction: column; gap: 5px;
@@ -150,9 +151,10 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .nav-btn {
-            width: 46px; height: 46px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            cursor: pointer; transition: all .2s; font-size: 9px; font-weight: 700; color: #64748b;
+            width: 44px; height: 42px; border-radius: 11px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            cursor: pointer; transition: all .2s; font-size: 8.5px; font-weight: 700; color: #64748b;
+            flex-shrink: 0;
         }
         .nav-btn:hover { background: rgba(37,99,235,.08); color: #2563eb; }
         .nav-btn.active { background: #2563eb; color: white; box-shadow: 0 3px 10px rgba(37,99,235,.35); }
@@ -5054,6 +5056,21 @@
         };
     </script>
 
+<!-- ══ 悬浮语言切换按钮（手机端始终可见） ══ -->
+<div id="langFab" onclick="openLanguageSwitcher()" title="切换语言" style="
+    position:fixed; bottom:16px; left:8px; z-index:60;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.88); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.6);
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s; gap:1px;
+    font-size:8px; font-weight:800; color:#475569;
+">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span id="langFabLabel">中</span>
+</div>
+
 <!-- ══════════════════════════════════════════════════
      ★ 语音唤醒导览 MODAL
 ══════════════════════════════════════════════════ -->
@@ -5067,7 +5084,7 @@
         </div>
     </div>
     <div class="vw-status" id="vwStatus">点击麦克风开始语音导览</div>
-    <div class="vw-hint">说出景点名称或指令，靖靖会为您自动导航和讲解</div>
+    <div class="vw-hint">🎙️ 点击麦克风说出景点名称，或点击下方词语快速导览<br><span style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;display:block;">支持Chrome/Safari · 识别后自动飞行定位并播放讲解</span></div>
     <div class="vw-keywords" id="vwKeywords"></div>
     <button class="vw-close" onclick="closeVoiceWake()">关闭语音导览</button>
 </div>
@@ -5180,23 +5197,47 @@ let voiceWakeActive = false;
 let recognition = null;
 let voiceListening = false;
 
-// POI关键词映射 (在POI数据加载后由initVoiceKeywords()完善)
+// POI关键词映射 - 全景区覆盖 + 别名支持
 const VOICE_CMDS = {
-    '芦江阁': 'ljg', '八元堂': 'byt', '皮影戏': 'pyx', '花开靖港': 'hkjc',
-    '老电影': 'ldy', '民俗': 'ms馆', '陶承': 'tcs', '楚河码头': 'chmd',
-    '正义码头': 'zymd', '省委旧址': 'hnsy', '宏泰坊': 'htf', '杨泗庙': 'ysm',
-    '铁器': 'tqg', '锄禾源': 'chy', '西牌坊': 'xpf',
-    '导航': '__navigate', '路线': '__route', '附近': '__nearby',
-    '打卡': '__checkin', 'AI': '__ai', '帮助': '__help',
+    // 核心景点（多别名）
+    '芦江阁': 'ljg', '芦江': 'ljg', '阁楼': 'ljg',
+    '八元堂': 'byt', '花鼓戏': 'byt', '戏台': 'byt', '宁乡会馆': 'byt',
+    '皮影戏': 'pyx', '皮影': 'pyx', '皮影馆': 'pyx',
+    '花开靖港': 'hkjc', '剧场': 'hkjc', '演艺': 'hkjc', '花开': 'hkjc',
+    '老电影': 'ldy', '电影院': 'ldy', '电影': 'ldy',
+    '民俗馆': 'ms馆', '民俗': 'ms馆', '收藏馆': 'ms馆', '捌零': 'ms馆',
+    '陶承': 'tcs', '革命母亲': 'tcs',
+    '楚河码头': 'chmd', '楚河': 'chmd', '码头': 'chmd',
+    '正义码头': 'zymd', '正义': 'zymd', '游船': 'zymd',
+    '省委旧址': 'hnsy', '省委': 'hnsy', '地下党': 'hnsy',
+    '宏泰坊': 'htf', '青楼': 'htf',
+    '杨泗庙': 'ysm', '观音': 'ysm', '庙': 'ysm',
+    '铁器': 'tqg', '铁艺': 'tqg', '铁器馆': 'tqg',
+    '锄禾源': 'chy', '农耕': 'chy', '农具': 'chy',
+    '西牌坊': 'xpf', '西入口': 'xpf', '西门': 'xpf',
+    '东牌坊': 'dpf', '东入口': 'dpf', '东门': 'dpf',
+    '游客中心': 'vc', '服务中心': 'vc', '游客服务': 'vc',
+    '八大碗': 'bdw', '餐厅': 'bdw', '吃饭': 'bdw',
+    '红色剧场': 'hsjc', '母亲的歌': 'hsjc', '红色': 'hsjc',
+    '刘畴西': 'lcx', '黄埔': 'lcx',
+    '二当家': 'edj', '商社': 'edj',
+    // 功能指令
+    '路线': '__route', '推荐路线': '__route', '怎么走': '__route', '路线推荐': '__route',
+    '打卡': '__checkin', '成就': '__checkin', '探索': '__checkin', '打卡成就': '__checkin',
+    'AI': '__ai', '靖靖': '__ai', '问一下': '__ai', '导游': '__ai', '问靖靖': '__ai',
+    '帮助': '__help', '怎么用': '__help', '功能': '__help',
 };
 
 function initVoiceWakeUI() {
     const container = document.getElementById('vwKeywords');
     if (!container) return;
     const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
-    const names = pois.slice(0,10).map(p => p.name);
-    names.push('附近景点', '今日路线', '打开AI', '打卡');
-    container.innerHTML = names.map(n =>
+    // 展示热门景点+功能词，分两行
+    const hotPOIs = ['ljg','byt','pyx','hkjc','chmd','ldy','htf','ysm'];
+    const hotNames = hotPOIs.map(id => pois.find(p=>p.id===id)?.name).filter(Boolean);
+    const cmds = ['路线推荐', '打卡成就', '问靖靖'];
+    const all = [...hotNames, ...cmds];
+    container.innerHTML = all.map(n =>
         `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')">${n}</div>`
     ).join('');
 }
@@ -5230,13 +5271,18 @@ function toggleVoiceListen() {
 function startVoiceListen() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        setVwStatus('⚠️ 您的浏览器不支持语音识别，请使用 Chrome');
+        setVwStatus('⚠️ 请使用 Chrome 或 Safari 14+ 以启用语音识别');
+        // Fallback: show keyword tap buttons more prominently
+        const kwEl = document.getElementById('vwKeywords');
+        if (kwEl) kwEl.style.display = 'flex';
         return;
     }
     recognition = new SpeechRecognition();
     recognition.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
+    recognition.maxAlternatives = 3;
     recognition.interimResults = true;
     recognition.continuous = false;
+    // On mobile, microphone permission may require user gesture - already handled by click
     recognition.onstart = () => {
         voiceListening = true;
         document.getElementById('vwOrb').classList.add('listening');
@@ -5286,11 +5332,12 @@ function processVoiceResult(text) {
             } else {
                 const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
                 if (poi) {
-                    setVwStatus('✅ 找到：' + poi.name);
+                    setVwStatus('✅ 找到「' + poi.name + '」，正在导航…');
                     HAPTIC.success();
                     setTimeout(() => {
                         closeVoiceWake();
-                        if (typeof openDetailCard === 'function') openDetailCard(poi);
+                        // 调用正确的函数名 enterDetailMode，并在进入后自动播放语音讲解
+                        voiceNavigateTo(poi);
                     }, 800);
                     return;
                 }
@@ -5302,11 +5349,11 @@ function processVoiceResult(text) {
     if (typeof POI_RAW_DATA !== 'undefined') {
         const matched = POI_RAW_DATA.find(p => p.name.includes(text) || text.includes(p.name));
         if (matched) {
-            setVwStatus('✅ 导航至：' + matched.name);
+            setVwStatus('✅ 导航至「' + matched.name + '」，正在飞行…');
             HAPTIC.success();
             setTimeout(() => {
                 closeVoiceWake();
-                if (typeof openDetailCard === 'function') openDetailCard(matched);
+                voiceNavigateTo(matched);
             }, 800);
             return;
         }
@@ -5318,9 +5365,18 @@ function processVoiceResult(text) {
 function handleVoiceAction(action) {
     closeVoiceWake();
     switch(action) {
-        case '__ai':    if(typeof toggleAIPanel==='function') toggleAIPanel(); break;
-        case '__route': if(typeof showSideList==='function') showSideList(); break;
-        case '__checkin': if(typeof openCheckinDetail==='function') openCheckinDetail(); break;
+        case '__ai':    
+            if(typeof toggleAIPanel==='function') toggleAIPanel();
+            speakText('靖靖已上线，请告诉我您想了解什么');
+            break;
+        case '__route': 
+            if(typeof showSideList==='function') showSideList();
+            speakText('为您推荐今日路线，请从底部选择适合您的游览路线');
+            break;
+        case '__checkin': 
+            if(typeof openCheckinDetail==='function') openCheckinDetail();
+            speakText('正在打开您的打卡成就页面');
+            break;
         case '__help':
             setVwStatus('💡 可说：景点名 / 附近景点 / 今日路线 / 打卡');
             break;
@@ -5338,6 +5394,31 @@ function simulateVoiceCmd(name) {
     HAPTIC.light();
     setVwStatus('🔍 识别中：' + name);
     setTimeout(() => processVoiceResult(name), 400);
+}
+
+// 语音朗读（TTS）- 在自动播放受限时提供文字转语音
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
+    u.rate = 0.92; u.pitch = 1.0; u.volume = 0.85;
+    window.speechSynthesis.speak(u);
+}
+
+// 带TTS的自动导览：先朗读景点名，再播放MP3讲解（两种音频互补）
+function voiceNavigateTo(poi) {
+    if (typeof enterDetailMode === 'function') {
+        enterDetailMode(poi);
+        // 朗读景点名称（立即响应，无需用户手势）
+        speakText('正在导航到' + poi.name + '，' + (poi.desc ? poi.desc.slice(0, 40) : ''));
+        // 同时尝试播放 MP3（iOS上可能被autoplay策略阻止，TTS作为兜底）
+        setTimeout(() => {
+            if (typeof playAudio === 'function' && poi.audio) {
+                playAudio(poi);
+            }
+        }, 500);
+    }
 }
 
 /* ════════════════════════════════════════════════════════
@@ -5435,6 +5516,10 @@ function switchLanguage(code) {
     renderLangGrid();
     applyLanguage();
     HAPTIC.success();
+    // 同步悬浮按钮标签
+    const fabLabel = document.getElementById('langFabLabel');
+    const lang = LANGUAGES.find(l => l.code === code);
+    if (fabLabel && lang) fabLabel.textContent = lang.code === 'zh' ? '中' : lang.code === 'en' ? 'EN' : lang.code === 'ja' ? '日' : '한';
     // 短暂延迟后关闭
     setTimeout(closeLanguageSwitcher, 600);
 }
@@ -5624,18 +5709,24 @@ function renderGroupTourRoom() {
     const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
     const getPoiName = id => { const p = pois.find(x=>x.id===id); return p ? p.name : '途中'; };
 
-    // 构建小地图点
+    // 构建小地图点 - 坐标系：3D x[-25,+29] → SVG x[6%,81%], z[-12,+9] → SVG y[21%,88%]
     const mapDots = GT.members.filter(m=>m.poi||m.isMe).map(m => {
         const poi = pois.find(p=>p.id===m.poi);
-        // 把3D坐标映射到 mini-map (100x60 容器内)
-        const px = poi ? Math.round((poi.pos[0]+30)/60*100) : 50;
-        const py = poi ? Math.round((poi.pos[2]+20)/35*60) : 30;
-        const cx = Math.max(4, Math.min(96, px));
-        const cy = Math.max(4, Math.min(56, py));
+        let cx, cy;
+        if (poi) {
+            // 将3D场景坐标映射到SVG地图百分比位置
+            const mapXmin=-28, mapXmax=32, mapZmin=-14, mapZmax=11;
+            cx = Math.round(((poi.pos[0]-mapXmin)/(mapXmax-mapXmin))*75 + 6);
+            cy = Math.round(((poi.pos[2]-mapZmin)/(mapZmax-mapZmin))*66 + 21);
+            cx = Math.max(4, Math.min(95, cx));
+            cy = Math.max(18, Math.min(92, cy));
+        } else {
+            cx = 50; cy = 50;
+        }
         return `<div class="gt-map-dot${m.isMe?' me':''}"
-            style="left:${cx}%;top:${cy}%;background:${m.color};color:${m.color};"
+            style="left:${cx}%;top:${cy}%;background:${m.color};border-color:white;z-index:5;"
             title="${m.name}${poi?(' · '+poi.name):''}">
-            <span style="font-size:10px;">${m.emoji}</span>
+            <span style="font-size:10px;line-height:1;">${m.emoji}</span>
         </div>`;
     }).join('');
 
@@ -5655,9 +5746,73 @@ function renderGroupTourRoom() {
             <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulseDot 1.5s ease infinite;display:inline-block;"></span>
             实时位置 · ${GT.members.filter(m=>m.status==='online').length} 人在线
         </div>
-        <div class="gt-map-preview" style="height:80px;">${mapDots}
-            <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(124,58,237,0.05));border-radius:14px;"></div>
-            <div style="position:absolute;bottom:6px;right:8px;font-size:9px;color:rgba(255,255,255,.3);">靖港古镇示意图</div>
+        <div class="gt-map-preview" id="gtMapPreview" style="height:140px;position:relative;overflow:hidden;border-radius:14px;background:#0a1628;">
+            <!-- SVG 靖港古镇示意底图 -->
+            <svg width="100%" height="100%" viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+                <!-- 水域背景 -->
+                <rect width="320" height="140" fill="#0a1628"/>
+                <!-- 芦江（主河道，横向） -->
+                <path d="M0,15 Q80,8 160,18 Q240,28 320,15" stroke="#1e40af" stroke-width="14" fill="none" opacity="0.6"/>
+                <path d="M0,15 Q80,8 160,18 Q240,28 320,15" stroke="#3b82f6" stroke-width="8" fill="none" opacity="0.4"/>
+                <!-- 夹河（右侧竖向小河） -->
+                <path d="M260,0 Q268,40 264,80 Q260,120 265,140" stroke="#1e40af" stroke-width="8" fill="none" opacity="0.5"/>
+                <path d="M260,0 Q268,40 264,80 Q260,120 265,140" stroke="#3b82f6" stroke-width="4" fill="none" opacity="0.35"/>
+                <!-- 古镇地块（主街区） -->
+                <rect x="20" y="28" width="235" height="95" rx="6" fill="#1e293b" opacity="0.8"/>
+                <!-- 保安街（主街道） -->
+                <rect x="20" y="67" width="235" height="6" rx="2" fill="#334155" opacity="0.9"/>
+                <!-- 横向支路 -->
+                <rect x="60" y="28" width="3" height="95" rx="1" fill="#334155" opacity="0.6"/>
+                <rect x="120" y="28" width="3" height="95" rx="1" fill="#334155" opacity="0.6"/>
+                <rect x="180" y="28" width="3" height="95" rx="1" fill="#334155" opacity="0.6"/>
+                <rect x="220" y="28" width="3" height="95" rx="1" fill="#334155" opacity="0.5"/>
+                <!-- 东牌坊位置 -->
+                <rect x="248" y="62" width="8" height="16" rx="2" fill="#475569" opacity="0.9"/>
+                <text x="252" y="58" font-size="5" fill="#94a3b8" text-anchor="middle">东门</text>
+                <!-- 西牌坊位置 -->
+                <rect x="16" y="62" width="8" height="16" rx="2" fill="#475569" opacity="0.9"/>
+                <text x="20" y="58" font-size="5" fill="#94a3b8" text-anchor="middle">西门</text>
+                <!-- 芦江阁（标志性建筑） -->
+                <polygon points="88,42 92,28 96,42" fill="#3b82f6" opacity="0.9"/>
+                <rect x="86" y="42" width="12" height="8" rx="1" fill="#2563eb" opacity="0.9"/>
+                <text x="92" y="57" font-size="5.5" fill="#93c5fd" text-anchor="middle" font-weight="bold">芦江阁</text>
+                <!-- 花开靖港剧场 -->
+                <rect x="30" y="75" width="22" height="14" rx="3" fill="#9d174d" opacity="0.85"/>
+                <text x="41" y="84" font-size="4.5" fill="#fda4af" text-anchor="middle">花开靖港</text>
+                <!-- 八元堂 -->
+                <rect x="100" y="55" width="18" height="12" rx="2" fill="#5b21b6" opacity="0.85"/>
+                <text x="109" y="63" font-size="4.5" fill="#c4b5fd" text-anchor="middle">八元堂</text>
+                <!-- 皮影戏 -->
+                <rect x="65" y="75" width="16" height="11" rx="2" fill="#92400e" opacity="0.85"/>
+                <text x="73" y="83" font-size="4.5" fill="#fcd34d" text-anchor="middle">皮影戏</text>
+                <!-- 游客中心 -->
+                <rect x="148" y="95" width="22" height="13" rx="2" fill="#92400e" opacity="0.9"/>
+                <text x="159" y="104" font-size="4.5" fill="#fde68a" text-anchor="middle">游客中心</text>
+                <!-- 楚河码头 -->
+                <rect x="55" y="38" width="16" height="10" rx="2" fill="#075985" opacity="0.9"/>
+                <text x="63" y="45" font-size="4.5" fill="#7dd3fc" text-anchor="middle">楚河码头</text>
+                <!-- 正义码头 -->
+                <rect x="195" y="38" width="16" height="10" rx="2" fill="#075985" opacity="0.9"/>
+                <text x="203" y="45" font-size="4.5" fill="#7dd3fc" text-anchor="middle">正义码头</text>
+                <!-- 靖港八大碗 -->
+                <rect x="218" y="72" width="16" height="11" rx="2" fill="#991b1b" opacity="0.85"/>
+                <text x="226" y="80" font-size="4.5" fill="#fca5a5" text-anchor="middle">八大碗</text>
+                <!-- 宏泰坊 -->
+                <rect x="88" y="88" width="14" height="10" rx="2" fill="#7c2d12" opacity="0.85"/>
+                <text x="95" y="96" font-size="4.5" fill="#fed7aa" text-anchor="middle">宏泰坊</text>
+                <!-- 水波纹动画 -->
+                <circle cx="160" cy="16" r="4" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.4">
+                    <animate attributeName="r" values="4;12;4" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- 罗盘 -->
+                <circle cx="300" cy="20" r="10" fill="rgba(30,41,59,0.9)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <text x="300" y="23" font-size="8" fill="white" text-anchor="middle" font-weight="bold">N</text>
+                <polygon points="300,12 298,18 302,18" fill="#ef4444"/>
+            </svg>
+            <!-- 成员位置点（绝对定位，覆盖在SVG上） -->
+            ${mapDots}
+            <div style="position:absolute;bottom:5px;left:8px;font-size:8px;color:rgba(255,255,255,.4);font-weight:600;">📍 靖港古镇示意图</div>
         </div>
     </div>
     <!-- 成员列表 -->
