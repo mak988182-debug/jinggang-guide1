@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -141,18 +141,29 @@
 
         /* ═══════ LEFT PANEL ═══════ */
         #leftPanel {
-            position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
+            position: fixed;
+            /* 自动避让 iPhone 摄像头岛屿（横屏时 safe-area-inset-left 覆盖刘海宽度） */
+            left: max(10px, env(safe-area-inset-left, 10px));
+            top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
+            /* 防止超出屏幕高度 */
+            max-height: calc(100dvh - 20px);
         }
         #leftNav {
-            display: flex; flex-direction: column; gap: 5px;
-            padding: 6px; border-radius: 16px;
+            display: flex; flex-direction: column; gap: 3px;
+            padding: 5px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            /* 按钮太多时可滚动，隐藏滚动条 */
+            overflow-y: auto;
+            max-height: calc(100dvh - 28px);
+            scrollbar-width: none; -ms-overflow-style: none;
         }
+        #leftNav::-webkit-scrollbar { display: none; }
         .nav-btn {
-            width: 46px; height: 46px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            cursor: pointer; transition: all .2s; font-size: 9px; font-weight: 700; color: #64748b;
+            width: 44px; height: 42px; border-radius: 11px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            cursor: pointer; transition: all .2s; font-size: 8.5px; font-weight: 700; color: #64748b;
+            flex-shrink: 0; /* 防止被压扁 */
         }
         .nav-btn:hover { background: rgba(37,99,235,.08); color: #2563eb; }
         .nav-btn.active { background: #2563eb; color: white; box-shadow: 0 3px 10px rgba(37,99,235,.35); }
@@ -166,7 +177,9 @@
 
         /* ═══════ RIGHT PANEL ═══════ */
         #rightPanel {
-            position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+            position: fixed;
+            right: max(10px, env(safe-area-inset-right, 10px));
+            top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
         }
         #rightFoldTab {
@@ -329,7 +342,7 @@
             font-size: 14px; font-weight: 700; color: white;
             text-align: center; min-height: 22px;
         }
-        .vw-hint {
+        .vw-hint { line-height:1.55; text-align:center;
             font-size: 11px; color: rgba(255,255,255,0.45);
             text-align: center; max-width: 260px; line-height: 1.7;
         }
@@ -1430,7 +1443,9 @@
         <div class="nav-btn" id="navGroupTour" onclick="openGroupTour()" title="组团游实时共享">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>组团
         </div>
-
+        <div class="nav-btn" id="navLanguage" onclick="openLanguageSwitcher()" title="多语言切换">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>语言
+        </div>
     </div>
     <div id="leftFoldTab" onclick="toggleFoldTab('leftNav','left','leftFoldTab')" title="收起/展开导航">
         <svg id="leftFoldIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="transition:transform .3s"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1457,11 +1472,6 @@
         </div>
         <div class="tool-btn" onclick="openReport()" title="游览报告">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
-        <!-- 语言切换按钮（移至右侧工具栏，手机端始终可见） -->
-        <div class="tool-btn" id="navLanguage" onclick="openLanguageSwitcher()" title="切换语言" style="position:relative;flex-direction:column;gap:1px;font-size:0;">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span id="langBadge" style="font-size:8px;font-weight:900;color:#2563eb;line-height:1;letter-spacing:0;">中</span>
         </div>
 
     </div>
@@ -3585,7 +3595,13 @@
                 document.getElementById('audioPoiName').textContent=poi.name;
                 const ac=document.getElementById('audioCtrl');ac.classList.remove('hidden');ac.classList.add('flex');
                 updateAudioUI();
-            }).catch(()=>{isAudioPlaying=false;updateAudioUI();});
+            }).catch(()=>{
+                isAudioPlaying=false;updateAudioUI();
+                // MP3 autoplay 被浏览器拦截 → 用 TTS 朗读景点讲解作为兜底
+                if (typeof voiceSpeakTTS === 'function' && poi.desc) {
+                    voiceSpeakTTS(poi.name + '。' + poi.desc.slice(0, 80));
+                }
+            });
             currentAudio.onended=()=>stopAudio();
         }
         function stopAudio(){
@@ -5044,15 +5060,6 @@
         }
 
         window.onload = () => {
-            // 恢复保存的语言（角标同步）
-            (function() {
-                const saved = localStorage.getItem('jg_lang') || 'zh';
-                const badge = document.getElementById('langBadge');
-                if (badge) {
-                    const labels = { zh:'中', en:'EN', ja:'日', ko:'한' };
-                    badge.textContent = labels[saved] || '中';
-                }
-            })();
             init();
             // 启动趣味功能
             setTimeout(() => {
@@ -5079,7 +5086,7 @@
         </div>
     </div>
     <div class="vw-status" id="vwStatus">点击麦克风开始语音导览</div>
-    <div class="vw-hint">说出景点名称或指令，靖靖会为您自动导航和讲解</div>
+    <div class="vw-hint">🎙️ 说出景点名称 → 自动飞行导航 + 播放语音讲解<br><span style="font-size:10px;opacity:.6;">支持 Chrome / Safari · 点击下方词语快速导览</span></div>
     <div class="vw-keywords" id="vwKeywords"></div>
     <button class="vw-close" onclick="closeVoiceWake()">关闭语音导览</button>
 </div>
@@ -5194,22 +5201,46 @@ let voiceListening = false;
 
 // POI关键词映射 (在POI数据加载后由initVoiceKeywords()完善)
 const VOICE_CMDS = {
-    '芦江阁': 'ljg', '八元堂': 'byt', '皮影戏': 'pyx', '花开靖港': 'hkjc',
-    '老电影': 'ldy', '民俗': 'ms馆', '陶承': 'tcs', '楚河码头': 'chmd',
-    '正义码头': 'zymd', '省委旧址': 'hnsy', '宏泰坊': 'htf', '杨泗庙': 'ysm',
-    '铁器': 'tqg', '锄禾源': 'chy', '西牌坊': 'xpf',
-    '导航': '__navigate', '路线': '__route', '附近': '__nearby',
-    '打卡': '__checkin', 'AI': '__ai', '帮助': '__help',
+    /* ── 景点（含别名，越具体越靠前） ── */
+    '游客服务中心': 'vc',  '游客中心': 'vc',   '服务中心': 'vc',
+    '八大碗':  'bdw',  '靖港八大碗': 'bdw', '餐厅': 'bdw',
+    '红色剧场': 'hsjc', '母亲的歌': 'hsjc', '红剧': 'hsjc',
+    '刘畴西': 'lcx',   '黄埔': 'lcx',
+    '皮影戏': 'pyx',   '皮影': 'pyx',
+    '东牌坊': 'dpf',   '东门': 'dpf',
+    '西牌坊': 'xpf',   '西门': 'xpf',
+    '芦江阁': 'ljg',   '芦江': 'ljg',
+    '八元堂': 'byt',   '花鼓戏': 'byt', '宁乡会馆': 'byt',
+    '花开靖港': 'hkjc','花开': 'hkjc', '演出': 'hkjc',
+    '老电影': 'ldy',   '电影院': 'ldy',
+    '民俗收藏': 'ms馆', '捌零': 'ms馆',  '亮点民俗': 'ms馆',
+    '陶承': 'tcs',
+    '楚河码头': 'chmd','楚河': 'chmd',  '码头': 'chmd',
+    '正义码头': 'zymd','正义': 'zymd',  '游船': 'zymd',
+    '省委旧址': 'hnsy','湖南省委': 'hnsy','地下党': 'hnsy',
+    '宏泰坊': 'htf',
+    '杨泗庙': 'ysm',   '杨泗': 'ysm',   '庙': 'ysm',
+    '铁器文化': 'tqg', '铁器': 'tqg',   '铁艺': 'tqg',
+    '二当家': 'edj',   '商社': 'edj',
+    '锄禾源': 'chy',   '农耕': 'chy',
+    /* ── 功能指令 ── */
+    '路线': '__route',   '推荐路线': '__route',
+    '打卡': '__checkin', '成就': '__checkin',
+    'AI':  '__ai',       '靖靖': '__ai',    '导游': '__ai',
+    '帮助': '__help',    '怎么用': '__help',
 };
 
 function initVoiceWakeUI() {
     const container = document.getElementById('vwKeywords');
     if (!container) return;
     const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
-    const names = pois.slice(0,10).map(p => p.name);
-    names.push('附近景点', '今日路线', '打开AI', '打卡');
-    container.innerHTML = names.map(n =>
-        `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')">${n}</div>`
+    // 分两行：演艺类 + 文化类
+    const showPOIs = pois.filter(p => ['演艺','民俗','古建'].includes(p.type)).slice(0,4).map(p=>p.name);
+    const restPOIs = pois.filter(p => !['演艺','民俗','古建'].includes(p.type)).slice(0,4).map(p=>p.name);
+    const cmds = ['推荐路线', '打开靖靖', '打卡成就'];
+    const all = [...showPOIs, ...restPOIs, ...cmds];
+    container.innerHTML = all.map(n =>
+        `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')" title="点击模拟说「${n}」">${n}</div>`
     ).join('');
 }
 
@@ -5242,13 +5273,17 @@ function toggleVoiceListen() {
 function startVoiceListen() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        setVwStatus('⚠️ 您的浏览器不支持语音识别，请使用 Chrome');
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        setVwStatus(isIOS
+            ? '⚠️ iOS Safari 请在「设置→Safari→麦克风」中允许，或用 Chrome'
+            : '⚠️ 请使用 Chrome / Safari 14+ 以启用语音识别');
         return;
     }
     recognition = new SpeechRecognition();
     recognition.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
     recognition.interimResults = true;
     recognition.continuous = false;
+    recognition.maxAlternatives = 5;  // 多候选，提升识别率
     recognition.onstart = () => {
         voiceListening = true;
         document.getElementById('vwOrb').classList.add('listening');
@@ -5256,9 +5291,21 @@ function startVoiceListen() {
         HAPTIC.light();
     };
     recognition.onresult = (e) => {
+        // 拿所有候选结果的第一选择拼合
         const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
         setVwStatus('🔍 识别中：' + transcript);
-        if (e.results[0].isFinal) processVoiceResult(transcript);
+        if (e.results[e.results.length - 1].isFinal) {
+            // 依次尝试每个候选，命中即止
+            const result = e.results[e.results.length - 1];
+            let found = false;
+            for (let ai = 0; ai < result.length && !found; ai++) {
+                const alt = result[ai].transcript;
+                // 检查是否能命中任何景点（预先检测，不弹错误提示）
+                const hit = [...Object.keys(VOICE_CMDS)].some(kw => alt.toLowerCase().includes(kw.toLowerCase()));
+                if (hit) { processVoiceResult(alt); found = true; }
+            }
+            if (!found) processVoiceResult(transcript);
+        }
     };
     recognition.onerror = () => {
         voiceListening = false;
@@ -5288,53 +5335,94 @@ function setVwStatus(txt) {
     if (el) el.textContent = txt;
 }
 
+/* 语音导航并自动讲解 */
+function voiceNavigateTo(poi) {
+    closeVoiceWake();
+    // 1. 3D 飞行导航到景点
+    if (typeof enterDetailMode === 'function') {
+        enterDetailMode(poi);
+    }
+    // 2. 自动播放 MP3 讲解（延迟等相机动画启动后）
+    setTimeout(() => {
+        // 先尝试 MP3
+        if (typeof playAudio === 'function' && poi.audio) {
+            playAudio(poi);
+        }
+        // 同时用 TTS 朗读景点名（MP3 被 autoplay 拦截时的兜底）
+        voiceSpeakTTS(poi.name + '。' + (poi.desc ? poi.desc.slice(0, 60) : ''));
+    }, 600);
+}
+
+/* TTS 语音朗读兜底（Web Speech Synthesis，无需用户手势） */
+function voiceSpeakTTS(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = (typeof currentLang !== 'undefined')
+        ? { zh:'zh-CN', en:'en-US', ja:'ja-JP', ko:'ko-KR' }[currentLang] || 'zh-CN'
+        : 'zh-CN';
+    u.rate = 0.9; u.pitch = 1; u.volume = 0.9;
+    window.speechSynthesis.speak(u);
+}
+
 function processVoiceResult(text) {
+    const lower = text.toLowerCase();
     // 关键词匹配
     for (const [kw, id] of Object.entries(VOICE_CMDS)) {
-        if (text.includes(kw)) {
+        if (lower.includes(kw.toLowerCase())) {
             highlightVoiceKw(kw);
             if (id.startsWith('__')) {
                 handleVoiceAction(id);
             } else {
                 const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
                 if (poi) {
-                    setVwStatus('✅ 找到：' + poi.name);
+                    setVwStatus('✅ 正在导航至「' + poi.name + '」并播放讲解…');
                     HAPTIC.success();
-                    setTimeout(() => {
-                        closeVoiceWake();
-                        if (typeof openDetailCard === 'function') openDetailCard(poi);
-                    }, 800);
+                    setTimeout(() => voiceNavigateTo(poi), 500);
                     return;
                 }
             }
             return;
         }
     }
-    // 模糊匹配POI名称
+    // 模糊匹配 POI 名称
     if (typeof POI_RAW_DATA !== 'undefined') {
-        const matched = POI_RAW_DATA.find(p => p.name.includes(text) || text.includes(p.name));
+        const t = lower;
+        const matched = POI_RAW_DATA.find(p =>
+            t.includes(p.name) || p.name.includes(text) ||
+            p.name.split('').some(ch => t.includes(ch) && ch.length > 1)
+        );
         if (matched) {
-            setVwStatus('✅ 导航至：' + matched.name);
+            setVwStatus('✅ 正在导航至「' + matched.name + '」并播放讲解…');
             HAPTIC.success();
-            setTimeout(() => {
-                closeVoiceWake();
-                if (typeof openDetailCard === 'function') openDetailCard(matched);
-            }, 800);
+            setTimeout(() => voiceNavigateTo(matched), 500);
             return;
         }
     }
-    setVwStatus('❓ 未找到"' + text + '"，请重试');
+    setVwStatus('❓ 未识别到景点"' + text + '"，请重试或点击下方景点');
     HAPTIC.error();
 }
 
 function handleVoiceAction(action) {
-    closeVoiceWake();
     switch(action) {
-        case '__ai':    if(typeof toggleAIPanel==='function') toggleAIPanel(); break;
-        case '__route': if(typeof showSideList==='function') showSideList(); break;
-        case '__checkin': if(typeof openCheckinDetail==='function') openCheckinDetail(); break;
+        case '__ai':
+            closeVoiceWake();
+            if(typeof toggleAIPanel==='function') toggleAIPanel();
+            voiceSpeakTTS('靖靖已上线，请告诉我您想了解什么');
+            break;
+        case '__route':
+            closeVoiceWake();
+            if(typeof showSideList==='function') showSideList();
+            voiceSpeakTTS('为您推荐游览路线，请从底部选择');
+            break;
+        case '__checkin':
+            closeVoiceWake();
+            if(typeof openCheckinDetail==='function') openCheckinDetail();
+            voiceSpeakTTS('为您打开打卡成就页面');
+            break;
         case '__help':
-            setVwStatus('💡 可说：景点名 / 附近景点 / 今日路线 / 打卡');
+            setVwStatus('💡 可说：景点名 / 今日路线 / 打开靖靖 / 打卡成就');
+            voiceSpeakTTS('您可以说出景点名称，或者说今日路线、打开靖靖');
             break;
     }
     HAPTIC.medium();
@@ -5348,8 +5436,11 @@ function highlightVoiceKw(kw) {
 
 function simulateVoiceCmd(name) {
     HAPTIC.light();
+    // 别名规范化
+    const aliases = {'打开靖靖':'靖靖', '推荐路线':'路线', '打卡成就':'打卡', '附近景点':'附近'};
+    const cmd = aliases[name] || name;
     setVwStatus('🔍 识别中：' + name);
-    setTimeout(() => processVoiceResult(name), 400);
+    setTimeout(() => processVoiceResult(cmd), 400);
 }
 
 /* ════════════════════════════════════════════════════════
@@ -5446,12 +5537,6 @@ function switchLanguage(code) {
     localStorage.setItem('jg_lang', code);
     renderLangGrid();
     applyLanguage();
-    // 同步右侧工具栏语言角标
-    const badge = document.getElementById('langBadge');
-    if (badge) {
-        const labels = { zh:'中', en:'EN', ja:'日', ko:'한' };
-        badge.textContent = labels[code] || '中';
-    }
     HAPTIC.success();
     // 短暂延迟后关闭
     setTimeout(closeLanguageSwitcher, 600);
@@ -5468,8 +5553,7 @@ function applyLanguage() {
     const navMap = {
         navSpots:'spots', navRoute:'route', navActivity:'activity',
         navTimeline:'history', navLeaderboard:'ranking', navPlanner:'planner',
-        navDayNight:'dayNight', navVoiceWake:'voiceNav', navGroupTour:'groupTour',
-        // navLanguage is now a tool-btn in rightTools; badge is updated via langBadge span
+        navDayNight:'dayNight', navVoiceWake:'voiceNav', navGroupTour:'groupTour', navLanguage:'language'
     };
     Object.entries(navMap).forEach(([id, key]) => {
         const btn = document.getElementById(id);
@@ -5479,9 +5563,6 @@ function applyLanguage() {
         if (nodes.length) nodes[nodes.length-1].textContent = t(key);
         else btn.appendChild(document.createTextNode(t(key)));
     });
-    // 右侧工具栏语言角标
-    const _lb = document.getElementById('langBadge');
-    if (_lb) { const _lm={zh:'中',en:'EN',ja:'日',ko:'한'}; _lb.textContent = _lm[lang] || '中'; }
 
     // 搜索框
     const si = document.getElementById('searchInput');
