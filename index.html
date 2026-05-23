@@ -143,16 +143,26 @@
         #leftPanel {
             position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
+            /* 防止超出屏幕高度 */
+            max-height: 100dvh;
         }
         #leftNav {
-            display: flex; flex-direction: column; gap: 5px;
-            padding: 6px; border-radius: 16px;
+            display: flex; flex-direction: column; gap: 4px;
+            padding: 5px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            /* 按钮超出时可滚动，隐藏滚动条 */
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: calc(100dvh - 20px);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        #leftNav::-webkit-scrollbar { display: none; }
         .nav-btn {
-            width: 46px; height: 46px; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            cursor: pointer; transition: all .2s; font-size: 9px; font-weight: 700; color: #64748b;
+            width: 44px; height: 42px; border-radius: 11px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            cursor: pointer; transition: all .2s; font-size: 8.5px; font-weight: 700; color: #64748b;
+            flex-shrink: 0; /* 防止按钮被压缩 */
         }
         .nav-btn:hover { background: rgba(37,99,235,.08); color: #2563eb; }
         .nav-btn.active { background: #2563eb; color: white; box-shadow: 0 3px 10px rgba(37,99,235,.35); }
