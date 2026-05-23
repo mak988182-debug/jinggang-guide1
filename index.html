@@ -1430,9 +1430,7 @@
         <div class="nav-btn" id="navGroupTour" onclick="openGroupTour()" title="组团游实时共享">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>组团
         </div>
-        <div class="nav-btn" id="navLanguage" onclick="openLanguageSwitcher()" title="多语言切换">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>语言
-        </div>
+
     </div>
     <div id="leftFoldTab" onclick="toggleFoldTab('leftNav','left','leftFoldTab')" title="收起/展开导航">
         <svg id="leftFoldIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="transition:transform .3s"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1459,6 +1457,11 @@
         </div>
         <div class="tool-btn" onclick="openReport()" title="游览报告">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <!-- 语言切换按钮（移至右侧工具栏，手机端始终可见） -->
+        <div class="tool-btn" id="navLanguage" onclick="openLanguageSwitcher()" title="切换语言" style="position:relative;flex-direction:column;gap:1px;font-size:0;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langBadge" style="font-size:8px;font-weight:900;color:#2563eb;line-height:1;letter-spacing:0;">中</span>
         </div>
 
     </div>
@@ -2146,119 +2149,14 @@
         ];
         POI_RAW_DATA.forEach(p=>{p.lngLat=sceneToLngLat(p.pos[0],p.pos[2]);});
 
-        /* ── Multilingual POI data ── */
-        const POI_I18N = {
-            en: {
-                vc:   { name:'Visitor Center',          type:'Service' },
-                bdw:  { name:'Jinggang Eight Bowls',     type:'Food' },
-                hsjc: { name:'Red Theater',              type:'Show' },
-                lcx:  { name:'Liu Chouxi Memorial',      type:'Heritage' },
-                pyx:  { name:'Shadow Puppet Theater',    type:'Folk Art' },
-                dpf:  { name:'East Archway',             type:'Entrance' },
-                xpf:  { name:'West Archway',             type:'Entrance' },
-                ljg:  { name:'Lujiang Pavilion',         type:'Scenic' },
-                byt:  { name:'Bayuan Hall',               type:'Historic' },
-                hkjc: { name:'Huakai Jinggang Theater', type:'Show' },
-                ldy:  { name:'Old Cinema',               type:'Leisure' },
-                'ms馆':{ name:'Folk Museum',             type:'Museum' },
-                tcs:  { name:'Tao Cheng Memorial',       type:'Heritage' },
-                chmd: { name:'Chuhe Wharf',              type:'Waterway' },
-                zymd: { name:'Zhengyi Wharf',            type:'Waterway' },
-                hnsy: { name:'Hunan CPC Committee Site', type:'Heritage' },
-                htf:  { name:'Hongtai Quarter',          type:'Museum' },
-                ysm:  { name:'Yangsi Temple',            type:'Folk' },
-                tqg:  { name:'Iron Culture Museum',      type:'Museum' },
-                edj:  { name:'Second Master House',      type:'Commerce' },
-                chy:  { name:'Chuheyuan',                type:'Science' },
-            },
-            ja: {
-                vc:   { name:'観光案内所',              type:'サービス' },
-                bdw:  { name:'靖港八大碗レストラン',    type:'グルメ' },
-                hsjc: { name:'赤い劇場',                type:'公演' },
-                lcx:  { name:'劉疇西記念館',            type:'文化遺産' },
-                pyx:  { name:'影絵人形劇場',            type:'民俗芸能' },
-                dpf:  { name:'東の牌坊',                type:'入口' },
-                xpf:  { name:'西の牌坊',                type:'入口' },
-                ljg:  { name:'蘆江閣',                  type:'景観' },
-                byt:  { name:'八元堂',                  type:'史跡' },
-                hkjc: { name:'花開靖港劇場',            type:'公演' },
-                ldy:  { name:'昔の映画館',              type:'レジャー' },
-                'ms馆':{ name:'民俗博物館',             type:'博物館' },
-                tcs:  { name:'陶承記念館',              type:'文化遺産' },
-                chmd: { name:'楚河の桟橋',              type:'水運' },
-                zymd: { name:'正義の桟橋',              type:'水運' },
-                hnsy: { name:'湖南省委旧址',            type:'文化遺産' },
-                htf:  { name:'宏泰坊',                  type:'博物館' },
-                ysm:  { name:'楊泗廟',                  type:'民俗' },
-                tqg:  { name:'鉄器文化館',              type:'博物館' },
-                edj:  { name:'二当家商社',              type:'商業' },
-                chy:  { name:'鋤禾源',                  type:'学習' },
-            },
-            ko: {
-                vc:   { name:'방문자 센터',             type:'서비스' },
-                bdw:  { name:'징강 팔대완 레스토랑',    type:'음식' },
-                hsjc: { name:'붉은 극장',               type:'공연' },
-                lcx:  { name:'류처우시 기념관',         type:'문화유산' },
-                pyx:  { name:'그림자 인형극 극장',      type:'민속 예술' },
-                dpf:  { name:'동쪽 패방',               type:'입구' },
-                xpf:  { name:'서쪽 패방',               type:'입구' },
-                ljg:  { name:'루장 정자',               type:'경관' },
-                byt:  { name:'바위안당',                type:'유적지' },
-                hkjc: { name:'화카이 징강 극장',        type:'공연' },
-                ldy:  { name:'옛날 영화관',             type:'여가' },
-                'ms馆':{ name:'민속 박물관',            type:'박물관' },
-                tcs:  { name:'타오청 기념관',           type:'문화유산' },
-                chmd: { name:'추허 부두',               type:'수운' },
-                zymd: { name:'정의 부두',               type:'수운' },
-                hnsy: { name:'후난성위 구지',           type:'문화유산' },
-                htf:  { name:'홍타이 구역',             type:'박물관' },
-                ysm:  { name:'양쓰 사원',               type:'민속' },
-                tqg:  { name:'철기 문화관',             type:'박물관' },
-                edj:  { name:'이당자 상사',             type:'상업' },
-                chy:  { name:'추허위안',                type:'교육' },
-            },
-        };
-
-        /* Helper: get localized POI name and type */
-        function getPoiName(poi) {
-            if (typeof currentLang === 'undefined' || currentLang === 'zh') return poi.name;
-            return (POI_I18N[currentLang]?.[poi.id]?.name) || poi.name;
-        }
-        function getPoiType(poi) {
-            if (typeof currentLang === 'undefined' || currentLang === 'zh') return poi.type;
-            return (POI_I18N[currentLang]?.[poi.id]?.type) || poi.type;
-        }
-
         /* ── Routes ── */
         const ROUTES=[
-            {id:'r1',name:'夜游火舞线',icon:'🔥',color:'#ef4444',bg:'#fff5f5',duration:'45分钟',count:'9景点',
-             i18n:{en:{name:'Night Fire Trail',duration:'45min',count:'9 spots'},ja:{name:'夜の炎舞ルート',duration:'45分',count:'9スポット'},ko:{name:'야간 화무 코스',duration:'45분',count:'9개 명소'}},
-             pois:['hkjc','ljg','chmd','zymd','bdw','byt','vc','dpf','htf']},
-            {id:'r2',name:'慢游古镇线',icon:'🌿',color:'#16a34a',bg:'#f0fdf4',duration:'60分钟',count:'12景点',
-             i18n:{en:{name:'Leisurely Town Walk',duration:'60min',count:'12 spots'},ja:{name:'のんびり古鎮ルート',duration:'60分',count:'12スポット'},ko:{name:'여유 고진 코스',duration:'60분',count:'12개 명소'}},
-             pois:['vc','ljg','byt','pyx','tcs','hsjc','lcx','hnsy','htf','chmd','ysm','tqg']},
-            {id:'r3',name:'亲子体验线',icon:'👨‍👩‍👧',color:'#2563eb',bg:'#eff6ff',duration:'90分钟',count:'8景点',
-             i18n:{en:{name:'Family Experience',duration:'90min',count:'8 spots'},ja:{name:'親子体験ルート',duration:'90分',count:'8スポット'},ko:{name:'가족 체험 코스',duration:'90분',count:'8개 명소'}},
-             pois:['pyx','ljg','byt','ldy','ms馆','ysm','tqg','chy']},
-            {id:'r4',name:'红色经典线',icon:'🏮',color:'#dc2626',bg:'#fef2f2',duration:'70分钟',count:'4景点',
-             i18n:{en:{name:'Red Heritage Trail',duration:'70min',count:'4 spots'},ja:{name:'赤い歴史ルート',duration:'70分',count:'4スポット'},ko:{name:'붉은 유산 코스',duration:'70분',count:'4개 명소'}},
-             pois:['hsjc','lcx','tcs','hnsy']},
-            {id:'r5',name:'精华打卡线',icon:'📸',color:'#7c3aed',bg:'#f5f3ff',duration:'50分钟',count:'7景点',
-             i18n:{en:{name:'Highlights Tour',duration:'50min',count:'7 spots'},ja:{name:'ハイライトルート',duration:'50分',count:'7スポット'},ko:{name:'하이라이트 코스',duration:'50분',count:'7개 명소'}},
-             pois:['vc','ljg','byt','bdw','chmd','htf','ysm']},
+            {id:'r1',name:'夜游火舞线',icon:'🔥',color:'#ef4444',bg:'#fff5f5',duration:'45分钟',count:'9景点', pois:['hkjc','ljg','chmd','zymd','bdw','byt','vc','dpf','htf']},
+            {id:'r2',name:'慢游古镇线',icon:'🌿',color:'#16a34a',bg:'#f0fdf4',duration:'60分钟',count:'12景点',pois:['vc','ljg','byt','pyx','tcs','hsjc','lcx','hnsy','htf','chmd','ysm','tqg']},
+            {id:'r3',name:'亲子体验线',icon:'👨‍👩‍👧',color:'#2563eb',bg:'#eff6ff',duration:'90分钟',count:'8景点', pois:['pyx','ljg','byt','ldy','ms馆','ysm','tqg','chy']},
+            {id:'r4',name:'红色经典线',icon:'🏮',color:'#dc2626',bg:'#fef2f2',duration:'70分钟',count:'4景点', pois:['hsjc','lcx','tcs','hnsy']},
+            {id:'r5',name:'精华打卡线',icon:'📸',color:'#7c3aed',bg:'#f5f3ff',duration:'50分钟',count:'7景点', pois:['vc','ljg','byt','bdw','chmd','htf','ysm']},
         ];
-        function getRouteName(r) {
-            if (typeof currentLang === 'undefined' || currentLang === 'zh' || !r.i18n?.[currentLang]) return r.name;
-            return r.i18n[currentLang].name;
-        }
-        function getRouteDuration(r) {
-            if (typeof currentLang === 'undefined' || currentLang === 'zh' || !r.i18n?.[currentLang]) return r.duration;
-            return r.i18n[currentLang].duration;
-        }
-        function getRouteCount(r) {
-            if (typeof currentLang === 'undefined' || currentLang === 'zh' || !r.i18n?.[currentLang]) return r.count;
-            return r.i18n[currentLang].count;
-        }
 
         /* ── Checkin ── */
         let checkinSet=new Set(JSON.parse(localStorage.getItem('jg_ci')||'[]'));
@@ -2266,43 +2164,21 @@
 
         // 探索等级配置
         const EXPLORER_RANKS = [
-            { min:0,  max:2,  emoji:'🧭', title:'初入古镇',   badge:'🗺️ 初入古镇',   color:'#2563eb', bg:'#dbeafe',
-              i18n:{en:{title:'First Steps',badge:'🗺️ First Steps'},ja:{title:'最初の一歩',badge:'🗺️ 最初の一歩'},ko:{title:'첫 발걸음',badge:'🗺️ 첫 발걸음'}} },
-            { min:3,  max:5,  emoji:'👣', title:'街巷漫步者', badge:'👣 街巷漫步者', color:'#7c3aed', bg:'#ede9fe',
-              i18n:{en:{title:'Street Wanderer',badge:'👣 Street Wanderer'},ja:{title:'路地の散策者',badge:'👣 路地の散策者'},ko:{title:'골목 탐방자',badge:'👣 골목 탐방자'}} },
-            { min:6,  max:9,  emoji:'🏮', title:'古镇探寻者', badge:'🏮 古镇探寻者', color:'#d97706', bg:'#fef3c7',
-              i18n:{en:{title:'Town Explorer',badge:'🏮 Town Explorer'},ja:{title:'古鎮探検家',badge:'🏮 古鎮探検家'},ko:{title:'고진 탐험가',badge:'🏮 고진 탐험가'}} },
-            { min:10, max:14, emoji:'🌊', title:'水乡达人',   badge:'🌊 水乡达人',   color:'#0ea5e9', bg:'#e0f2fe',
-              i18n:{en:{title:'Watertown Master',badge:'🌊 Watertown Master'},ja:{title:'水郷の達人',badge:'🌊 水郷の達人'},ko:{title:'수향 달인',badge:'🌊 수향 달인'}} },
-            { min:15, max:18, emoji:'🎭', title:'非遗守护者', badge:'🎭 非遗守护者', color:'#ec4899', bg:'#fce7f3',
-              i18n:{en:{title:'Heritage Guardian',badge:'🎭 Heritage Guardian'},ja:{title:'文化遺産の守護者',badge:'🎭 文化遺産守護者'},ko:{title:'문화유산 수호자',badge:'🎭 문화유산 수호자'}} },
-            { min:19, max:20, emoji:'🏆', title:'靖港大使',   badge:'🏆 靖港大使',   color:'#f59e0b', bg:'#fff7ed',
-              i18n:{en:{title:'Jinggang Ambassador',badge:'🏆 Ambassador'},ja:{title:'靖港大使',badge:'🏆 靖港大使'},ko:{title:'징강 대사',badge:'🏆 징강 대사'}} },
+            { min:0,  max:2,  emoji:'🧭', title:'初入古镇',   badge:'🗺️ 初入古镇',   color:'#2563eb', bg:'#dbeafe' },
+            { min:3,  max:5,  emoji:'👣', title:'街巷漫步者', badge:'👣 街巷漫步者', color:'#7c3aed', bg:'#ede9fe' },
+            { min:6,  max:9,  emoji:'🏮', title:'古镇探寻者', badge:'🏮 古镇探寻者', color:'#d97706', bg:'#fef3c7' },
+            { min:10, max:14, emoji:'🌊', title:'水乡达人',   badge:'🌊 水乡达人',   color:'#0ea5e9', bg:'#e0f2fe' },
+            { min:15, max:18, emoji:'🎭', title:'非遗守护者', badge:'🎭 非遗守护者', color:'#ec4899', bg:'#fce7f3' },
+            { min:19, max:20, emoji:'🏆', title:'靖港大使',   badge:'🏆 靖港大使',   color:'#f59e0b', bg:'#fff7ed' },
         ];
-        function getRankTitle(rank) {
-            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
-            return (rank.i18n?.[lang]?.title) || rank.title;
-        }
-        function getRankBadge(rank) {
-            const lang = typeof currentLang !== 'undefined' ? currentLang : 'zh';
-            return (rank.i18n?.[lang]?.badge) || rank.badge;
-        }
         const ACHIEVEMENTS = [
-            { id:'first',name:'初探之旅', desc:'打卡第1个景点',   icon:'🌟',check:n=>n>=1,
-              i18n:{en:{name:'First Steps',desc:'Check in 1st spot'},ja:{name:'初めての一歩',desc:'最初のスポットを訪問'},ko:{name:'첫 방문',desc:'첫 번째 명소 체크인'}} },
-            { id:'trio',name:'三人行',   desc:'打卡3个景点',      icon:'🎯',check:n=>n>=3,
-              i18n:{en:{name:'Triple Check',desc:'Check in 3 spots'},ja:{name:'三ヵ所訪問',desc:'3スポット訪問'},ko:{name:'세 곳 방문',desc:'3개 명소 체크인'}} },
-            { id:'water',name:'水乡情缘',desc:'打卡两个码头',     icon:'⛵',check:(n,s)=>s.has('chmd')&&s.has('zymd'),
-              i18n:{en:{name:'Waterfront Love',desc:'Visit both wharfs'},ja:{name:'水郷の縁',desc:'両桟橋を訪問'},ko:{name:'수변 연인',desc:'두 부두 방문'}} },
-            { id:'red',name:'红色基因', desc:'游览全部红色景点',  icon:'🏅',check:(n,s)=>['hsjc','lcx','tcs','hnsy'].every(x=>s.has(x)),
-              i18n:{en:{name:'Red Heritage',desc:'All heritage sites'},ja:{name:'赤い遺産',desc:'全文化遺産訪問'},ko:{name:'붉은 유산',desc:'모든 유산지 방문'}} },
-            { id:'half',name:'半程英雄',desc:'打卡10个景点',      icon:'💪',check:n=>n>=10,
-              i18n:{en:{name:'Halfway Hero',desc:'Check in 10 spots'},ja:{name:'半分ヒーロー',desc:'10スポット訪問'},ko:{name:'반환점 영웅',desc:'10개 명소 체크인'}} },
-            { id:'full',name:'集齐靖港',desc:'打卡全部20个景点',  icon:'👑',check:n=>n>=20,
-              i18n:{en:{name:'Complete Jinggang',desc:'All 20 spots!'},ja:{name:'靖港コンプリート',desc:'全20スポット訪問'},ko:{name:'징강 완주',desc:'전체 20개 명소 체크인'}} },
+            { id:'first',  name:'初探之旅',  desc:'打卡第1个景点',   icon:'🌟', check: n => n>=1 },
+            { id:'trio',   name:'三人行',    desc:'打卡3个景点',     icon:'🎯', check: n => n>=3 },
+            { id:'water',  name:'水乡情缘',  desc:'打卡两个码头',    icon:'⛵', check: (n,s) => s.has('chmd')&&s.has('zymd') },
+            { id:'red',    name:'红色基因',  desc:'游览全部红色景点', icon:'🏅', check: (n,s) => ['hsjc','lcx','tcs','hnsy'].every(x=>s.has(x)) },
+            { id:'half',   name:'半程英雄',  desc:'打卡10个景点',    icon:'💪', check: n => n>=10 },
+            { id:'full',   name:'集齐靖港',  desc:'打卡全部20个景点', icon:'👑', check: n => n>=20 },
         ];
-        function getAchName(ach) { const l=typeof currentLang!=='undefined'?currentLang:'zh'; return (ach.i18n?.[l]?.name)||ach.name; }
-        function getAchDesc(ach) { const l=typeof currentLang!=='undefined'?currentLang:'zh'; return (ach.i18n?.[l]?.desc)||ach.desc; }
 
         function getRank(n) {
             return EXPLORER_RANKS.find(r => n >= r.min && n <= r.max) || EXPLORER_RANKS[0];
@@ -2326,13 +2202,13 @@
             const fill = document.getElementById('ciXpFill');
             if (fill) { fill.style.width = xpPct+'%'; fill.style.background = `linear-gradient(90deg, ${rank.color}, ${rank.color}99)`; }
 
-            // 称号 (localized)
+            // 称号
             const badge = document.getElementById('checkinTitleBadge');
-            if (badge) { badge.textContent = getRankBadge(rank); badge.style.background = rank.bg; badge.style.color = rank.color; }
+            if (badge) { badge.textContent = rank.badge; badge.style.background = rank.bg; badge.style.color = rank.color; }
             const emoji = document.getElementById('checkinTitleEmoji');
             if (emoji) emoji.textContent = rank.emoji;
             const title = document.getElementById('checkinTitleText');
-            if (title) title.textContent = getRankTitle(rank);
+            if (title) title.textContent = rank.title;
         }
 
         function openCheckinDetail() {
@@ -2347,15 +2223,7 @@
             const label = document.getElementById('checkinRankLabel');
             if (label) {
                 const nextRank = EXPLORER_RANKS.find(r => r.min > n);
-                const rankNextPhrases = {
-                    zh: (cnt,emoji,title)=>`再打卡 ${cnt} 个景点升级为「${emoji} ${title}」`,
-                    en: (cnt,emoji,title)=>`Check in ${cnt} more spots to reach "${emoji} ${title}"`,
-                    ja: (cnt,emoji,title)=>`あと ${cnt} スポット訪問で「${emoji} ${title}」へ`,
-                    ko: (cnt,emoji,title)=>`${cnt}개 명소 더 방문하면 "${emoji} ${title}" 달성`,
-                };
-                const maxPhrases = { zh:'🎉 您已达到最高荣誉！', en:'🎉 You reached the highest rank!', ja:'🎉 最高ランクに達成しました！', ko:'🎉 최고 등급에 도달했습니다!' };
-                const rankNextFn = rankNextPhrases[typeof currentLang!=='undefined'?currentLang:'zh'] || rankNextPhrases.zh;
-                const nextTip = nextRank ? rankNextFn(nextRank.min - n, nextRank.emoji, nextRank.title) : (maxPhrases[typeof currentLang!=='undefined'?currentLang:'zh']||maxPhrases.zh);
+                const nextTip = nextRank ? `再打卡 ${nextRank.min - n} 个景点升级为「${nextRank.emoji} ${nextRank.title}」` : '🎉 您已达到最高荣誉！';
                 label.innerHTML = `<span class="ci-title-badge" style="background:${rank.bg};color:${rank.color};font-size:11px;padding:3px 10px;">${rank.badge}</span>  <span style="margin-left:6px;">${nextTip}</span>`;
             }
 
@@ -2371,8 +2239,8 @@
                         ? `background:#f0fdf4;border-color:#bbf7d0;`
                         : `background:#f8fafc;border-color:#e2e8f0;`;
                     div.innerHTML = `<span class="ach-icon">${ach.icon}</span>
-                        <div><div style="font-size:12px;font-weight:800;color:${done?'#16a34a':'#64748b'}">${getAchName(ach)}</div>
-                        <div style="font-size:10px;color:#94a3b8">${getAchDesc(ach)}${done?' ✓':''}</div></div>`;
+                        <div><div style="font-size:12px;font-weight:800;color:${done?'#16a34a':'#64748b'}">${ach.name}</div>
+                        <div style="font-size:10px;color:#94a3b8">${ach.desc}${done?' ✓':''}</div></div>`;
                     achSec.appendChild(div);
                 });
             }
@@ -2387,8 +2255,7 @@
                     div.className = `ci-grid-dot ${done?'done':'undone'}`;
                     div.title = poi.name;
                     div.onclick = () => { closeCheckinDetail(); enterDetailMode(poi); };
-                    const shortName = getPoiName(poi);
-                    div.innerHTML = `<span style="font-size:14px">${done?'✓':'?'}</span><span style="font-size:7px;text-align:center;line-height:1.2;">${shortName.slice(0,4)}</span>`;
+                    div.innerHTML = `<span style="font-size:14px">${done?'✓':'?'}</span><span style="font-size:7px;text-align:center;line-height:1.2;">${poi.name.slice(0,4)}</span>`;
                     grid.appendChild(div);
                 });
             }
@@ -2452,8 +2319,7 @@
             const next = getNextShowTime(show);
             document.getElementById('showName').textContent = show.name;
             const slEl=document.getElementById('showLocation'); if(slEl) slEl.textContent='📍 '+show.location;
-            const startWord = {zh:'开始',en:'Start',ja:'開始',ko:'시작'}[typeof currentLang!=='undefined'?currentLang:'zh']||'开始';
-            document.getElementById('showTime').textContent = '🕖 ' + next.time + ' ' + startWord;
+            document.getElementById('showTime').textContent = '🕖 ' + next.time + ' 开始';
             updateCountdown();
         }
 
@@ -2534,12 +2400,6 @@
         function toggleSearch() { document.getElementById('searchBox').classList.toggle('hide-right'); }
 
         /* ══ 活动页面 ══ */
-        const ACT_CAT_I18N = {
-            zh: { '民俗':'民俗','演艺':'演艺','亲子':'亲子','体验':'体验','全部':'全部' },
-            en: { '民俗':'Folk','演艺':'Show','亲子':'Family','体验':'Experience','全部':'All' },
-            ja: { '民俗':'民俗','演艺':'公演','亲子':'ファミリー','体验':'体験','全部':'全て' },
-            ko: { '民俗':'민속','演艺':'공연','亲子':'가족','体验':'체험','全部':'전체' },
-        };
         const ACTIVITIES = [
             { id:'a1', cat:'民俗', icon:'🥁', iconBg:'#fef3c7', name:'湖湘非遗文化节', date:'2025.06.20—06.29', time:'09:00—21:00', place:'全景区', desc:'汇聚皮影、花鼓戏、铁艺、木版年画等20余项省级以上非遗项目，大师现场展演互动。', spots:286, hot:true, color:'#f59e0b' },
             { id:'a2', cat:'演艺', icon:'🎭', iconBg:'#fce7f3', name:'花开靖港·夏夜演艺季', date:'2025.06.01—08.31', time:'19:00—21:30', place:'花开靖港剧场', desc:'以长沙文夕大火为背景的沉浸式大型演艺秀，每周末加场，感受湖湘儿女家国情怀。', spots:124, hot:true, color:'#ec4899' },
@@ -2572,8 +2432,8 @@
                         <div class="act-card-icon" style="background:${act.iconBg};">${act.icon}</div>
                         <div class="act-card-body">
                             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                                <span class="act-tag" style="background:${act.color}22;color:${act.color};border:1px solid ${act.color}44;">${ACT_CAT_I18N[typeof currentLang!=='undefined'?currentLang:'zh']?.[act.cat]||act.cat}</span>
-                                ${act.hot ? `<span class="act-tag" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">🔥 ${{zh:'热门',en:'Hot',ja:'人気',ko:'인기'}[typeof currentLang!=='undefined'?currentLang:'zh']||'热门'}</span>` : ''}
+                                <span class="act-tag" style="background:${act.color}22;color:${act.color};border:1px solid ${act.color}44;">${act.cat}</span>
+                                ${act.hot ? '<span class="act-tag" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">🔥 热门</span>' : ''}
                             </div>
                             <div style="font-size:15px;font-weight:900;color:white;margin:4px 0 3px;">${act.name}</div>
                             <div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.5;">${act.desc}</div>
@@ -2584,7 +2444,7 @@
                         <div class="act-stat" style="margin-left:8px;">🕒 ${act.time}</div>
                         <button class="act-register-btn" style="color:${act.color};border-color:${act.color}44;background:${act.color}18;"
                             onclick="event.stopPropagation();actRegister('${act.id}','${act.name}')">
-                            ${act.spots < 30 ? ('⚡ '+({zh:'仅剩',en:'Only',ja:'残り',ko:'남은'}[typeof currentLang!=='undefined'?currentLang:'zh']||'仅剩')+act.spots+({zh:'名',en:' left',ja:'名',ko:'명'}[typeof currentLang!=='undefined'?currentLang:'zh']||'名')) : ({zh:'立即报名',en:'Register',ja:'申込む',ko:'신청'}[typeof currentLang!=='undefined'?currentLang:'zh']||'立即报名')}
+                            ${act.spots < 30 ? '⚡ 仅剩'+act.spots+'名' : '立即报名'}
                         </button>
                     </div>`;
                 list.appendChild(card);
@@ -2690,7 +2550,7 @@
             pill.innerHTML = `
                 <span style="width:8px;height:8px;border-radius:50%;background:${r.color};flex-shrink:0;"></span>
                 <span>${r.icon} ${r.name}</span>
-                <span style="color:rgba(255,255,255,.45);font-weight:600;">${getRouteCount(r)}</span>
+                <span style="color:rgba(255,255,255,.45);font-weight:600;">${(r.pois||[]).length} 个景点</span>
                 <button onclick="clearRouteFilter()" style="margin-left:4px;width:20px;height:20px;border-radius:50%;
                     background:rgba(255,255,255,.15);border:none;cursor:pointer;color:white;font-size:11px;
                     display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
@@ -3279,58 +3139,29 @@
             if (effectiveWt >= 10) return 'yellow';
             return 'green';
         }
-        // CROWD_LABELS is now language-aware - computed each call
-        const CROWD_LABELS_MAP = {
-            zh: { green:'畅游',     yellow:'稍拥挤',       red:'高峰' },
-            en: { green:'Easy',    yellow:'Moderate',     red:'Busy' },
-            ja: { green:'空いてる', yellow:'やや混雑',      red:'混雑中' },
-            ko: { green:'한산',     yellow:'약간 혼잡',     red:'혼잡' },
-        };
-        function getCrowdLabels() {
-            return CROWD_LABELS_MAP[typeof currentLang!=='undefined'?currentLang:'zh'] || CROWD_LABELS_MAP.zh;
-        }
-        // Keep old name as getter for backward compatibility
-        const CROWD_LABELS = new Proxy({}, { get(_, k) { return getCrowdLabels()[k]; } });
+        const CROWD_LABELS = { green:'畅游', yellow:'稍拥挤', red:'高峰' };
         const CROWD_ICONS  = { green:'🟢', yellow:'🟡', red:'🔴' };
 
-        const CROWD_LEVEL_TEXTS = {
-            zh: { closed:'未开园', low:'较少', mid:'适中', high:'较多' },
-            en: { closed:'Closed', low:'Light', mid:'Moderate', high:'Busy' },
-            ja: { closed:'未開園', low:'少ない', mid:'普通', high:'多い' },
-            ko: { closed:'미개장', low:'한산', mid:'보통', high:'혼잡' },
-        };
         function updateCrowd(){
             const h=new Date().getHours();
-            const lang = typeof currentLang!=='undefined'?currentLang:'zh';
-            const texts = CROWD_LEVEL_TEXTS[lang] || CROWD_LEVEL_TEXTS.zh;
-            const[txt,col]=h<9?[texts.closed,'#94a3b8']:h<11?[texts.low,'#22c55e']:h<13||h>=17?[texts.mid,'#f59e0b']:[texts.high,'#ef4444'];
+            const[txt,col]=h<9?['未开园','#94a3b8']:h<11?['较少','#22c55e']:h<13||h>=17?['适中','#f59e0b']:['较多','#ef4444'];
             const el=document.getElementById('crowdLevel');if(el){el.textContent=txt;el.style.color=col;}
         }
         updateCrowd();setInterval(updateCrowd,60000);
 
         /* ── Wait Times ── */
         function getWTC(m){return m<=15?'time-low':m<=30?'time-med':'time-high';}
-        // Wait time string templates (language-aware)
-        const WAIT_STRINGS = {
-            zh: { ended:'今日结束', noWait:'无需等待', nextShow:(w)=>`下一场 ${w}min`, wait:(w)=>`等待 ${w}min` },
-            en: { ended:'Ended today', noWait:'No wait', nextShow:(w)=>`Next in ${w}min`, wait:(w)=>`Wait ${w}min` },
-            ja: { ended:'本日終了', noWait:'待ち無し', nextShow:(w)=>`次回 ${w}分後`, wait:(w)=>`待ち ${w}分` },
-            ko: { ended:'오늘 종료', noWait:'대기 없음', nextShow:(w)=>`다음 ${w}분 후`, wait:(w)=>`대기 ${w}분` },
-        };
-        function getWS() { return WAIT_STRINGS[typeof currentLang!=='undefined'?currentLang:'zh'] || WAIT_STRINGS.zh; }
-
         function updateWaitTimes(){
             const cur=new Date().getHours()*60+new Date().getMinutes();
-            const ws = getWS();
             POI_RAW_DATA.forEach(poi=>{
                 let disp='',cls='';
                 if(poi.schedules?.length){
                     let next=-1;
                     for(const t of poi.schedules){const[h,m]=t.split(':').map(Number);if(h*60+m>cur){next=h*60+m;break;}}
-                    if(next===-1){disp=ws.ended;cls='time-ended';}
-                    else{const w=next-cur;disp=ws.nextShow(w);cls=getWTC(w);}
-                }else if(poi.baseWaitTime===0){disp=ws.noWait;cls='time-low';}
-                else{const w=Math.max(0,poi.baseWaitTime+Math.floor(Math.sin(cur/5+poi.pos[0])*5));disp=ws.wait(w);cls=getWTC(w);}
+                    if(next===-1){disp='今日结束';cls='time-ended';}
+                    else{const w=next-cur;disp=`下一场 ${w}min`;cls=getWTC(w);}
+                }else if(poi.baseWaitTime===0){disp='无需等待';cls='time-low';}
+                else{const w=Math.max(0,poi.baseWaitTime+Math.floor(Math.sin(cur/5+poi.pos[0])*5));disp=`等待 ${w}min`;cls=getWTC(w);}
                 poi.currentDisplay=disp;poi.currentClass=cls;
                 const tag=document.getElementById('wtt-'+poi.id);if(tag){tag.className='wait-time-tag '+cls;tag.textContent=disp;}
                 const lt=document.getElementById('lst-'+poi.id);if(lt)lt.textContent=disp;
@@ -3494,14 +3325,13 @@
                 card.className='route-card';
                 card.style.cssText=`background:${r.bg};`;
                 card.id='rc_'+r.id;
-                const startLabel = {zh:'开始游览 →',en:'Start Tour →',ja:'ツアー開始 →',ko:'투어 시작 →'}[typeof currentLang!=='undefined'?currentLang:'zh']||'开始游览 →';
                 card.innerHTML=`
                     <div class="rc-icon">${r.icon}</div>
-                    <div class="rc-name" style="color:${r.color}">${getRouteName(r)}</div>
-                    <div class="rc-meta">${getRouteDuration(r)} · ${getRouteCount(r)}</div>
+                    <div class="rc-name" style="color:${r.color}">${r.name}</div>
+                    <div class="rc-meta">${r.duration} · ${r.count}</div>
                     <div class="rc-poi-chips">${chipNames}${moreCount>0?`<span class="rc-poi-chip" style="color:${r.color};background:${r.color}18;">+${moreCount}</span>`:''}</div>
                     <button class="rc-start-btn" style="margin-top:6px;padding:4px 0;width:100%;border-radius:8px;font-size:10px;font-weight:800;color:white;background:${r.color};border:none;cursor:pointer;opacity:0;transition:opacity .2s;">
-                        ${startLabel}
+                        开始游览 →
                     </button>`;
                 card.onclick=()=>{
                     document.querySelectorAll('.route-card').forEach(c=>{
@@ -3521,8 +3351,7 @@
             const more=document.createElement('div');
             more.className='route-card';
             more.style.cssText='background:rgba(248,250,252,0.9);border:1.5px dashed #cbd5e1;align-items:center;text-align:center;justify-content:center;';
-            const moreLabel={zh:'更多路线',en:'More Routes',ja:'もっと見る',ko:'더 많은 노선'}[typeof currentLang!=='undefined'?currentLang:'zh']||'更多路线';
-            more.innerHTML=`<div style="font-size:18px;margin-bottom:3px">🗺️</div><div style="font-size:11px;font-weight:700;color:#475569">${moreLabel}</div>`;
+            more.innerHTML=`<div style="font-size:18px;margin-bottom:3px">🗺️</div><div style="font-size:11px;font-weight:700;color:#475569">更多路线</div>`;
             scroll.appendChild(more);
         }
 
@@ -3772,12 +3601,11 @@
             const list=document.getElementById('poiList');list.innerHTML='';
             POI_RAW_DATA.forEach(poi=>{
                 const cl = getCrowdLevel(poi);
-                const cl_labels = getCrowdLabels();
-                const crowdHtml = `<span class="crowd-badge crowd-${cl}" style="font-size:8px;padding:1px 5px;">${cl_labels[cl]}</span>`;
+                const crowdHtml = `<span class="crowd-badge crowd-${cl}" style="font-size:8px;padding:1px 5px;">${CROWD_LABELS[cl]}</span>`;
                 const item=document.createElement('div');
                 item.className='flex items-center gap-3 p-2.5 rounded-xl bg-white/50 hover:bg-white cursor-pointer transition';
                 item.onclick=()=>enterDetailMode(poi);
-                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${getPoiName(poi)}</div><div class="flex items-center gap-1.5 mt-0.5">${crowdHtml}<span id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</span></div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><div class="flex items-center gap-1.5 mt-0.5">${crowdHtml}<span id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</span></div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
                 list.appendChild(item);
             });
         }
@@ -3813,12 +3641,11 @@
                 }else{const b=mkBuilding(poi.color);b.position.set(...poi.pos);detailGroup.add(b);}
             }
             animateCamera(new THREE.Vector3(poi.pos[0],poi.pos[1]+10,poi.pos[2]+15),new THREE.Vector3(poi.pos[0],poi.pos[1]+2,poi.pos[2]));
-            document.getElementById('detailTitle').textContent=getPoiName(poi);
+            document.getElementById('detailTitle').textContent=poi.name;
             document.getElementById('detailDesc').textContent=poi.desc;
             document.getElementById('detailImg').src=poi.img;
-            document.getElementById('detailBadge').textContent=getPoiType(poi);
-            const noWaitStr = getWS().noWait;
-            document.getElementById('detailWaitTime').textContent=poi.currentDisplay||noWaitStr;
+            document.getElementById('detailBadge').textContent=poi.type;
+            document.getElementById('detailWaitTime').textContent=poi.currentDisplay||'无需等待';
             // 人流预警徽章
             const cl = getCrowdLevel(poi);
             const cb = document.getElementById('detailCrowdBadge');
@@ -3982,7 +3809,7 @@
                 ring.rotation.x=-Math.PI/2;ring.position.set(...poi.pos);mapGroup.add(ring);poi.ring=ring;
                 const div=document.createElement('div');div.className='poi-label';
                 div.onclick=e=>{e.stopPropagation();enterDetailMode(poi);};
-                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name" id="pln-${poi.id}">${getPoiName(poi)}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}">${poi.currentDisplay||''}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
+                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}">${poi.currentDisplay||''}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
                 lc.appendChild(div);
                 labels.push({element:div,position:new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0,.5,0)),data:poi});
             });
@@ -4974,7 +4801,7 @@
                 div.className = 'pool-item' + (inPlan ? ' in-plan' : '');
                 div.id = 'pool_' + poi.id;
                 div.onclick = () => addToPlan(poi);
-                div.innerHTML = `<div class="pi-dot" style="background:${poi.color};"></div><span>${getPoiName(poi)}</span><span style="margin-left:auto;font-size:9px;color:#94a3b8;font-weight:600;">${getPoiType(poi)}</span>`;
+                div.innerHTML = `<div class="pi-dot" style="background:${poi.color};"></div><span>${poi.name}</span><span style="margin-left:auto;font-size:9px;color:#94a3b8;font-weight:600;">${poi.type}</span>`;
                 pool.appendChild(div);
             });
         }
@@ -5017,8 +4844,8 @@
                     <div class="plan-slot-time">${timeStr}</div>
                     <div class="plan-slot-card" style="border-left:3px solid ${item.poi.color};">
                         <button class="plan-del" onclick="removeFromPlan(${i})">✕</button>
-                        <div style="font-size:12px;font-weight:800;color:#1e293b;margin-right:24px;">${getPoiName(item.poi)}</div>
-                        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${getPoiType(item.poi)} · ${{zh:'约35分钟',en:'~35 min',ja:'約35分',ko:'약 35분'}[typeof currentLang!=='undefined'?currentLang:'zh']||'约35分钟'}</div>
+                        <div style="font-size:12px;font-weight:800;color:#1e293b;margin-right:24px;">${item.poi.name}</div>
+                        <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${item.poi.type} · 约35分钟</div>
                         ${item.poi.schedules?.length ? `<div style="font-size:9px;color:${item.poi.color};margin-top:4px;font-weight:700;">演出时间：${item.poi.schedules.slice(0,3).join(' / ')}</div>` : ''}
                     </div>`;
                 tl.appendChild(slot);
@@ -5084,8 +4911,7 @@
             const myRank = getRank(myCount);
 
             // 合并真实用户和我的数据
-            const meName = {zh:'我',en:'Me',ja:'私',ko:'나'}[typeof currentLang!=='undefined'?currentLang:'zh']||'我';
-            const me = { name:meName, avatar: myRank.emoji, count: myCount, rank_title: myRank.title, rank_obj: myRank, isMe: true };
+            const me = { name:'我', avatar: myRank.emoji, count: myCount, rank_title: myRank.title, isMe: true };
             const allUsers = [...MOCK_USERS, me].sort((a,b)=>b.count-a.count);
 
             // 领奖台（前三）
@@ -5104,7 +4930,7 @@
                             ${u.avatar}
                         </div>
                         <div style="font-size:11px;font-weight:800;color:white;text-align:center;">${u.name.slice(0,5)}</div>
-                        <div style="font-size:10px;color:rgba(255,255,255,.4);">${u.count} ${{zh:'个景点',en:'spots',ja:'スポット',ko:'명소'}[typeof currentLang!=='undefined'?currentLang:'zh']||'个景点'}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.4);">${u.count}个景点</div>
                         <div class="lb-pod-bar" style="background:${c}33;height:${h}px;">
                             <div class="lb-pod-rank" style="background:${c};color:white;">${actualRank === 1 ? '🥇' : actualRank === 2 ? '🥈' : '🥉'}</div>
                             <div style="font-size:18px;padding-top:16px;">${actualRank}</div>
@@ -5118,13 +4944,13 @@
                     <div class="lb-row-avatar">${u.avatar}</div>
                     <div style="flex:1;min-width:0;">
                         <div style="font-size:12px;font-weight:800;color:white;display:flex;align-items:center;gap:6px;">
-                            ${u.name}${u.isMe?`<span style="font-size:9px;background:rgba(37,99,235,.3);color:#93c5fd;padding:1px 6px;border-radius:8px;font-weight:700;">${{zh:'我',en:'Me',ja:'私',ko:'나'}[typeof currentLang!=='undefined'?currentLang:'zh']||'我'}</span>`:''}
+                            ${u.name}${u.isMe?'<span style="font-size:9px;background:rgba(37,99,235,.3);color:#93c5fd;padding:1px 6px;border-radius:8px;font-weight:700;">我</span>':''}
                         </div>
-                        <div style="font-size:10px;color:rgba(255,255,255,.35);">${u.rank_obj ? getRankTitle(u.rank_obj) : u.rank_title}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.35);">${u.rank_title}</div>
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:16px;font-weight:900;color:${i<3?podColors[i]:'rgba(255,255,255,.6)'};">${u.count}</div>
-                        <div style="font-size:9px;color:rgba(255,255,255,.3);">${{zh:'景点',en:'spots',ja:'スポット',ko:'명소'}[typeof currentLang!=='undefined'?currentLang:'zh']||'景点'}</div>
+                        <div style="font-size:9px;color:rgba(255,255,255,.3);">景点</div>
                     </div>
                 </div>`).join('')}
             <div style="text-align:center;margin-top:16px;font-size:10px;color:rgba(255,255,255,.25);">排行榜每小时刷新 · 数据仅供参考</div>`;
@@ -5218,6 +5044,15 @@
         }
 
         window.onload = () => {
+            // 恢复保存的语言（角标同步）
+            (function() {
+                const saved = localStorage.getItem('jg_lang') || 'zh';
+                const badge = document.getElementById('langBadge');
+                if (badge) {
+                    const labels = { zh:'中', en:'EN', ja:'日', ko:'한' };
+                    badge.textContent = labels[saved] || '中';
+                }
+            })();
             init();
             // 启动趣味功能
             setTimeout(() => {
@@ -5611,25 +5446,12 @@ function switchLanguage(code) {
     localStorage.setItem('jg_lang', code);
     renderLangGrid();
     applyLanguage();
-
-    // Re-run all dynamic content renderers so they pick up new language
-    if (typeof updateWaitTimes === 'function') updateWaitTimes();
-    if (typeof buildPOIList === 'function') buildPOIList();
-    if (typeof buildRouteCards === 'function') buildRouteCards();
-    if (typeof updateCheckinUI === 'function') updateCheckinUI();
-    if (typeof renderActivities === 'function') renderActivities();
-
-    // Update map POI label names (they have id="pln-{id}")
-    if (typeof POI_RAW_DATA !== 'undefined') {
-        POI_RAW_DATA.forEach(poi => {
-            const el = document.getElementById('pln-' + poi.id);
-            if (el) el.textContent = getPoiName(poi);
-        });
+    // 同步右侧工具栏语言角标
+    const badge = document.getElementById('langBadge');
+    if (badge) {
+        const labels = { zh:'中', en:'EN', ja:'日', ko:'한' };
+        badge.textContent = labels[code] || '中';
     }
-
-    // Update html lang attribute
-    document.documentElement.lang = { zh:'zh-CN', en:'en', ja:'ja', ko:'ko' }[code] || 'zh-CN';
-
     HAPTIC.success();
     // 短暂延迟后关闭
     setTimeout(closeLanguageSwitcher, 600);
@@ -5646,7 +5468,8 @@ function applyLanguage() {
     const navMap = {
         navSpots:'spots', navRoute:'route', navActivity:'activity',
         navTimeline:'history', navLeaderboard:'ranking', navPlanner:'planner',
-        navDayNight:'dayNight', navVoiceWake:'voiceNav', navGroupTour:'groupTour', navLanguage:'language'
+        navDayNight:'dayNight', navVoiceWake:'voiceNav', navGroupTour:'groupTour',
+        // navLanguage is now a tool-btn in rightTools; badge is updated via langBadge span
     };
     Object.entries(navMap).forEach(([id, key]) => {
         const btn = document.getElementById(id);
@@ -5656,6 +5479,9 @@ function applyLanguage() {
         if (nodes.length) nodes[nodes.length-1].textContent = t(key);
         else btn.appendChild(document.createTextNode(t(key)));
     });
+    // 右侧工具栏语言角标
+    const _lb = document.getElementById('langBadge');
+    if (_lb) { const _lm={zh:'中',en:'EN',ja:'日',ko:'한'}; _lb.textContent = _lm[lang] || '中'; }
 
     // 搜索框
     const si = document.getElementById('searchInput');
