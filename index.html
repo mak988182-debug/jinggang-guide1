@@ -141,29 +141,18 @@
 
         /* ═══════ LEFT PANEL ═══════ */
         #leftPanel {
-            position: fixed;
-            /* 自动避让 iPhone 摄像头岛屿（横屏时 safe-area-inset-left 覆盖刘海宽度） */
-            left: max(10px, env(safe-area-inset-left, 10px));
-            top: 50%; transform: translateY(-50%);
+            position: fixed; left: 16px; top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
-            /* 防止超出屏幕高度 */
-            max-height: calc(100dvh - 20px);
         }
         #leftNav {
-            display: flex; flex-direction: column; gap: 3px;
-            padding: 5px; border-radius: 16px;
+            display: flex; flex-direction: column; gap: 5px;
+            padding: 6px; border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            /* 按钮太多时可滚动，隐藏滚动条 */
-            overflow-y: auto;
-            max-height: calc(100dvh - 28px);
-            scrollbar-width: none; -ms-overflow-style: none;
         }
-        #leftNav::-webkit-scrollbar { display: none; }
         .nav-btn {
-            width: 44px; height: 42px; border-radius: 11px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-            cursor: pointer; transition: all .2s; font-size: 8.5px; font-weight: 700; color: #64748b;
-            flex-shrink: 0; /* 防止被压扁 */
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            cursor: pointer; transition: all .2s; font-size: 9px; font-weight: 700; color: #64748b;
         }
         .nav-btn:hover { background: rgba(37,99,235,.08); color: #2563eb; }
         .nav-btn.active { background: #2563eb; color: white; box-shadow: 0 3px 10px rgba(37,99,235,.35); }
@@ -177,9 +166,7 @@
 
         /* ═══════ RIGHT PANEL ═══════ */
         #rightPanel {
-            position: fixed;
-            right: max(10px, env(safe-area-inset-right, 10px));
-            top: 50%; transform: translateY(-50%);
+            position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
             z-index: 40; display: flex; align-items: center; gap: 6px;
         }
         #rightFoldTab {
@@ -219,7 +206,10 @@
 
         /* ═══════ BOTTOM BAR ═══════ */
         #bottomBar {
-            position: fixed; bottom: 12px; left: 66px; right: 62px;
+            position: fixed;
+            bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            left: max(66px, calc(env(safe-area-inset-left, 0px) + 60px));
+            right: max(62px, calc(env(safe-area-inset-right, 0px) + 56px));
             z-index: 40; display: flex; align-items: stretch; gap: 6px; height: 76px;
         }
         #routeSection {
@@ -280,8 +270,24 @@
         .desc-scroll::-webkit-scrollbar-thumb { background:rgba(0,0,0,.1); border-radius:3px; }
 
         /* ── AI Panel ── */
-        #aiPanel { transition:all .35s cubic-bezier(.4,0,.2,1); transform-origin:bottom right; }
+        #aiPanel {
+            transition: all .35s cubic-bezier(.4,0,.2,1);
+            transform-origin: bottom right;
+        }
         #aiPanel.hide-right { opacity:0; pointer-events:none; transform:scale(.94) translateY(10px); }
+        /* 手机横屏：AI面板铺满（避免被裁切） */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            #aiPanel {
+                position: fixed !important;
+                left: max(8px, env(safe-area-inset-left, 8px)) !important;
+                right: max(8px, env(safe-area-inset-right, 8px)) !important;
+                bottom: 8px !important;
+                width: auto !important;
+                max-width: none !important;
+                max-height: 72dvh !important;
+                border-radius: 20px !important;
+            }
+        }
         .ai-user { background:#2563eb; color:#fff; border-radius:16px 16px 3px 16px; margin-left:auto; }
         .ai-bot  { background:rgba(255,255,255,.95); color:#1e293b; border-radius:16px 16px 16px 3px; border:1px solid rgba(0,0,0,.06); }
         #aiMessages::-webkit-scrollbar { width:3px; }
@@ -342,7 +348,7 @@
             font-size: 14px; font-weight: 700; color: white;
             text-align: center; min-height: 22px;
         }
-        .vw-hint { line-height:1.55; text-align:center;
+        .vw-hint {
             font-size: 11px; color: rgba(255,255,255,0.45);
             text-align: center; max-width: 260px; line-height: 1.7;
         }
@@ -524,20 +530,19 @@
         #searchBox { position:fixed; top:16px; right:76px; z-index:55; width:220px; transition:all .25s; }
         #searchBox.hide-right { opacity:0; pointer-events:none; transform:translateX(8px); }
 
-        /* ── 恢复栏（右侧边缘贴边，不遮挡地图） ── */
+        /* ── 恢复栏（底部栏上方水平排列，绝不遮挡右侧工具） ── */
         #restoreBar {
             position: fixed;
-            right: 56px;   /* 让开右侧工具栏宽度 */
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 60;
+            bottom: calc(max(12px, env(safe-area-inset-bottom, 12px)) + 82px);
+            left: max(66px, calc(env(safe-area-inset-left, 0px) + 60px));
+            right: max(66px, calc(env(safe-area-inset-right, 0px) + 60px));
+            z-index: 38;           /* 低于工具栏 z-index:40，不遮挡 */
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 5px;
             pointer-events: none;
-            max-height: 80vh;
-            overflow: hidden;
-            padding: 6px 0;
+            justify-content: flex-start;
         }
         .restore-chip {
             pointer-events: auto;
@@ -545,15 +550,15 @@
             background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
             border: 1px solid rgba(255,255,255,0.14);
             color: #e2e8f0; font-size: 10px; font-weight: 700;
-            padding: 6px 10px;
+            padding: 5px 10px;
             border-radius: 10px;
             cursor: pointer; transition: all .2s; white-space: nowrap;
-            box-shadow: -3px 2px 12px rgba(0,0,0,0.28);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.28);
             animation: chipSlide .22s cubic-bezier(.175,.885,.32,1.275) both;
         }
-        .restore-chip:hover { background: rgba(37,99,235,0.92); padding-right: 14px; }
+        .restore-chip:hover { background: rgba(37,99,235,0.92); }
         .restore-chip .rc-dot { width:5px; height:5px; border-radius:50%; background:#60a5fa; flex-shrink:0; }
-        @keyframes chipSlide { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes chipSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
 
         /* ══ 路线高亮系统 ══ */
@@ -1262,17 +1267,19 @@
            ③ 足迹回放 — 打卡路径动画
         ══════════════════════════════════════ */
         #footprintBtn {
-            position: fixed; bottom: 100px; left: 66px; z-index: 45;
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 14px; border-radius: 20px;
-            background: rgba(15,23,42,0.88); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.15); color: white;
-            font-size: 11px; font-weight: 700; cursor: pointer;
-            transition: all .25s; box-shadow: 0 4px 16px rgba(0,0,0,.35);
-            opacity: 0; pointer-events: none;
+            /* 与 restoreBar 同行，使用相同视觉风格 */
+            pointer-events: auto;
+            display: none; align-items: center; gap: 5px;
+            background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.14); color: #e2e8f0;
+            font-size: 10px; font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer; transition: all .2s; white-space: nowrap;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.28);
         }
-        #footprintBtn.visible { opacity: 1; pointer-events: auto; }
-        #footprintBtn:hover { background: rgba(37,99,235,0.9); transform: translateY(-2px); }
+        #footprintBtn.visible { display: flex; }
+        #footprintBtn:hover { background: rgba(37,99,235,0.92); }
         #footprintCanvas {
             position: fixed; inset: 0; z-index: 12; pointer-events: none;
             opacity: 0; transition: opacity .5s;
@@ -1485,7 +1492,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
                 实时客流导览
             </div>
-            <button class="fold-btn" onclick="hideSideList()" title="关闭">
+            <button class="fold-btn" onclick="togglePanel('sideListPanel','right')" title="收起客流导览">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -1687,7 +1694,7 @@
 </div>
 
 <!-- ══ AI PANEL ══ -->
-<div id="aiPanel" class="hide-right fixed bottom-24 right-16 z-50 g rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="width:340px;max-height:480px;border:1.5px solid rgba(37,99,235,0.13);">
+<div id="aiPanel" class="hide-right fixed bottom-24 right-4 z-50 g rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="width:min(340px, calc(100vw - 80px));max-height:min(480px, 75dvh);border:1.5px solid rgba(37,99,235,0.13);">
     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100/80 flex-shrink-0" style="background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.04));">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
@@ -1704,8 +1711,8 @@
             <button onclick="clearAIChat()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.76"/></svg>
             </button>
-            <button onclick="toggleAIPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button onclick="toggleAIPanel()" title="关闭AI面板" class="w-8 h-8 rounded-xl flex items-center justify-center transition" style="background:rgba(239,68,68,0.1);color:#ef4444;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
     </div>
@@ -1715,7 +1722,7 @@
             当前：<strong id="aiContextName"></strong><span class="text-blue-300 ml-1">· 靖靖已了解</span>
         </div>
     </div>
-    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:200px;max-height:260px;"></div>
+    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:120px;max-height:min(260px, 45dvh);"></div>
     <div id="aiChips" class="px-3.5 py-2 flex gap-1.5 overflow-x-auto no-scrollbar border-t border-slate-50 flex-shrink-0">
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">今日推荐路线</button>
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">人少的景点</button>
@@ -2335,12 +2342,13 @@
 
         /* ── 面板状态管理（支持恢复） ── */
         const PANEL_META = {
-            weatherCapsule: { label:'天气',   dir:'top',    icon:'🌤️' },
-            showCard:        { label:'今日演出', dir:'top',   icon:'🎭' },
-            leftNav:         { label:'导航',   dir:'left',   icon:'🧭' },
-            rightTools:      { label:'工具栏', dir:'right',  icon:'🔧' },
+            weatherCapsule: { label:'天气',     dir:'top',   icon:'🌤️' },
+            showCard:        { label:'今日演出',  dir:'top',   icon:'🎭' },
+            leftNav:         { label:'导航',     dir:'left',  icon:'🧭' },
+            rightTools:      { label:'工具栏',   dir:'right', icon:'🔧' },
             routeSection:    { label:'推荐路线', dir:'bottom', icon:'🗺️' },
             checkinSection:  { label:'打卡进度', dir:'bottom', icon:'✅' },
+            sideListPanel:   { label:'客流导览', dir:'right', icon:'🕐' },  // ← 新增
         };
         const hiddenPanels = new Set();
 
@@ -2393,6 +2401,9 @@
         function renderRestoreBar() {
             const bar = document.getElementById('restoreBar');
             bar.innerHTML = '';
+            // 把 footprintBtn 插回 restoreBar（它和恢复chip共享底部工具条）
+            const fp = document.getElementById('footprintBtn');
+            if (fp) bar.appendChild(fp);
             hiddenPanels.forEach(id => {
                 const meta = PANEL_META[id];
                 if (!meta) return;
@@ -2405,8 +2416,18 @@
             });
         }
 
-        function showSideList() { document.getElementById('sideListPanel').classList.remove('hide-right'); }
-        function hideSideList() { document.getElementById('sideListPanel').classList.add('hide-right'); }
+        function showSideList() {
+            const el = document.getElementById('sideListPanel');
+            if (el && el.classList.contains('hide-right')) {
+                // 如果是被 togglePanel 隐藏的，用 restorePanel 恢复
+                restorePanel('sideListPanel');
+            } else if (el) {
+                el.classList.remove('hide-right');
+            }
+        }
+        function hideSideList() {
+            togglePanel('sideListPanel', 'right');
+        }
         function toggleSearch() { document.getElementById('searchBox').classList.toggle('hide-right'); }
 
         /* ══ 活动页面 ══ */
@@ -3595,13 +3616,7 @@
                 document.getElementById('audioPoiName').textContent=poi.name;
                 const ac=document.getElementById('audioCtrl');ac.classList.remove('hidden');ac.classList.add('flex');
                 updateAudioUI();
-            }).catch(()=>{
-                isAudioPlaying=false;updateAudioUI();
-                // MP3 autoplay 被浏览器拦截 → 用 TTS 朗读景点讲解作为兜底
-                if (typeof voiceSpeakTTS === 'function' && poi.desc) {
-                    voiceSpeakTTS(poi.name + '。' + poi.desc.slice(0, 80));
-                }
-            });
+            }).catch(()=>{isAudioPlaying=false;updateAudioUI();});
             currentAudio.onended=()=>stopAudio();
         }
         function stopAudio(){
@@ -5086,7 +5101,7 @@
         </div>
     </div>
     <div class="vw-status" id="vwStatus">点击麦克风开始语音导览</div>
-    <div class="vw-hint">🎙️ 说出景点名称 → 自动飞行导航 + 播放语音讲解<br><span style="font-size:10px;opacity:.6;">支持 Chrome / Safari · 点击下方词语快速导览</span></div>
+    <div class="vw-hint">说出景点名称或指令，靖靖会为您自动导航和讲解</div>
     <div class="vw-keywords" id="vwKeywords"></div>
     <button class="vw-close" onclick="closeVoiceWake()">关闭语音导览</button>
 </div>
@@ -5201,46 +5216,22 @@ let voiceListening = false;
 
 // POI关键词映射 (在POI数据加载后由initVoiceKeywords()完善)
 const VOICE_CMDS = {
-    /* ── 景点（含别名，越具体越靠前） ── */
-    '游客服务中心': 'vc',  '游客中心': 'vc',   '服务中心': 'vc',
-    '八大碗':  'bdw',  '靖港八大碗': 'bdw', '餐厅': 'bdw',
-    '红色剧场': 'hsjc', '母亲的歌': 'hsjc', '红剧': 'hsjc',
-    '刘畴西': 'lcx',   '黄埔': 'lcx',
-    '皮影戏': 'pyx',   '皮影': 'pyx',
-    '东牌坊': 'dpf',   '东门': 'dpf',
-    '西牌坊': 'xpf',   '西门': 'xpf',
-    '芦江阁': 'ljg',   '芦江': 'ljg',
-    '八元堂': 'byt',   '花鼓戏': 'byt', '宁乡会馆': 'byt',
-    '花开靖港': 'hkjc','花开': 'hkjc', '演出': 'hkjc',
-    '老电影': 'ldy',   '电影院': 'ldy',
-    '民俗收藏': 'ms馆', '捌零': 'ms馆',  '亮点民俗': 'ms馆',
-    '陶承': 'tcs',
-    '楚河码头': 'chmd','楚河': 'chmd',  '码头': 'chmd',
-    '正义码头': 'zymd','正义': 'zymd',  '游船': 'zymd',
-    '省委旧址': 'hnsy','湖南省委': 'hnsy','地下党': 'hnsy',
-    '宏泰坊': 'htf',
-    '杨泗庙': 'ysm',   '杨泗': 'ysm',   '庙': 'ysm',
-    '铁器文化': 'tqg', '铁器': 'tqg',   '铁艺': 'tqg',
-    '二当家': 'edj',   '商社': 'edj',
-    '锄禾源': 'chy',   '农耕': 'chy',
-    /* ── 功能指令 ── */
-    '路线': '__route',   '推荐路线': '__route',
-    '打卡': '__checkin', '成就': '__checkin',
-    'AI':  '__ai',       '靖靖': '__ai',    '导游': '__ai',
-    '帮助': '__help',    '怎么用': '__help',
+    '芦江阁': 'ljg', '八元堂': 'byt', '皮影戏': 'pyx', '花开靖港': 'hkjc',
+    '老电影': 'ldy', '民俗': 'ms馆', '陶承': 'tcs', '楚河码头': 'chmd',
+    '正义码头': 'zymd', '省委旧址': 'hnsy', '宏泰坊': 'htf', '杨泗庙': 'ysm',
+    '铁器': 'tqg', '锄禾源': 'chy', '西牌坊': 'xpf',
+    '导航': '__navigate', '路线': '__route', '附近': '__nearby',
+    '打卡': '__checkin', 'AI': '__ai', '帮助': '__help',
 };
 
 function initVoiceWakeUI() {
     const container = document.getElementById('vwKeywords');
     if (!container) return;
     const pois = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA : [];
-    // 分两行：演艺类 + 文化类
-    const showPOIs = pois.filter(p => ['演艺','民俗','古建'].includes(p.type)).slice(0,4).map(p=>p.name);
-    const restPOIs = pois.filter(p => !['演艺','民俗','古建'].includes(p.type)).slice(0,4).map(p=>p.name);
-    const cmds = ['推荐路线', '打开靖靖', '打卡成就'];
-    const all = [...showPOIs, ...restPOIs, ...cmds];
-    container.innerHTML = all.map(n =>
-        `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')" title="点击模拟说「${n}」">${n}</div>`
+    const names = pois.slice(0,10).map(p => p.name);
+    names.push('附近景点', '今日路线', '打开AI', '打卡');
+    container.innerHTML = names.map(n =>
+        `<div class="vw-kw" onclick="simulateVoiceCmd('${n}')">${n}</div>`
     ).join('');
 }
 
@@ -5273,17 +5264,13 @@ function toggleVoiceListen() {
 function startVoiceListen() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        setVwStatus(isIOS
-            ? '⚠️ iOS Safari 请在「设置→Safari→麦克风」中允许，或用 Chrome'
-            : '⚠️ 请使用 Chrome / Safari 14+ 以启用语音识别');
+        setVwStatus('⚠️ 您的浏览器不支持语音识别，请使用 Chrome');
         return;
     }
     recognition = new SpeechRecognition();
     recognition.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
     recognition.interimResults = true;
     recognition.continuous = false;
-    recognition.maxAlternatives = 5;  // 多候选，提升识别率
     recognition.onstart = () => {
         voiceListening = true;
         document.getElementById('vwOrb').classList.add('listening');
@@ -5291,21 +5278,9 @@ function startVoiceListen() {
         HAPTIC.light();
     };
     recognition.onresult = (e) => {
-        // 拿所有候选结果的第一选择拼合
         const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
         setVwStatus('🔍 识别中：' + transcript);
-        if (e.results[e.results.length - 1].isFinal) {
-            // 依次尝试每个候选，命中即止
-            const result = e.results[e.results.length - 1];
-            let found = false;
-            for (let ai = 0; ai < result.length && !found; ai++) {
-                const alt = result[ai].transcript;
-                // 检查是否能命中任何景点（预先检测，不弹错误提示）
-                const hit = [...Object.keys(VOICE_CMDS)].some(kw => alt.toLowerCase().includes(kw.toLowerCase()));
-                if (hit) { processVoiceResult(alt); found = true; }
-            }
-            if (!found) processVoiceResult(transcript);
-        }
+        if (e.results[0].isFinal) processVoiceResult(transcript);
     };
     recognition.onerror = () => {
         voiceListening = false;
@@ -5335,94 +5310,53 @@ function setVwStatus(txt) {
     if (el) el.textContent = txt;
 }
 
-/* 语音导航并自动讲解 */
-function voiceNavigateTo(poi) {
-    closeVoiceWake();
-    // 1. 3D 飞行导航到景点
-    if (typeof enterDetailMode === 'function') {
-        enterDetailMode(poi);
-    }
-    // 2. 自动播放 MP3 讲解（延迟等相机动画启动后）
-    setTimeout(() => {
-        // 先尝试 MP3
-        if (typeof playAudio === 'function' && poi.audio) {
-            playAudio(poi);
-        }
-        // 同时用 TTS 朗读景点名（MP3 被 autoplay 拦截时的兜底）
-        voiceSpeakTTS(poi.name + '。' + (poi.desc ? poi.desc.slice(0, 60) : ''));
-    }, 600);
-}
-
-/* TTS 语音朗读兜底（Web Speech Synthesis，无需用户手势） */
-function voiceSpeakTTS(text) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = (typeof currentLang !== 'undefined')
-        ? { zh:'zh-CN', en:'en-US', ja:'ja-JP', ko:'ko-KR' }[currentLang] || 'zh-CN'
-        : 'zh-CN';
-    u.rate = 0.9; u.pitch = 1; u.volume = 0.9;
-    window.speechSynthesis.speak(u);
-}
-
 function processVoiceResult(text) {
-    const lower = text.toLowerCase();
     // 关键词匹配
     for (const [kw, id] of Object.entries(VOICE_CMDS)) {
-        if (lower.includes(kw.toLowerCase())) {
+        if (text.includes(kw)) {
             highlightVoiceKw(kw);
             if (id.startsWith('__')) {
                 handleVoiceAction(id);
             } else {
                 const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
                 if (poi) {
-                    setVwStatus('✅ 正在导航至「' + poi.name + '」并播放讲解…');
+                    setVwStatus('✅ 找到：' + poi.name);
                     HAPTIC.success();
-                    setTimeout(() => voiceNavigateTo(poi), 500);
+                    setTimeout(() => {
+                        closeVoiceWake();
+                        if (typeof openDetailCard === 'function') openDetailCard(poi);
+                    }, 800);
                     return;
                 }
             }
             return;
         }
     }
-    // 模糊匹配 POI 名称
+    // 模糊匹配POI名称
     if (typeof POI_RAW_DATA !== 'undefined') {
-        const t = lower;
-        const matched = POI_RAW_DATA.find(p =>
-            t.includes(p.name) || p.name.includes(text) ||
-            p.name.split('').some(ch => t.includes(ch) && ch.length > 1)
-        );
+        const matched = POI_RAW_DATA.find(p => p.name.includes(text) || text.includes(p.name));
         if (matched) {
-            setVwStatus('✅ 正在导航至「' + matched.name + '」并播放讲解…');
+            setVwStatus('✅ 导航至：' + matched.name);
             HAPTIC.success();
-            setTimeout(() => voiceNavigateTo(matched), 500);
+            setTimeout(() => {
+                closeVoiceWake();
+                if (typeof openDetailCard === 'function') openDetailCard(matched);
+            }, 800);
             return;
         }
     }
-    setVwStatus('❓ 未识别到景点"' + text + '"，请重试或点击下方景点');
+    setVwStatus('❓ 未找到"' + text + '"，请重试');
     HAPTIC.error();
 }
 
 function handleVoiceAction(action) {
+    closeVoiceWake();
     switch(action) {
-        case '__ai':
-            closeVoiceWake();
-            if(typeof toggleAIPanel==='function') toggleAIPanel();
-            voiceSpeakTTS('靖靖已上线，请告诉我您想了解什么');
-            break;
-        case '__route':
-            closeVoiceWake();
-            if(typeof showSideList==='function') showSideList();
-            voiceSpeakTTS('为您推荐游览路线，请从底部选择');
-            break;
-        case '__checkin':
-            closeVoiceWake();
-            if(typeof openCheckinDetail==='function') openCheckinDetail();
-            voiceSpeakTTS('为您打开打卡成就页面');
-            break;
+        case '__ai':    if(typeof toggleAIPanel==='function') toggleAIPanel(); break;
+        case '__route': if(typeof showSideList==='function') showSideList(); break;
+        case '__checkin': if(typeof openCheckinDetail==='function') openCheckinDetail(); break;
         case '__help':
-            setVwStatus('💡 可说：景点名 / 今日路线 / 打开靖靖 / 打卡成就');
-            voiceSpeakTTS('您可以说出景点名称，或者说今日路线、打开靖靖');
+            setVwStatus('💡 可说：景点名 / 附近景点 / 今日路线 / 打卡');
             break;
     }
     HAPTIC.medium();
@@ -5436,11 +5370,8 @@ function highlightVoiceKw(kw) {
 
 function simulateVoiceCmd(name) {
     HAPTIC.light();
-    // 别名规范化
-    const aliases = {'打开靖靖':'靖靖', '推荐路线':'路线', '打卡成就':'打卡', '附近景点':'附近'};
-    const cmd = aliases[name] || name;
     setVwStatus('🔍 识别中：' + name);
-    setTimeout(() => processVoiceResult(cmd), 400);
+    setTimeout(() => processVoiceResult(name), 400);
 }
 
 /* ════════════════════════════════════════════════════════
