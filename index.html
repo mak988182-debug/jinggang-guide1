@@ -277,8 +277,23 @@
         .desc-scroll::-webkit-scrollbar-thumb { background:rgba(0,0,0,.1); border-radius:3px; }
 
         /* ── AI Panel ── */
-        #aiPanel { transition:all .35s cubic-bezier(.4,0,.2,1); transform-origin:bottom right; }
+        #aiPanel { transition:all .3s cubic-bezier(.4,0,.2,1); transform-origin:bottom right; }
         #aiPanel.hide-right { opacity:0; pointer-events:none; transform:scale(.94) translateY(10px); }
+        /* 最小化状态：只保留标题栏，隐藏内容区 */
+        #aiPanel.minimized #aiContextBar,
+        #aiPanel.minimized #aiMessages,
+        #aiPanel.minimized #aiChips,
+        #aiPanel.minimized #aiPanel > div:last-child {
+            display: none !important;
+        }
+        #aiPanel.minimized {
+            max-height: 54px !important;
+            overflow: hidden;
+        }
+        #aiMinimizeBtn .ai-min-icon-collapse { display: block; }
+        #aiMinimizeBtn .ai-min-icon-expand   { display: none; }
+        #aiPanel.minimized #aiMinimizeBtn .ai-min-icon-collapse { display: none; }
+        #aiPanel.minimized #aiMinimizeBtn .ai-min-icon-expand   { display: block; }
         .ai-user { background:#2563eb; color:#fff; border-radius:16px 16px 3px 16px; margin-left:auto; }
         .ai-bot  { background:rgba(255,255,255,.95); color:#1e293b; border-radius:16px 16px 16px 3px; border:1px solid rgba(0,0,0,.06); }
         #aiMessages::-webkit-scrollbar { width:3px; }
@@ -1687,7 +1702,18 @@
 </div>
 
 <!-- ══ AI PANEL ══ -->
-<div id="aiPanel" class="hide-right fixed bottom-24 right-16 z-50 g rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="width:340px;max-height:480px;border:1.5px solid rgba(37,99,235,0.13);">
+<div id="aiPanel" class="hide-right fixed z-50 g shadow-2xl flex flex-col overflow-hidden"
+     style="
+        /* 位置：贴右侧工具栏左边，底部留空 */
+        bottom: 96px;
+        right: 58px;
+        /* 响应式宽度：最大340px，小屏留安全边距 */
+        width: min(340px, calc(100vw - 80px));
+        /* 响应式高度：最大480px，小屏不超过60%视口 */
+        max-height: min(480px, 60dvh);
+        border-radius: 20px;
+        border: 1.5px solid rgba(37,99,235,0.13);
+     ">
     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100/80 flex-shrink-0" style="background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.04));">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
@@ -1701,10 +1727,17 @@
             </div>
         </div>
         <div class="flex items-center gap-1">
+            <!-- 最小化按钮：收起为只显示标题栏的小条 -->
+            <button id="aiMinimizeBtn" onclick="minimizeAIPanel()" title="最小化/展开" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+                <!-- 展开时显示 — 收起图标 -->
+                <svg class="ai-min-icon-collapse" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <!-- 最小化时显示 ▲ 展开图标 -->
+                <svg class="ai-min-icon-expand" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
             <button onclick="clearAIChat()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.76"/></svg>
             </button>
-            <button onclick="toggleAIPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+            <button onclick="toggleAIPanel()" title="关闭" class="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center text-slate-400 hover:text-red-400 transition">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -1715,7 +1748,7 @@
             当前：<strong id="aiContextName"></strong><span class="text-blue-300 ml-1">· 靖靖已了解</span>
         </div>
     </div>
-    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:200px;max-height:260px;"></div>
+    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:100px;max-height:min(260px, 35dvh);"></div>
     <div id="aiChips" class="px-3.5 py-2 flex gap-1.5 overflow-x-auto no-scrollbar border-t border-slate-50 flex-shrink-0">
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">今日推荐路线</button>
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">人少的景点</button>
@@ -4143,8 +4176,18 @@
             aiOpen=!aiOpen;
             const p=document.getElementById('aiPanel');
             p.classList.toggle('hide-right',!aiOpen);
-            if(aiOpen&&aiHistory.length===0)setTimeout(()=>addMsg('ai','你好呀！我是靖靖 🏮，靖港古镇专属AI导游～有什么想问的尽管来！'),200);
-            if(aiOpen)setTimeout(()=>document.getElementById('aiInput').focus(),300);
+            if(aiOpen){
+                // 打开时恢复展开状态
+                p.classList.remove('minimized');
+                if(aiHistory.length===0)setTimeout(()=>addMsg('ai','你好呀！我是靖靖 🏮，靖港古镇专属AI导游～有什么想问的尽管来！'),200);
+                setTimeout(()=>document.getElementById('aiInput').focus(),300);
+            }
+        }
+
+        /* 最小化/还原 AI 面板（只收起内容区，保留标题栏） */
+        function minimizeAIPanel(){
+            const p = document.getElementById('aiPanel');
+            p.classList.toggle('minimized');
         }
         function addMsg(role,text){
             const c=document.getElementById('aiMessages');
