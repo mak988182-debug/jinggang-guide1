@@ -5229,12 +5229,33 @@ let voiceListening = false;
 
 // POI关键词映射 (在POI数据加载后由initVoiceKeywords()完善)
 const VOICE_CMDS = {
-    '芦江阁': 'ljg', '八元堂': 'byt', '皮影戏': 'pyx', '花开靖港': 'hkjc',
-    '老电影': 'ldy', '民俗': 'ms馆', '陶承': 'tcs', '楚河码头': 'chmd',
-    '正义码头': 'zymd', '省委旧址': 'hnsy', '宏泰坊': 'htf', '杨泗庙': 'ysm',
-    '铁器': 'tqg', '锄禾源': 'chy', '西牌坊': 'xpf',
-    '导航': '__navigate', '路线': '__route', '附近': '__nearby',
-    '打卡': '__checkin', 'AI': '__ai', '帮助': '__help',
+    // 全部20个景点（含常用别名）
+    '游客服务中心': 'vc',  '游客中心': 'vc',   '服务中心': 'vc',
+    '靖港八大碗':  'bdw',  '八大碗': 'bdw',    '餐厅': 'bdw',
+    '红色剧场':   'hsjc',  '母亲的歌': 'hsjc', '红剧': 'hsjc',
+    '刘畴西':     'lcx',   '事迹室': 'lcx',
+    '皮影戏':     'pyx',   '皮影': 'pyx',
+    '东牌坊':     'dpf',   '东门': 'dpf',
+    '西牌坊':     'xpf',   '西门': 'xpf',
+    '芦江阁':     'ljg',   '芦江': 'ljg',
+    '八元堂':     'byt',   '花鼓戏': 'byt',
+    '花开靖港':   'hkjc',  '花开': 'hkjc',   '演艺秀': 'hkjc',
+    '老电影':     'ldy',   '电影院': 'ldy',
+    '民俗':       'ms馆',  '民俗馆': 'ms馆',  '收藏馆': 'ms馆',
+    '陶承':       'tcs',   '革命母亲': 'tcs',
+    '楚河码头':   'chmd',  '楚河': 'chmd',    '游船': 'chmd',
+    '正义码头':   'zymd',  '正义': 'zymd',
+    '省委旧址':   'hnsy',  '湖南省委': 'hnsy',
+    '宏泰坊':     'htf',   '青楼': 'htf',
+    '杨泗庙':     'ysm',   '庙': 'ysm',
+    '铁器':       'tqg',   '铁器馆': 'tqg',
+    '二当家':     'edj',   '商社': 'edj',
+    '锄禾源':     'chy',   '农耕': 'chy',
+    // 功能指令
+    '路线': '__route',    '推荐路线': '__route',
+    '打卡': '__checkin',  '成就': '__checkin',
+    'AI':   '__ai',       '靖靖': '__ai',   '导游': '__ai',
+    '帮助': '__help',     '怎么用': '__help',
 };
 
 function initVoiceWakeUI() {
@@ -5284,6 +5305,7 @@ function startVoiceListen() {
     recognition.lang = currentLang === 'en' ? 'en-US' : currentLang === 'ja' ? 'ja-JP' : currentLang === 'ko' ? 'ko-KR' : 'zh-CN';
     recognition.interimResults = true;
     recognition.continuous = false;
+    recognition.maxAlternatives = 5;
     recognition.onstart = () => {
         voiceListening = true;
         document.getElementById('vwOrb').classList.add('listening');
@@ -5291,9 +5313,18 @@ function startVoiceListen() {
         HAPTIC.light();
     };
     recognition.onresult = (e) => {
+        // 用最后一条结果判断 isFinal
+        const lastResult = e.results[e.results.length - 1];
         const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
         setVwStatus('🔍 识别中：' + transcript);
-        if (e.results[0].isFinal) processVoiceResult(transcript);
+        if (lastResult.isFinal) {
+            // 遍历候选结果，提升命中率
+            let hit = false;
+            for (let i = 0; i < lastResult.length && !hit; i++) {
+                hit = tryMatchVoice(lastResult[i].transcript);
+            }
+            if (!hit) tryMatchVoice(transcript);
+        }
     };
     recognition.onerror = () => {
         voiceListening = false;
@@ -5323,43 +5354,75 @@ function setVwStatus(txt) {
     if (el) el.textContent = txt;
 }
 
-function processVoiceResult(text) {
-    // 关键词匹配
+/* 导航到 POI 并自动播放讲解 */
+function voiceNavigateTo(poi) {
+    closeVoiceWake();
+    // 1. 3D 飞行导航（正确函数名）
+    enterDetailMode(poi);
+    // 2. 延迟播放 MP3 讲解（等相机动画启动）
+    setTimeout(() => {
+        if (poi.audio && typeof playAudio === 'function') {
+            playAudio(poi);
+        }
+        // 3. iOS autoplay 兜底：MP3 被拦截时用 TTS 朗读景点名+简介
+        setTimeout(() => {
+            if (typeof isAudioPlaying !== 'undefined' && !isAudioPlaying && window.speechSynthesis) {
+                const u = new SpeechSynthesisUtterance(
+                    poi.name + '。' + (poi.desc ? poi.desc.slice(0, 60) : '')
+                );
+                const langMap = { en:'en-US', ja:'ja-JP', ko:'ko-KR' };
+                u.lang = langMap[typeof currentLang!=='undefined'?currentLang:''] || 'zh-CN';
+                u.rate = 0.9;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
+            }
+        }, 900);
+    }, 600);
+}
+
+/* 尝试将识别文本匹配到景点/指令，返回是否命中 */
+function tryMatchVoice(text) {
+    if (!text || !text.trim()) return false;
+    const lc = text.toLowerCase().replace(/\s/g, '');
+    // 1. 关键词精确匹配
     for (const [kw, id] of Object.entries(VOICE_CMDS)) {
-        if (text.includes(kw)) {
+        if (lc.includes(kw.toLowerCase().replace(/\s/g, ''))) {
             highlightVoiceKw(kw);
             if (id.startsWith('__')) {
                 handleVoiceAction(id);
-            } else {
-                const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
-                if (poi) {
-                    setVwStatus('✅ 找到：' + poi.name);
-                    HAPTIC.success();
-                    setTimeout(() => {
-                        closeVoiceWake();
-                        if (typeof openDetailCard === 'function') openDetailCard(poi);
-                    }, 800);
-                    return;
-                }
+                return true;
             }
-            return;
+            const poi = typeof POI_RAW_DATA !== 'undefined' ? POI_RAW_DATA.find(p => p.id === id) : null;
+            if (poi) {
+                setVwStatus('✅ 正在导航至「' + poi.name + '」并播放讲解…');
+                HAPTIC.success();
+                setTimeout(() => voiceNavigateTo(poi), 500);
+                return true;
+            }
         }
     }
-    // 模糊匹配POI名称
+    // 2. POI 名称模糊匹配
     if (typeof POI_RAW_DATA !== 'undefined') {
-        const matched = POI_RAW_DATA.find(p => p.name.includes(text) || text.includes(p.name));
+        const matched = POI_RAW_DATA.find(p => {
+            const pn = p.name.toLowerCase().replace(/\s/g, '');
+            return lc.includes(pn) || pn.includes(lc.slice(0, 2));
+        });
         if (matched) {
-            setVwStatus('✅ 导航至：' + matched.name);
+            setVwStatus('✅ 正在导航至「' + matched.name + '」并播放讲解…');
             HAPTIC.success();
-            setTimeout(() => {
-                closeVoiceWake();
-                if (typeof openDetailCard === 'function') openDetailCard(matched);
-            }, 800);
-            return;
+            setTimeout(() => voiceNavigateTo(matched), 500);
+            return true;
         }
     }
-    setVwStatus('❓ 未找到"' + text + '"，请重试');
-    HAPTIC.error();
+    return false;
+}
+
+/* 向下兼容：simulateVoiceCmd 仍可调用 */
+function processVoiceResult(text) {
+    if (!tryMatchVoice(text)) {
+        setVwStatus('❓ 未识别到景点「' + text + '」，请重试或点击下方景点');
+        HAPTIC.error();
+    }
 }
 
 function handleVoiceAction(action) {
