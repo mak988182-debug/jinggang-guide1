@@ -1470,6 +1470,9 @@
         <div class="tool-btn" onclick="openReport()" title="游览报告">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         </div>
+        <div class="tool-btn" onclick="showFeedbackModal()" title="意见反馈" id="feedbackToolBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
 
     </div>
 </div>
@@ -2074,32 +2077,105 @@
 </div>
 
 <!-- ══ FEEDBACK ══ -->
-<div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div class="g rounded-3xl p-6 max-w-sm w-full relative shadow-2xl">
-        <button onclick="hideFeedbackModal()" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 transition">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <h3 class="text-sm font-black text-slate-800 mb-1 flex items-center gap-2">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            意见收集箱
-        </h3>
-        <p class="text-[11px] text-slate-400 mb-4">感谢您的使用，有任何问题或建议请告诉我们。</p>
-        <div class="space-y-2.5">
-            <select id="feedbackType" class="w-full p-2.5 rounded-xl bg-white/80 border border-slate-200 outline-none text-sm text-slate-700">
-                <option value="💡 功能建议">💡 功能建议</option>
-                <option value="🐛 错误报告">🐛 错误报告</option>
-                <option value="📝 内容纠错">📝 内容纠错</option>
-                <option value="💬 其他">💬 其他</option>
-            </select>
-            <textarea id="feedbackContent" rows="3" placeholder="请描述您的问题或建议…" class="w-full p-2.5 rounded-xl bg-white/80 border border-slate-200 outline-none text-sm text-slate-700 resize-none"></textarea>
-            <input id="feedbackContact" type="text" placeholder="联系方式（选填）" class="w-full p-2.5 rounded-xl bg-white/80 border border-slate-200 outline-none text-sm text-slate-700">
+<!-- ══ 意见反馈弹窗 ══ -->
+<div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4" onclick="if(event.target===this)hideFeedbackModal()">
+    <div class="g rounded-3xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden" style="border:1.5px solid rgba(255,255,255,0.7);max-height:90dvh;">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div>
+                    <div class="text-[13px] font-black text-slate-800">意见反馈</div>
+                    <div class="text-[9px] text-slate-400">您的每条反馈都会被认真阅读</div>
+                </div>
+            </div>
+            <button onclick="hideFeedbackModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 transition">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
-        <button id="submitFeedbackBtn" onclick="submitFeedback()" class="w-full mt-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-200 transition active:scale-95 flex items-center justify-center gap-2">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            提交反馈
-        </button>
+
+        <!-- 切换：提交 / 历史 -->
+        <div class="flex border-b border-slate-100 flex-shrink-0">
+            <button id="fbTabSubmit" onclick="switchFbTab('submit')" class="flex-1 py-2.5 text-[12px] font-bold text-blue-600 border-b-2 border-blue-600 transition">✍️ 提交反馈</button>
+            <button id="fbTabHistory" onclick="switchFbTab('history')" class="flex-1 py-2.5 text-[12px] font-bold text-slate-400 border-b-2 border-transparent transition">📋 反馈记录</button>
+        </div>
+
+        <!-- 提交表单 -->
+        <div id="fbPanelSubmit" class="flex-1 overflow-y-auto p-5 space-y-3">
+            <!-- 满意度评分 -->
+            <div>
+                <div class="text-[11px] font-bold text-slate-600 mb-2">整体满意度</div>
+                <div class="flex gap-2" id="fbStars">
+                    <span class="fb-star text-2xl cursor-pointer transition" data-v="1">☆</span>
+                    <span class="fb-star text-2xl cursor-pointer transition" data-v="2">☆</span>
+                    <span class="fb-star text-2xl cursor-pointer transition" data-v="3">☆</span>
+                    <span class="fb-star text-2xl cursor-pointer transition" data-v="4">☆</span>
+                    <span class="fb-star text-2xl cursor-pointer transition" data-v="5">☆</span>
+                </div>
+                <input type="hidden" id="feedbackRating" value="0">
+            </div>
+
+            <!-- 反馈类型 -->
+            <div>
+                <div class="text-[11px] font-bold text-slate-600 mb-1.5">反馈类型</div>
+                <div class="grid grid-cols-2 gap-2" id="fbTypeGrid">
+                    <label class="fb-type-btn"><input type="radio" name="fbType" value="💡 功能建议" class="hidden">💡 功能建议</label>
+                    <label class="fb-type-btn"><input type="radio" name="fbType" value="🐛 错误报告" class="hidden">🐛 错误报告</label>
+                    <label class="fb-type-btn"><input type="radio" name="fbType" value="📝 内容纠错" class="hidden">📝 内容纠错</label>
+                    <label class="fb-type-btn"><input type="radio" name="fbType" value="💬 其他建议" class="hidden">💬 其他建议</label>
+                </div>
+            </div>
+
+            <!-- 内容 -->
+            <div>
+                <div class="text-[11px] font-bold text-slate-600 mb-1.5">反馈内容 <span class="text-red-400">*</span></div>
+                <textarea id="feedbackContent" rows="3" placeholder="请详细描述您的问题或建议，帮助我们改进导览体验…" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none text-[12px] text-slate-700 resize-none focus:border-blue-400 transition"></textarea>
+                <div class="text-right text-[10px] text-slate-400 mt-0.5" id="fbCharCount">0 / 500</div>
+            </div>
+
+            <!-- 联系方式 -->
+            <div>
+                <div class="text-[11px] font-bold text-slate-600 mb-1.5">联系方式 <span class="text-slate-400 font-normal">（选填，方便我们回复）</span></div>
+                <input id="feedbackContact" type="text" placeholder="微信号 / 手机号 / 邮箱" class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none text-[12px] text-slate-700 focus:border-blue-400 transition">
+            </div>
+
+            <!-- 提交状态 -->
+            <div id="fbStatusMsg" class="hidden text-[12px] font-semibold text-center py-2 rounded-xl"></div>
+
+            <!-- 提交按钮 -->
+            <button id="submitFeedbackBtn" onclick="submitFeedback()" class="w-full py-3 rounded-xl text-white text-[13px] font-bold transition active:scale-95 flex items-center justify-center gap-2" style="background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 6px 20px rgba(37,99,235,0.35);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                提交反馈
+            </button>
+        </div>
+
+        <!-- 历史记录面板 -->
+        <div id="fbPanelHistory" class="flex-1 overflow-y-auto p-5 hidden">
+            <div id="fbHistoryList" class="space-y-3">
+                <div class="text-center text-slate-400 text-[12px] py-8">加载中…</div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.fb-type-btn {
+    display:flex; align-items:center; justify-content:center;
+    padding:7px 10px; border-radius:10px; font-size:11px; font-weight:700;
+    cursor:pointer; transition:all .18s;
+    border:1.5px solid #e2e8f0; color:#64748b; background:#f8fafc;
+}
+.fb-type-btn:has(input:checked),
+.fb-type-btn.selected {
+    border-color:#2563eb; color:#2563eb; background:#eff6ff;
+}
+.fb-star.active { filter:none; }
+.fb-history-card {
+    background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px 14px;
+}
+</style>
 
 <!-- Labels -->
 <canvas id="routeLineCanvas"></canvas>
@@ -3330,26 +3406,173 @@
         }
         function hideQRModal(){document.getElementById('qrModal').classList.replace('flex','hidden');}
         function copyQRUrl(){navigator.clipboard.writeText(document.getElementById('qrUrl').textContent).then(()=>alert('已复制'));}
-        function showFeedbackModal(){document.getElementById('feedbackModal').classList.replace('hidden','flex');}
-        function hideFeedbackModal(){
-            document.getElementById('feedbackModal').classList.replace('flex','hidden');
-            document.getElementById('feedbackContent').value='';
-            document.getElementById('feedbackContact').value='';
+        /* ══ 意见反馈系统 ══ */
+        let fbCurrentRating = 0;
+
+        function showFeedbackModal() {
+            document.getElementById('feedbackModal').classList.replace('hidden','flex');
+            switchFbTab('submit');
+            // 初始化星级交互
+            document.querySelectorAll('.fb-star').forEach(star => {
+                star.onclick = () => setFbRating(parseInt(star.dataset.v));
+                star.onmouseenter = () => highlightStars(parseInt(star.dataset.v));
+                star.onmouseleave = () => highlightStars(fbCurrentRating);
+            });
+            // 字数计数
+            const ta = document.getElementById('feedbackContent');
+            if (ta) {
+                ta.oninput = () => {
+                    const cnt = ta.value.length;
+                    const el = document.getElementById('fbCharCount');
+                    if (el) el.textContent = cnt + ' / 500';
+                    if (cnt > 500) ta.value = ta.value.slice(0, 500);
+                };
+            }
+            // 类型按钮交互
+            document.querySelectorAll('.fb-type-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    btn.querySelector('input').checked = true;
+                };
+            });
         }
-        async function submitFeedback(){
-            const type=document.getElementById('feedbackType').value;
-            const content=document.getElementById('feedbackContent').value.trim();
-            const contact=document.getElementById('feedbackContact').value.trim();
-            const btn=document.getElementById('submitFeedbackBtn');
-            if(!content){alert('请填写反馈内容');return;}
-            const orig=btn.innerHTML;btn.innerHTML='提交中…';btn.disabled=true;
-            const loc=userLocation?`${userLocation.lng},${userLocation.lat}`:'未定位';
-            try{
-                const{error}=await supabaseClient.from('jinggang-suggestion-box').insert([{content:`[${type}]\n${content}\n📍${loc}`,contact:contact||'未留'}]);
-                if(error)throw error;
-                alert('提交成功！感谢您的反馈。');hideFeedbackModal();
-            }catch(e){alert('提交失败：'+(e.message||JSON.stringify(e)));}
-            finally{btn.innerHTML=orig;btn.disabled=false;}
+
+        function hideFeedbackModal() {
+            document.getElementById('feedbackModal').classList.replace('flex','hidden');
+            // 重置表单
+            const ta = document.getElementById('feedbackContent');
+            if (ta) ta.value = '';
+            const ci = document.getElementById('feedbackContact');
+            if (ci) ci.value = '';
+            setFbRating(0);
+            document.querySelectorAll('.fb-type-btn').forEach(b => { b.classList.remove('selected'); });
+            const status = document.getElementById('fbStatusMsg');
+            if (status) { status.className = 'hidden text-[12px] font-semibold text-center py-2 rounded-xl'; status.textContent = ''; }
+            const cnt = document.getElementById('fbCharCount');
+            if (cnt) cnt.textContent = '0 / 500';
+        }
+
+        function setFbRating(v) {
+            fbCurrentRating = v;
+            document.getElementById('feedbackRating').value = v;
+            highlightStars(v);
+        }
+
+        function highlightStars(v) {
+            document.querySelectorAll('.fb-star').forEach(s => {
+                const sv = parseInt(s.dataset.v);
+                s.textContent = sv <= v ? '★' : '☆';
+                s.style.color = sv <= v ? '#f59e0b' : '#cbd5e1';
+            });
+        }
+
+        function switchFbTab(tab) {
+            const isSubmit = tab === 'submit';
+            document.getElementById('fbPanelSubmit').classList.toggle('hidden', !isSubmit);
+            document.getElementById('fbPanelHistory').classList.toggle('hidden', isSubmit);
+            document.getElementById('fbTabSubmit').className =
+                'flex-1 py-2.5 text-[12px] font-bold transition ' +
+                (isSubmit ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 border-b-2 border-transparent');
+            document.getElementById('fbTabHistory').className =
+                'flex-1 py-2.5 text-[12px] font-bold transition ' +
+                (!isSubmit ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-400 border-b-2 border-transparent');
+            if (!isSubmit) loadFbHistory();
+        }
+
+        function getFbStatus(show, ok, msg) {
+            const el = document.getElementById('fbStatusMsg');
+            if (!el) return;
+            if (!show) { el.className = 'hidden text-[12px] font-semibold text-center py-2 rounded-xl'; return; }
+            el.className = 'text-[12px] font-semibold text-center py-2 rounded-xl ' +
+                (ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        async function submitFeedback() {
+            const ta = document.getElementById('feedbackContent');
+            const content = ta ? ta.value.trim() : '';
+            const contact = (document.getElementById('feedbackContact') || {}).value?.trim() || '';
+            const rating = parseInt(document.getElementById('feedbackRating').value) || 0;
+            const typeEl = document.querySelector('input[name="fbType"]:checked');
+            const type = typeEl ? typeEl.value : '💬 其他建议';
+            const btn = document.getElementById('submitFeedbackBtn');
+
+            if (!content) { getFbStatus(true, false, '⚠️ 请填写反馈内容'); return; }
+            getFbStatus(false);
+
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="animate-spin"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".3"/><path d="M21 12a9 9 0 00-9-9"/></svg> 提交中…';
+            btn.disabled = true;
+
+            const loc = typeof userLocation !== 'undefined' && userLocation
+                ? `${userLocation.lng.toFixed(5)},${userLocation.lat.toFixed(5)}`
+                : '未定位';
+            const ua = navigator.userAgent.slice(0, 80);
+            const payload = {
+                type,
+                content,
+                rating: rating || null,
+                contact: contact || null,
+                location: loc,
+                user_agent: ua,
+                created_at: new Date().toISOString(),
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('feedback')
+                    .insert([payload]);
+                if (error) throw error;
+                getFbStatus(true, true, '✅ 提交成功！感谢您的宝贵反馈');
+                // 重置表单（保留弹窗）
+                ta.value = '';
+                if (document.getElementById('feedbackContact')) document.getElementById('feedbackContact').value = '';
+                setFbRating(0);
+                document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('selected'));
+                if (document.getElementById('fbCharCount')) document.getElementById('fbCharCount').textContent = '0 / 500';
+                // 3秒后关闭
+                setTimeout(hideFeedbackModal, 2500);
+            } catch (e) {
+                getFbStatus(true, false, '❌ 提交失败：' + (e.message || '网络异常，请稍后重试'));
+            } finally {
+                btn.innerHTML = origHtml;
+                btn.disabled = false;
+            }
+        }
+
+        async function loadFbHistory() {
+            const list = document.getElementById('fbHistoryList');
+            if (!list) return;
+            list.innerHTML = '<div class="text-center text-slate-400 text-[12px] py-8">加载中…</div>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('feedback')
+                    .select('type,content,rating,created_at')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="text-center text-slate-400 text-[12px] py-8">暂无反馈记录</div>';
+                    return;
+                }
+                list.innerHTML = data.map(row => {
+                    const stars = row.rating ? '★'.repeat(row.rating) + '☆'.repeat(5 - row.rating) : '—';
+                    const starColor = row.rating ? '#f59e0b' : '#cbd5e1';
+                    const date = row.created_at ? new Date(row.created_at).toLocaleDateString('zh-CN') : '';
+                    return `<div class="fb-history-card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                            <span style="font-size:11px;font-weight:800;color:#334155;">${row.type || '💬 其他'}</span>
+                            <span style="font-size:12px;color:${starColor};">${stars}</span>
+                        </div>
+                        <div style="font-size:12px;color:#475569;line-height:1.6;">${row.content}</div>
+                        <div style="font-size:10px;color:#94a3b8;margin-top:6px;">${date}</div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                list.innerHTML = `<div class="text-center text-red-400 text-[12px] py-8">加载失败：${e.message || '网络异常'}</div>`;
+            }
         }
 
         /* ── Route cards ── */
