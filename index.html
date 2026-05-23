@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -206,10 +206,7 @@
 
         /* ═══════ BOTTOM BAR ═══════ */
         #bottomBar {
-            position: fixed;
-            bottom: max(12px, env(safe-area-inset-bottom, 12px));
-            left: max(66px, calc(env(safe-area-inset-left, 0px) + 60px));
-            right: max(62px, calc(env(safe-area-inset-right, 0px) + 56px));
+            position: fixed; bottom: 12px; left: 66px; right: 62px;
             z-index: 40; display: flex; align-items: stretch; gap: 6px; height: 76px;
         }
         #routeSection {
@@ -270,24 +267,8 @@
         .desc-scroll::-webkit-scrollbar-thumb { background:rgba(0,0,0,.1); border-radius:3px; }
 
         /* ── AI Panel ── */
-        #aiPanel {
-            transition: all .35s cubic-bezier(.4,0,.2,1);
-            transform-origin: bottom right;
-        }
+        #aiPanel { transition:all .35s cubic-bezier(.4,0,.2,1); transform-origin:bottom right; }
         #aiPanel.hide-right { opacity:0; pointer-events:none; transform:scale(.94) translateY(10px); }
-        /* 手机横屏：AI面板铺满（避免被裁切） */
-        @media screen and (orientation: landscape) and (max-height: 500px) {
-            #aiPanel {
-                position: fixed !important;
-                left: max(8px, env(safe-area-inset-left, 8px)) !important;
-                right: max(8px, env(safe-area-inset-right, 8px)) !important;
-                bottom: 8px !important;
-                width: auto !important;
-                max-width: none !important;
-                max-height: 72dvh !important;
-                border-radius: 20px !important;
-            }
-        }
         .ai-user { background:#2563eb; color:#fff; border-radius:16px 16px 3px 16px; margin-left:auto; }
         .ai-bot  { background:rgba(255,255,255,.95); color:#1e293b; border-radius:16px 16px 16px 3px; border:1px solid rgba(0,0,0,.06); }
         #aiMessages::-webkit-scrollbar { width:3px; }
@@ -530,19 +511,20 @@
         #searchBox { position:fixed; top:16px; right:76px; z-index:55; width:220px; transition:all .25s; }
         #searchBox.hide-right { opacity:0; pointer-events:none; transform:translateX(8px); }
 
-        /* ── 恢复栏（底部栏上方水平排列，绝不遮挡右侧工具） ── */
+        /* ── 恢复栏（右侧边缘贴边，不遮挡地图） ── */
         #restoreBar {
             position: fixed;
-            bottom: calc(max(12px, env(safe-area-inset-bottom, 12px)) + 82px);
-            left: max(66px, calc(env(safe-area-inset-left, 0px) + 60px));
-            right: max(66px, calc(env(safe-area-inset-right, 0px) + 60px));
-            z-index: 38;           /* 低于工具栏 z-index:40，不遮挡 */
+            right: 56px;   /* 让开右侧工具栏宽度 */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 60;
             display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px;
+            flex-direction: column;
+            gap: 4px;
             pointer-events: none;
-            justify-content: flex-start;
+            max-height: 80vh;
+            overflow: hidden;
+            padding: 6px 0;
         }
         .restore-chip {
             pointer-events: auto;
@@ -550,15 +532,15 @@
             background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
             border: 1px solid rgba(255,255,255,0.14);
             color: #e2e8f0; font-size: 10px; font-weight: 700;
-            padding: 5px 10px;
+            padding: 6px 10px;
             border-radius: 10px;
             cursor: pointer; transition: all .2s; white-space: nowrap;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.28);
+            box-shadow: -3px 2px 12px rgba(0,0,0,0.28);
             animation: chipSlide .22s cubic-bezier(.175,.885,.32,1.275) both;
         }
-        .restore-chip:hover { background: rgba(37,99,235,0.92); }
+        .restore-chip:hover { background: rgba(37,99,235,0.92); padding-right: 14px; }
         .restore-chip .rc-dot { width:5px; height:5px; border-radius:50%; background:#60a5fa; flex-shrink:0; }
-        @keyframes chipSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes chipSlide { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
 
         /* ══ 路线高亮系统 ══ */
@@ -1267,19 +1249,17 @@
            ③ 足迹回放 — 打卡路径动画
         ══════════════════════════════════════ */
         #footprintBtn {
-            /* 与 restoreBar 同行，使用相同视觉风格 */
-            pointer-events: auto;
-            display: none; align-items: center; gap: 5px;
-            background: rgba(15,23,42,0.88); backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.14); color: #e2e8f0;
-            font-size: 10px; font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 10px;
-            cursor: pointer; transition: all .2s; white-space: nowrap;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.28);
+            position: fixed; bottom: 100px; left: 66px; z-index: 45;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: 20px;
+            background: rgba(15,23,42,0.88); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15); color: white;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            transition: all .25s; box-shadow: 0 4px 16px rgba(0,0,0,.35);
+            opacity: 0; pointer-events: none;
         }
-        #footprintBtn.visible { display: flex; }
-        #footprintBtn:hover { background: rgba(37,99,235,0.92); }
+        #footprintBtn.visible { opacity: 1; pointer-events: auto; }
+        #footprintBtn:hover { background: rgba(37,99,235,0.9); transform: translateY(-2px); }
         #footprintCanvas {
             position: fixed; inset: 0; z-index: 12; pointer-events: none;
             opacity: 0; transition: opacity .5s;
@@ -1492,7 +1472,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
                 实时客流导览
             </div>
-            <button class="fold-btn" onclick="togglePanel('sideListPanel','right')" title="收起客流导览">
+            <button class="fold-btn" onclick="hideSideList()" title="关闭">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -1694,7 +1674,7 @@
 </div>
 
 <!-- ══ AI PANEL ══ -->
-<div id="aiPanel" class="hide-right fixed bottom-24 right-4 z-50 g rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="width:min(340px, calc(100vw - 80px));max-height:min(480px, 75dvh);border:1.5px solid rgba(37,99,235,0.13);">
+<div id="aiPanel" class="hide-right fixed bottom-24 right-16 z-50 g rounded-3xl shadow-2xl flex flex-col overflow-hidden" style="width:340px;max-height:480px;border:1.5px solid rgba(37,99,235,0.13);">
     <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100/80 flex-shrink-0" style="background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.04));">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
@@ -1711,8 +1691,8 @@
             <button onclick="clearAIChat()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.76"/></svg>
             </button>
-            <button onclick="toggleAIPanel()" title="关闭AI面板" class="w-8 h-8 rounded-xl flex items-center justify-center transition" style="background:rgba(239,68,68,0.1);color:#ef4444;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button onclick="toggleAIPanel()" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
     </div>
@@ -1722,7 +1702,7 @@
             当前：<strong id="aiContextName"></strong><span class="text-blue-300 ml-1">· 靖靖已了解</span>
         </div>
     </div>
-    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:120px;max-height:min(260px, 45dvh);"></div>
+    <div id="aiMessages" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2" style="min-height:200px;max-height:260px;"></div>
     <div id="aiChips" class="px-3.5 py-2 flex gap-1.5 overflow-x-auto no-scrollbar border-t border-slate-50 flex-shrink-0">
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">今日推荐路线</button>
         <button class="ai-chip flex-shrink-0" onclick="sendAIChip(this)">人少的景点</button>
@@ -2166,6 +2146,43 @@
         ];
         POI_RAW_DATA.forEach(p=>{p.lngLat=sceneToLngLat(p.pos[0],p.pos[2]);});
 
+        /* ── POI 多语言名称 ── */
+        const POI_NAMES = {
+            en: {
+                vc:'Visitor Center',      bdw:'Eight Bowls',         hsjc:'Red Theater',
+                lcx:'Liu Chouxi Hall',    pyx:'Shadow Puppet House',  dpf:'East Archway',
+                xpf:'West Archway',       ljg:'Lujiang Pavilion',     byt:'Bayuan Hall',
+                hkjc:'Huakai Theater',    ldy:'Old Cinema',           'ms馆':'Folk Museum',
+                tcs:'Tao Cheng Hall',     chmd:'Chuhe Wharf',         zymd:'Zhengyi Wharf',
+                hnsy:'CPC Hunan Site',    htf:'Hongtai Quarter',      ysm:'Yangsi Temple',
+                tqg:'Iron Culture Hall',  edj:'Second Master Shop',   chy:'Chuheyuan Farm',
+            },
+            ja: {
+                vc:'観光センター',        bdw:'八大碗レストラン',     hsjc:'赤い劇場',
+                lcx:'劉疇西記念館',       pyx:'影絵人形劇場',         dpf:'東牌坊',
+                xpf:'西牌坊',             ljg:'蘆江閣',               byt:'八元堂',
+                hkjc:'花開靖港劇場',      ldy:'老映画館',             'ms馆':'民俗館',
+                tcs:'陶承記念館',         chmd:'楚河埠頭',            zymd:'正義埠頭',
+                hnsy:'湖南省委旧址',      htf:'宏泰坊',               ysm:'楊泗廟',
+                tqg:'鉄器文化館',         edj:'二当家商社',           chy:'鋤禾源',
+            },
+            ko: {
+                vc:'관광 안내소',         bdw:'팔대완 레스토랑',      hsjc:'붉은 극장',
+                lcx:'류처우시 기념관',    pyx:'그림자 인형극장',      dpf:'동쪽 패방',
+                xpf:'서쪽 패방',          ljg:'루장 누각',            byt:'바위안당',
+                hkjc:'화카이 극장',       ldy:'옛 영화관',            'ms馆':'민속 박물관',
+                tcs:'타오청 기념관',      chmd:'추허 부두',           zymd:'정의 부두',
+                hnsy:'후난성위 구지',     htf:'훙타이팡',             ysm:'양쓰 사원',
+                tqg:'철기 문화관',        edj:'이당자 상점',          chy:'추허위안',
+            },
+        };
+
+        /* 获取当前语言下的 POI 显示名 */
+        function getPoiName(poi) {
+            if (typeof currentLang === 'undefined' || currentLang === 'zh') return poi.name;
+            return (POI_NAMES[currentLang] && POI_NAMES[currentLang][poi.id]) || poi.name;
+        }
+
         /* ── Routes ── */
         const ROUTES=[
             {id:'r1',name:'夜游火舞线',icon:'🔥',color:'#ef4444',bg:'#fff5f5',duration:'45分钟',count:'9景点', pois:['hkjc','ljg','chmd','zymd','bdw','byt','vc','dpf','htf']},
@@ -2342,13 +2359,12 @@
 
         /* ── 面板状态管理（支持恢复） ── */
         const PANEL_META = {
-            weatherCapsule: { label:'天气',     dir:'top',   icon:'🌤️' },
-            showCard:        { label:'今日演出',  dir:'top',   icon:'🎭' },
-            leftNav:         { label:'导航',     dir:'left',  icon:'🧭' },
-            rightTools:      { label:'工具栏',   dir:'right', icon:'🔧' },
+            weatherCapsule: { label:'天气',   dir:'top',    icon:'🌤️' },
+            showCard:        { label:'今日演出', dir:'top',   icon:'🎭' },
+            leftNav:         { label:'导航',   dir:'left',   icon:'🧭' },
+            rightTools:      { label:'工具栏', dir:'right',  icon:'🔧' },
             routeSection:    { label:'推荐路线', dir:'bottom', icon:'🗺️' },
             checkinSection:  { label:'打卡进度', dir:'bottom', icon:'✅' },
-            sideListPanel:   { label:'客流导览', dir:'right', icon:'🕐' },  // ← 新增
         };
         const hiddenPanels = new Set();
 
@@ -2401,9 +2417,6 @@
         function renderRestoreBar() {
             const bar = document.getElementById('restoreBar');
             bar.innerHTML = '';
-            // 把 footprintBtn 插回 restoreBar（它和恢复chip共享底部工具条）
-            const fp = document.getElementById('footprintBtn');
-            if (fp) bar.appendChild(fp);
             hiddenPanels.forEach(id => {
                 const meta = PANEL_META[id];
                 if (!meta) return;
@@ -2416,18 +2429,8 @@
             });
         }
 
-        function showSideList() {
-            const el = document.getElementById('sideListPanel');
-            if (el && el.classList.contains('hide-right')) {
-                // 如果是被 togglePanel 隐藏的，用 restorePanel 恢复
-                restorePanel('sideListPanel');
-            } else if (el) {
-                el.classList.remove('hide-right');
-            }
-        }
-        function hideSideList() {
-            togglePanel('sideListPanel', 'right');
-        }
+        function showSideList() { document.getElementById('sideListPanel').classList.remove('hide-right'); }
+        function hideSideList() { document.getElementById('sideListPanel').classList.add('hide-right'); }
         function toggleSearch() { document.getElementById('searchBox').classList.toggle('hide-right'); }
 
         /* ══ 活动页面 ══ */
@@ -3636,7 +3639,7 @@
                 const item=document.createElement('div');
                 item.className='flex items-center gap-3 p-2.5 rounded-xl bg-white/50 hover:bg-white cursor-pointer transition';
                 item.onclick=()=>enterDetailMode(poi);
-                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate">${poi.name}</div><div class="flex items-center gap-1.5 mt-0.5">${crowdHtml}<span id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</span></div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+                item.innerHTML=`<div class="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style="background:${poi.color}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="flex-1 min-w-0"><div class="text-[12px] font-bold text-slate-800 truncate" data-poi-id="${poi.id}">${getPoiName(poi)}</div><div class="flex items-center gap-1.5 mt-0.5">${crowdHtml}<span id="lst-${poi.id}" class="text-[9px] text-slate-400">${poi.currentDisplay||''}</span></div></div><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
                 list.appendChild(item);
             });
         }
@@ -3840,7 +3843,7 @@
                 ring.rotation.x=-Math.PI/2;ring.position.set(...poi.pos);mapGroup.add(ring);poi.ring=ring;
                 const div=document.createElement('div');div.className='poi-label';
                 div.onclick=e=>{e.stopPropagation();enterDetailMode(poi);};
-                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name">${poi.name}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}">${poi.currentDisplay||''}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
+                div.innerHTML=`<div class="poi-scale-wrapper"><div class="poi-bubble"><span class="poi-name" data-poi-id="${poi.id}">${getPoiName(poi)}</span><span id="wtt-${poi.id}" class="wait-time-tag ${poi.currentClass||''}">${poi.currentDisplay||''}</span></div><div class="poi-pin" style="background:${poi.color}"></div></div>`;
                 lc.appendChild(div);
                 labels.push({element:div,position:new THREE.Vector3(...poi.pos).add(new THREE.Vector3(0,.5,0)),data:poi});
             });
@@ -5515,6 +5518,23 @@ function applyLanguage() {
     if (ciTitle && ciTitle.textContent !== '') {
         // 保留当前等级称号不覆盖
     }
+
+    // ── POI 名称同步（3D地图气泡 + 右侧客流列表）──
+    if (typeof POI_RAW_DATA !== 'undefined' && typeof getPoiName === 'function') {
+        POI_RAW_DATA.forEach(poi => {
+            const name = getPoiName(poi);
+            // 更新所有标记了 data-poi-id 的元素
+            document.querySelectorAll('[data-poi-id="' + poi.id + '"]').forEach(el => {
+                el.textContent = name;
+            });
+        });
+        // 重新渲染客流列表（含名称+拥挤度标签）
+        if (typeof buildPOIList === 'function') buildPOIList();
+    }
+
+    // ── html lang 属性 ──
+    const _langCodeMap = { zh:'zh-CN', en:'en', ja:'ja', ko:'ko' };
+    document.documentElement.lang = _langCodeMap[currentLang] || 'zh-CN';
 }
 
 /* ════════════════════════════════════════════════════════
